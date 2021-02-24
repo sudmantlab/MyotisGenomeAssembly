@@ -1,0 +1,10 @@
+name: HiFiAssembly
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - hifiasm
+  - canu
+  - purge_dups
+prefix: /global/home/users/mvazquez/miniconda3/envs/HiFiAssembly

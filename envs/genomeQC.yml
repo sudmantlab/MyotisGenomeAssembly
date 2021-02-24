@@ -1,0 +1,16 @@
+name: genomeQC
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - merqury
+  - htslib
+  - meryl
+  - genomescope2
+  - kmc
+  - jellyfish
+  - assembly-stats
+  - busco
+  - purge_dups
+prefix: /global/home/users/mvazquez/miniconda3/envs/genomeQC
