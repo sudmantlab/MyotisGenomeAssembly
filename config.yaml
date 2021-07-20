@@ -1,0 +1,22 @@
+species: 
+  - Myotis lucifugus
+  - Myotis evotis
+  - Myotis thysanodes
+  - Myotis volans
+  - Myotis californicus
+  - Myotis auriculus
+  - Myotis occultus
+  - Myotis velifer
+  - Myotis yumanensis
+species_abbr:
+  "Myotis lucifugus" = M_lucifugus,
+  "Myotis evotis" = M_evotis,
+  "Myotis thysanodes" = M_thysanodes,
+  "Myotis volans" = M_volans,
+  "Myotis californicus" = M_californicus,
+  "Myotis auriculus" = M_auriculus,
+  "Myotis occultus" = M_occultus,
+  "Myotis velifer" = M_velifer,
+  "Myotis yumanensis" = M_yumanensis
+
+
