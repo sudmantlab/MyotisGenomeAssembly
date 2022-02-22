@@ -1,6 +1,12 @@
-data/*
-output/*
-logs
-.RData
-.Rhistory
+data/
+output/
+logs/
+.RData 
+.Rhistory 
+.snakemake 
+_* 
+code/*/
+.R*
 .snakemake
+code/*.tgz
+

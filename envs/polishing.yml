@@ -1,0 +1,8 @@
+name: Polishing
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake-minimal
+

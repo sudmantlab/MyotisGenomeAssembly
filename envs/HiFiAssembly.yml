@@ -4,7 +4,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - hifiasm
-  - canu
-  - purge_dups
+  - hifiasm=0.16.1
+  - purge_dups=1.2.5
+  - blast
+  - bamtools
+  - snakemake-minimal
+  - gfatools
+
+
 prefix: /global/home/users/mvazquez/miniconda3/envs/HiFiAssembly
