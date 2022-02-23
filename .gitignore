@@ -9,4 +9,4 @@ code/*/
 .R*
 .snakemake
 code/*.tgz
-
+generator*
