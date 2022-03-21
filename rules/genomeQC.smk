@@ -35,9 +35,9 @@ rule meryl_union_sum:
 rule merqury_run_haplotig:
     input: 
         meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
-        hap1_p = "output/hifiasm/{species}/{settings}/{opt}/{species}.asm.bp.hap1.p_ctg.gfa",
-        hap2_p = "output/hifiasm/{species}/{settings}/{opt}/{species}.asm.bp.hap2.p_ctg.gfa"        
-    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.haplotig")
+        hap1 = "output/hifiasm-fasta/{species}/{ccs_settings}/{hifiasm_opt}/{species}.asm.hap1.p_ctg.{hic}.fa",
+        hap2 = "output/hifiasm-fasta/{species}/{ccs_settings}/{hifiasm_opt}/{species}.asm.hap2.p_ctg.{hic}.fa"        
+    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.{hic}.haplotig")
     conda: "../envs/genomeQC.yml"
     threads: 52
     # shadow: "shallow"
@@ -48,15 +48,15 @@ rule merqury_run_haplotig:
         cd {output}
         pwd -P
         #rmdir $ROOTPROJDIR/{output}
-        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.hap1_p} $ROOTPROJDIR/{input.hap2_p} {wildcards.species}.haplotig
+        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.hap1_p} $ROOTPROJDIR/{input.hap2_p} {wildcards.species}.{wildcards.hic}.haplotig
         cd -
     """
 
 rule merqury_run_consensus:
     input: 
         meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
-        consensus = "output/hifiasm/{species}/{settings}/{opt}/{species}.asm.bp.p_ctg.gfa",
-    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.consensus")
+        consensus = "output/hifiasm/{species}/{settings}/{opt}/{species}.asm.p_ctg.{hic}.fa",
+    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.{hic}.consensus")
     conda: "../envs/genomeQC.yml"
     threads: 52
     # shadow: "shallow"
@@ -67,17 +67,16 @@ rule merqury_run_consensus:
         cd {output}
         pwd -P
         #rmdir $ROOTPROJDIR/{output}
-        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.consensus
+        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.{wildcards.hic}.consensus
         cd -
     """
 
 
-rule merqury_run_hic_haplotig:
+rule merqury_run_yahs:
     input: 
-        meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
-        hap1_p = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.hap1.p_ctg.gfa",
-        hap2_p = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.hap2.p_ctg.gfa"        
-    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.haplotig.hic")
+        meryl = "output/meryl/union-sum/{species}/{ccs_settings}/{species}.meryl",
+        consensus = "output/yahs/{species}/{ccs_settings}/{hifiasm_opt}/{species}.{genometype}.{hic}_scaffolds_final.fa",
+    output: directory("output/merqury/{species}/{ccs_settings}/{hifiasm_opt}/{species}.{hic}.{genometype}.yahs")
     conda: "../envs/genomeQC.yml"
     threads: 52
     # shadow: "shallow"
@@ -88,30 +87,51 @@ rule merqury_run_hic_haplotig:
         cd {output}
         pwd -P
         #rmdir $ROOTPROJDIR/{output}
-        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.hap1_p} $ROOTPROJDIR/{input.hap2_p} {wildcards.species}.haplotig.hic
+        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.{wildcards.hic}.{wildcards.genometype}.yahs
         cd -
     """
-    #shell: "merqury.sh {input.meryl} {input.hap1_p} {input.hap2_p} {output}"
 
-rule merqury_run_hic_consensus:
-    input: 
-        meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
-        consensus = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.p_ctg.gfa",
-    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.consensus.hic")
-    conda: "../envs/genomeQC.yml"
-    threads: 52
-    # shadow: "shallow"
-    shell: """
-        ROOTPROJDIR="$(pwd -P)"
-        echo $ROOTPROJDIR
-        mkdir -p {output}
-        cd {output}
-        pwd -P
-        #rmdir $ROOTPROJDIR/{output}
-        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.consensus.hic
-        cd -
-    """
-    #shell: "merqury.sh {input.meryl} {input.hap1_p} {input.hap2_p} {output}"
+
+#rule merqury_run_hic_haplotig:
+#    input: 
+#        meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
+#        hap1_p = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.hap1.p_ctg.gfa",
+#        hap2_p = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.hap2.p_ctg.gfa"        
+#    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.haplotig.hic")
+#    conda: "../envs/genomeQC.yml"
+#    threads: 52
+#    # shadow: "shallow"
+#    shell: """
+#        ROOTPROJDIR="$(pwd -P)"
+#        echo $ROOTPROJDIR
+#        mkdir -p {output}
+#        cd {output}
+#        pwd -P
+#        #rmdir $ROOTPROJDIR/{output}
+#        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.hap1_p} $ROOTPROJDIR/{input.hap2_p} {wildcards.species}.haplotig.hic
+#        cd -
+#    """
+#    #shell: "merqury.sh {input.meryl} {input.hap1_p} {input.hap2_p} {output}"
+
+#rule merqury_run_hic_consensus:
+#    input: 
+#        meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
+#        consensus = "output/hifiasm-HiC/{species}/{settings}/{opt}/{species}.asm.hic.p_ctg.gfa",
+#    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.consensus.hic")
+#    conda: "../envs/genomeQC.yml"
+#    threads: 52
+#    # shadow: "shallow"
+#    shell: """
+#        ROOTPROJDIR="$(pwd -P)"
+#        echo $ROOTPROJDIR
+#        mkdir -p {output}
+#        cd {output}
+#        pwd -P
+#        #rmdir $ROOTPROJDIR/{output}
+#        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.consensus.hic
+#        cd -
+#    """
+#    #shell: "merqury.sh {input.meryl} {input.hap1_p} {input.hap2_p} {output}"
 
 
 rule jellyfish_run:
@@ -185,19 +205,32 @@ rule genometools:
                                 genomesize=get_genomesize(input.gs2summary))
               )
 
-rule get_readsDepth_CCS:
-    input: get_hifiasm_inputs
-    output: "output/readDepthStats_CCS/{species}/{settings}/stats.tsv"
-    run:
-        import json
-        from pathlib import Path
-        outlist = []
-        for report in input:
-            with report.open() as f:
-                data = json.load(f)
-            read = [i['value'] for i in data["attributes"] if i['id'] == "ccs2.number_of_ccs_reads" ]
-            bases = [i['value'] for i in data["attributes"] if i['id'] == "ccs2.total_number_of_ccs_bases" ]
-            name = report.stem
-            outlist.append("\t".join([name, str(read[0]), str(bases[0])]) + "\n")
-        with open(output, "w") as f:
-            f.writelines(outlist)
+rule genometools_yahs:
+    input: 
+        fasta = "output/yahs/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}_scaffolds_final.fa",
+        gs2summary = "output/genomescope2/{species}/{ccs_opts}/{species}/log.txt"
+    output: "output/gt-seqstat/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}.scaffold.stats"
+    run: 
+        shell("./code/bin/gt "
+              "seqstat -contigs -genome "
+              "{genomesize} "
+              "{input} > "
+              "{output}".format(input=input.fasta,
+                                output=output, 
+                                genomesize=get_genomesize(input.gs2summary))
+              )
+
+rule genometools_LJA:
+    input: 
+        fasta = "output/yahs/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}_scaffolds_final.fa",
+        gs2summary = "output/genomescope2/{species}/{ccs_opts}/{species}/log.txt"
+    output: "output/gt-seqstat/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}.scaffold.stats"
+    run: 
+        shell("./code/bin/gt "
+              "seqstat -contigs -genome "
+              "{genomesize} "
+              "{input} > "
+              "{output}".format(input=input.fasta,
+                                output=output, 
+                                genomesize=get_genomesize(input.gs2summary))
+              )

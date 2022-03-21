@@ -90,12 +90,12 @@ rule pairtools_sort:
     threads: 32
     shell: 
         """
-        mkdir /global/scratch2/mvazquez/tmp_pairtools
+        tmpdir=$(mktemp -d -p .)
         pairtools sort \
-          --tmpdir=/global/scratch2/mvazquez/tmp_pairtools \
+          --tmpdir=$tmpdir \
           --nproc {threads} \
           {input} > {output} 2> {log}
-        rm -r /global/scratch2/mvazquez/tmp_pairtools
+        rm -r $tmpdir
         """
 
 

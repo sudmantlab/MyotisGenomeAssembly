@@ -5,8 +5,10 @@ logs/
 .Rhistory 
 .snakemake 
 _* 
+code/*.jar
 code/*/
 .R*
 .snakemake
 code/*.tgz
 generator*
+.ipynb*

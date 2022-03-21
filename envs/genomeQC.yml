@@ -13,4 +13,7 @@ dependencies:
   - assembly-stats
   - busco
   - purge_dups
+  - quast
+  - gridss
+
 prefix: /global/home/users/mvazquez/miniconda3/envs/genomeQC

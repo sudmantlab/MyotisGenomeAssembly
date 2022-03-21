@@ -10,6 +10,6 @@ dependencies:
   - bamtools
   - snakemake-minimal
   - gfatools
-
+  - actc
 
 prefix: /global/home/users/mvazquez/miniconda3/envs/HiFiAssembly
