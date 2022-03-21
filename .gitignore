@@ -12,3 +12,4 @@ code/*/
 code/*.tgz
 generator*
 .ipynb*
+cluster_config.yml
