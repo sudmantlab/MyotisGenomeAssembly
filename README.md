@@ -12,12 +12,19 @@ href="https://orcid.org/0000-0001-8341-2390" target="orcid.widget" rel="me noope
 style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
 style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> 
 \- [docmanny](https://vazquez.bio)
-* **Elise Lauterbur** 
+* **Elise Lauterbur** <a itemprop="sameAs" content="https://orcid.org/0000-0002-7362-3618"
+href="https://orcid.org/0000-0002-7362-3618" target="orcid.widget" rel="me noopener noreferrer" 
+style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
+style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> 
 \- [lauterbur](https://github.com/lauterbur)
-* **David Enard**
+* 
+* **David Enard** <a itemprop="sameAs" content="https://orcid.org/0000-0002-7362-3618"
+href="https://orcid.org/0000-0002-7362-3618" target="orcid.widget" rel="me noopener noreferrer" 
+style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
+style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> 
 \-
-* **Peter Sudmant** <a itemprop="sameAs" content="https://orcid.org/0000-0002-9573-8248" 
-href="https://orcid.org/0000-0002-9573-8248" target="orcid.widget" rel="me noopener noreferrer" 
+* **Peter Sudmant** <a itemprop="sameAs" content="https://orcid.org/0000-0003-2634-8016" 
+href="https://orcid.org/0000-0003-2634-8016" target="orcid.widget" rel="me noopener noreferrer" 
 style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
 style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a>
 \- [petersudmant](https://github.com/petersudmant) 
