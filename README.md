@@ -12,7 +12,7 @@ href="https://orcid.org/0000-0001-8341-2390" target="orcid.widget" rel="me noope
 style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
 style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> 
 \- [docmanny](https://vazquez.bio)
-* **Elise Lauterbur** <a itemprop="sameAs" content="https://orcid.org/0000-0002-7362-3618"
+* **M Elise Lauterbur** <a itemprop="sameAs" content="https://orcid.org/0000-0002-7362-3618"
 href="https://orcid.org/0000-0002-7362-3618" target="orcid.widget" rel="me noopener noreferrer" 
 style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
 style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a> 
