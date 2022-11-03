@@ -1,0 +1,115 @@
+---
+title: "script for compiling longevity quotients"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("D:/Spring22/SudmantLab/bats")##use wd with files
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+load libraries
+
+```{r}
+
+###list of bat species###
+bat_species <- c("Myotis myotis",
+                 "Myotis auriculus",
+                 "Myotis californicus",
+                 "Myotis evotis",
+                 "Myotis lucifugus",
+                 "Myotis occultus",
+                 "Myotis thysanodes",
+                 "Myotis velifer",
+                 "Myotis volans")
+```
+list bat species
+
+```{r}
+###clean pantheria and AnAge###
+pantheria_dat <- read.table("PanTHERIA_1-0_WR05_Aug2008.txt", header = T, sep="\t")
+anage_dat <- read.table("anage_data.txt", header = T, sep = "\t")
+
+pantheria_dat_trim <- select(pantheria_dat, 
+                             MSW05_Order, 
+                             MSW05_Family, 
+                             MSW05_Genus, 
+                             MSW05_Species,
+                             MSW05_Binomial,
+                             X5.1_AdultBodyMass_g,
+                             X17.1_MaxLongevity_m)
+pantheria_dat_trim <- mutate(pantheria_dat_trim, Source = "pantheria",.after = MSW05_Binomial)
+pantheria_dat_trim$X17.1_MaxLongevity_m <- pantheria_dat_trim$X17.1_MaxLongevity_m/12
+anage_dat_trim <- select(anage_dat,
+                         Order,
+                         Family,
+                         Genus,
+                         Species,
+                         Adult.weight..g.,
+                         Maximum.longevity..yrs.)
+anage_dat_trim <- mutate(anage_dat_trim,Binomial = paste(Genus, Species, sep=" "), .after = Species, Source = "anage" )
+colnames(pantheria_dat_trim) <- c("Order", "Family", "Genus", "Species", "Binomial","Source","AdultWeight", "MaxLongevity")
+colnames(anage_dat_trim) <- c("Order", "Family", "Genus", "Species", "Binomial", "Source", "AdultWeight", "MaxLongevity")
+evotis <- data.frame(Order = "Chiroptera", Family = "Vespertilionidae", Genus = "Myotis", Species = "evotis", Binomial = "Myotis evotis", AdultWeight = 7.4, MaxLongevity = 22, Source = "google")
+occultus <- data.frame(Order = "Chiroptera", Family = "Vespertilionidae", Genus = "Myotis", Species = "occultus", Binomial = "Myotis occultus", AdultWeight = 9, MaxLongevity = 31, Source = "google")
+anage_dat_trim <- rbind(anage_dat_trim, evotis)
+anage_dat_trim <- rbind(anage_dat_trim, occultus)
+```
+load pantheria and anage data, ensure consistent labeling of data across two data sets. add variable "Source" to denote source. Google indicates some source from google, will need verification from Manny.
+
+```{r}
+
+###intersect the two databases###
+dat_merged <- merge(anage_dat_trim, pantheria_dat_trim, 
+                    by = c("Order","Family","Genus","Species","Binomial"), 
+                    all.x = T, all.y = T)
+dat_merged <- replace(dat_merged, is.na(dat_merged), 0)
+
+dat_merged <- mutate(dat_merged, AdultWeight=pmax(AdultWeight.x, AdultWeight.y), MaxLongevity = pmax(MaxLongevity.x, MaxLongevity.y))
+
+dat_merged <- select(dat_merged,
+                     Order,
+                     Family,
+                     Genus,
+                     Species,
+                     Binomial,
+                     AdultWeight,
+                     MaxLongevity)
+
+dat_merged <- dat_merged[dat_merged$MaxLongevity != 0,]
+dat_merged <- dat_merged[dat_merged$AdultWeight != 0,]
+```
+Merge databases, intersect species common to both databases and take maximum of weight and longevity.
+
+```{r}
+###filter bat species###
+dat_merged <-  mutate(dat_merged, SpecialBats = ifelse(Binomial %in% bat_species, "Manny's bats", "Others"))
+
+###log transform###
+dat_merged <- mutate(dat_merged, AvgLongevity = 1/(1-exp(log(.1)/MaxLongevity))) 
+dat_merged <- mutate(dat_merged, LogMaxLongevity = log(MaxLongevity,10), LogWeight = log(AdultWeight, 10))
+
+###construct model###
+m_nonbat <- lm(LogMaxLongevity ~ LogWeight, filter(dat_merged, SpecialBats == "Others"))
+
+###predict on bats###
+dat_merged <- mutate(dat_merged, PredLogLongevity = predict(m_nonbat, dat_merged))
+dat_merged <- mutate(dat_merged, LongevityQuotient = LogMaxLongevity - PredLogLongevity)
+
+###plot LQs###
+ggplot(dat_merged)+
+  geom_boxplot(data = filter(dat_merged, SpecialBats == "Others"), aes(y=LongevityQuotient))+
+  geom_point(data=filter(dat_merged, SpecialBats == "Manny's bats"), aes(x=0,y=LongevityQuotient), size = 5, color = "red")
+
+ggplot(dat_merged)+
+  geom_histogram(mapping = aes(x=LongevityQuotient))+
+  geom_jitter(data=filter(dat_merged, SpecialBats == "Manny's bats"), aes(x=LongevityQuotient, y = 0), size =2, color = "red")
+
+dat_merged[dat_merged$SpecialBats == "Manny's bats",]
+```
+Calculate longevity quotients (residuals post model fitting) and assign to dataframe

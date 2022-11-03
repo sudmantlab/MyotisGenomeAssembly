@@ -1,0 +1,17 @@
+name: gapFiller
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - tgsgapcloser
+  - ragtag
+  - minimap2
+  - intervaltree
+  - python
+  - pysam>=0.15.2
+  - networkx
+  - numpy
+  - unimap 
+  - pilon
+  - racon
+  - snakemake-minimal

@@ -1,0 +1,12 @@
+name: RapidCuration
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - pretext-suite
+  - seqtk
+  - python=3.6
+  - cooler
+  - pairix
+  - h5py
+  - tabix
