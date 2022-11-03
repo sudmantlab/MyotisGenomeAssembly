@@ -1,8 +1,0 @@
-name: RepeatMasker
-channels:
-  - bioconda
-  - conda-forge
-  - defaults
-dependencies:
-  - snakemake-minimal
-  - repeatmasker

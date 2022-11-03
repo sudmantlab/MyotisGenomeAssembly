@@ -1,8 +1,0 @@
-name: RNAQC
-channels:
-  - bioconda
-  - conda-forge
-  - defaults
-dependencies:
-  - fastqc
-  - multiqc
