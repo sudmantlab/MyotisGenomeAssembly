@@ -1,0 +1,120 @@
+{
+    "format": "annotation",
+    "command": "/venv/bin/funannotate predict -i data/genomes/mMyoEvo1.fa --species Myotis evotis --transcript_evidence /global/scratch/users/mvazquez/projects/BatGenomeAnalysis/annotation/data/trinity/M_evotis/E2R_S77_L002-trinity/Trinity.fasta --busco_db mammalia --organism other --repeats2evm --keep_evm --busco_seed_species human -o /global/scratch/users/mvazquez/projects/BatGenomeAnalysis/annotation/output/funannotate/mMyoEvo1_withBAM -d /global/scratch/users/mvazquez/projects/BatGenomeAnalysis/annotation/data/database --rna_bam /global/scratch/users/mvazquez/projects/BatGenomeAnalysis/annotation/output/mapping/Myotis_evotis/mMyoEvo1/E2R_S77_L002/Aligned.sortedByCoord.out.bam --cpus 40 --force",
+    "organism": "Myotis_evotis",
+    "software": {
+        "name": "funannotate",
+        "version": "1.8.14",
+        "date": "2022-09-21",
+        "resources": {
+            "merops": {
+                "type": "diamond",
+                "version": "12.0",
+                "date": "2017-10-04",
+                "num-records": "5009"
+            },
+            "uniprot": {
+                "type": "diamond",
+                "version": "2022_03",
+                "date": "2022-08-03",
+                "num-records": "568002"
+            },
+            "dbCAN": {
+                "type": "hmmer3",
+                "version": "11.0",
+                "date": "2022-08-09",
+                "num-records": "641"
+            },
+            "pfam": {
+                "type": "hmmer3",
+                "version": "35.0",
+                "date": "2021-11",
+                "num-records": "19632"
+            },
+            "repeats": {
+                "type": "diamond",
+                "version": "1.0",
+                "date": "2022-09-12",
+                "num-records": "11950"
+            },
+            "go": {
+                "type": "text",
+                "version": "2022-07-01",
+                "date": "2022-07-01",
+                "num-records": "47328"
+            },
+            "mibig": {
+                "type": "diamond",
+                "version": "1.4",
+                "date": "2022-09-12",
+                "num-records": "31023"
+            },
+            "interpro": {
+                "type": "xml",
+                "version": "90.0",
+                "date": "2022-08-04",
+                "num-records": "40597"
+            },
+            "busco_outgroups": {
+                "type": "outgroups",
+                "version": "1.0",
+                "date": "2022-09-12",
+                "num-records": "8"
+            },
+            "gene2product": {
+                "type": "text",
+                "version": "1.80",
+                "date": "2022-07-06",
+                "num-records": "34160"
+            }
+        }
+    },
+    "assembly": {
+        "num_contigs": 116,
+        "length": 2070482010,
+        "mean_length": 17848982.84,
+        "N50": 100887357,
+        "L50": 7,
+        "N90": 54197208,
+        "L90": 18,
+        "GC_content": 43.18
+    },
+    "annotation": {
+        "genes": 123630,
+        "common_name": 0,
+        "mRNA": 39766,
+        "tRNA": 83864,
+        "ncRNA": 0,
+        "rRNA": 0,
+        "avg_gene_length": 1299.79,
+        "transcript-level": {
+            "CDS_transcripts": 39766,
+            "CDS_five_utr": 0,
+            "CDS_three_utr": 0,
+            "CDS_no_utr": 39766,
+            "CDS_five_three_utr": 0,
+            "CDS_complete": 25666,
+            "CDS_no-start": 4392,
+            "CDS_no-stop": 3685,
+            "CDS_no-start_no-stop": 6023,
+            "total_exons": 139378,
+            "total_cds_exons": 139378,
+            "multiple_exon_transcript": 25811,
+            "single_exon_transcript": 13955,
+            "avg_exon_length": 180.77,
+            "avg_protein_length": 255.72,
+            "functional": {
+                "go_terms": 0,
+                "interproscan": 0,
+                "eggnog": 0,
+                "pfam": 0,
+                "cazyme": 0,
+                "merops": 0,
+                "busco": 0,
+                "secretion": 0
+            },
+            "pct_exon_overlap_transcript_evidence": 10.47,
+            "pct_exon_overlap_protein_evidence": 0.01
+        }
+    }
+}
