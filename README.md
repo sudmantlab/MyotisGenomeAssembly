@@ -42,12 +42,16 @@ style="width:1em;margin-right:.5em;" alt="ORCID iD icon"></a>
 Repo Structure: 
 -------
 
-- `assembly`: Contains the scripts, Snakefiles, and other parts necessary for assembling all genomes
-- `analyses`: Contains all of the analyses being done for the paper in their own folders. 
+- `assembly/`: Contains the scripts, Snakefiles, and other parts necessary for assembling all genomes
+- `analyses/`: Contains all of the analyses being done for the paper in their own folders. 
 Under debate whether to house each analysis in its own folder in this repo or to have git submodules
 linked to folders here.
-- `manuscript`: Holds the final figures and texts for the paper.
+- `data/`: PLACE FINAL PRODUCTS <1GB IN HERE. 
+Serves as a central spot to place files and outputs that are dependencies for other projects. 
+Note that this might change if we agree on a better way to track and share dependencies.
+- `manuscript/`: Holds the final figures and texts for the paper.
 - `tools.bib`: Bibliography file of tools and scripts used herein. Under debate if this should be one
 file or a `tools.bib` file in each folder.
+
 
 For more information, please find a detailed README in each folder. 
