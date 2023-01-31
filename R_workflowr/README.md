@@ -1,9 +1,9 @@
-Analysis Webpage
+Website for visualizing results
 ================
 
-This folder acts as a central spot for planning and running reproducible analyses using the `workflowr` 
-package, RStudio, and Netlify. 
+# Analyses:
 
-***Analyses in this folder should ONLY link to the `data/` folder at the root project directory!!!***
+1. [QC Plots](ng_curves.html)
+1. [Sample Collection Distribution](sample_map.html)
 
 
