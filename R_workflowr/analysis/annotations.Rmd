@@ -1,0 +1,89 @@
+---
+title: "annotations"
+author: "Juan M Vazquez (docmanny)"
+date: "2023-01-31"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r libraries}
+library(tidyverse)
+library(plotly)
+library(ggpubr)
+library(rtracklayer)
+library(GenomicRanges)
+```
+
+
+```{r data}
+myoMyo.gb <- import.gff("../../data/gff/GCA_014108235.1_mMyoMyo1.p_genomic.gff.gz")
+df.myoMyo.gb <- rtracklayer::as.data.frame(myoMyo.gb) %>% as_tibble
+myoMyo.gb.genes <- df.myoMyo.gb %>% filter(type == 'gene')
+
+myoVel.toga <- import.gff("../../analyses/makeHub/data/gff_temp/gff_temp/mMyoVel1/mMyoVel1_TOGA_hg38.gff")
+df.myoVel.toga <- rtracklayer::as.data.frame(myoVel.toga) %>% as_tibble
+myoVel.toga.genes <- df.myoVel.toga %>% filter(type == 'gene')
+
+```
+
+```{r}
+p.myoMyo.genbank.hist <- myoMyo.gb.genes %>% 
+  ggplot(
+    aes(
+      x=width, 
+      label=ID
+    )
+  ) + 
+  geom_histogram(binwidth = 1000) + 
+  labs(x='Size(kb)', y='# Genes (log)', title='mMyoMyo - GenBank') + 
+  scale_y_log10() +
+  theme_pubclean() 
+
+p.myoMyo.genbank.hist %>% ggplotly()
+```
+
+```{r}
+p.myoVel.toga.hist <- myoVel.toga.genes %>% 
+  ggplot(
+    aes(
+      x=width, 
+      label=ID
+    )
+  ) + 
+  geom_histogram(binwidth = 1000) + 
+  scale_y_log10() +
+  labs(x='Size(kb)', y='# Genes (log)', title='mMyoVel1 - TOGA') + 
+  theme_pubclean() 
+
+p.myoVel.toga.hist %>% ggplotly()
+```
+
+```{r}
+p.overlay.myoVel.myoMyo.hist <-  ggplot(
+  ) + 
+  geom_histogram(aes(
+      x=width, 
+      color=source,
+      fill=source
+    ), 
+    data= myoVel.toga.genes, binwidth = 1000) + 
+  geom_histogram(aes(
+      x=width, 
+      color=source,
+      fill=source
+    ),
+    data= myoMyo.gb.genes, binwidth = 1000) + 
+  scale_y_log10() +
+  scale_color_brewer() + 
+  scale_fill_brewer() + 
+  labs(x='Size(kb)', y='# Genes (log)', title='myoMyo GB vs myoVel TOGA') + 
+  theme_pubclean() 
+
+p.overlay.myoVel.myoMyo.hist %>% ggplotly()
+```
+
+
+

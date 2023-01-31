@@ -1,0 +1,354 @@
+---
+title: "QC Plots"
+author: "Juan Manuel Vazquez"
+date: "6/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=F, echo=F}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
+knitr::opts_chunk$set(crop = TRUE)
+library(tidyverse)
+library(magrittr)
+library(ggpubr)
+library(patchwork)
+library(ggtree)
+library(ggtreeExtra)
+library(ggtext)
+library(ggsci)
+# library(gghighlight)
+# library(plotly)
+```
+
+```{r assembly_stats}
+assembly_stats <- read_tsv("~/projects/MyotisGenomeAssembly/data/chiroptera.contig.assembly_stats.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
+  mutate(contig = str_detect(genomeName, "contig")) %>% 
+  filter(str_detect(genomeName, "M_|mmyo|\\.chr", negate=T)) %>%
+  filter(str_detect(genomeName, "mMyo.+1(?!_unmasked)", negate=T)) %>%
+  separate(genomeName, c("name", "scaffold"), sep="\\.") %>% 
+  arrange(name, contig) %>% 
+  select(-scaffold)
+
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+```
+
+```{r metadata}
+meta <- read_tsv("../data/chiroptera_genomes_20220627.tsv") %>% 
+  filter(!is.na(`Assembly BioProject Lineage Parent Accessions`)) %>% 
+  mutate(`Organism Name` = `Organism Name` %>% str_replace_all(" ", "_"))
+
+meta.origin <- meta %>% 
+  filter(str_detect(`Assembly BioProject Lineage Title`, "[Aa]ssembl", negate = T)) %>%
+  filter(str_detect(`Assembly BioProject Lineage Title`, "Myotis myotis", negate = T)) %>% 
+  filter(str_detect(`Assembly BioProject Lineage Title`, "Pipistrellus", negate = T)) %>% 
+  select(name=`Organism Name`, `Assembly BioProject Lineage Title`) %>% 
+  group_by(name) %>% 
+  summarize(Origin = `Assembly BioProject Lineage Title` %>% unique %>% sort %>%  paste(collapse=",")) %>% 
+  mutate(Origin = Origin %>% 
+           str_replace("The European Reference Genome Atlas,Vertebrate Genomes Project", "Vertebrate Genomes Project") %>% 
+           str_replace("Bat1K Project,Vertebrate Genomes Project", "Bat1K Project") %>% 
+           str_replace("Genome sequencing for Pteropus vampyrus", "Other") %>% 
+           str_replace("Eptesicus fuscus Genome Sequencing", "Other")
+         ) %>% 
+  bind_rows(assembly_stats %>% filter(str_detect(name, "mMyo")) %>% select(name) %>% distinct %>% mutate(Origin="This Paper"))
+
+assembly_stats.meta <- assembly_stats %>% 
+  left_join(meta.origin, by="name") %>% 
+  replace_na(list(Origin="Other")) %>% 
+  mutate(
+    species = name %>% 
+      str_replace("mMyoAui.*", "Myotis_auriculus") %>% 
+      str_replace("mMyoCai.*", "Myotis_californicus") %>% 
+      str_replace("mMyoOcc.*", "Myotis_occultus") %>% 
+      str_replace("mMyoLuc.*", "Myotis_lucifugus") %>% 
+      str_replace("mMyoYum.*", "Myotis_yumanensis") %>% 
+      str_replace("mMyoVol.*", "Myotis_volans") %>% 
+      str_replace("mMyoVel.*", "Myotis_velifer") %>% 
+      str_replace("mMyoEvo.*", "Myotis_evotis") %>% 
+      str_replace("mMyoThy.*", "Myotis_thysanodes") %>% 
+      str_replace("_T2T","") %>% 
+      str_replace("myoLuc2", "Myotis_lucifugus")
+  )
+
+assembly_stats.meta[str_detect(assembly_stats.meta$name, "T2T"),"Origin"] <- "T2T"
+assembly_stats.meta[str_detect(assembly_stats.meta$name, "Yum"),"Origin"] <- "CCGP"
+
+
+```
+
+```{r some phylogeny sprinkled in}
+tr <- treeio::read.newick("~/projects/MyotisGenomeAssembly/data/tree/species_timetree2.nwk") %>% 
+  ape::drop.tip("Rhinolophus_sinicus")
+
+setdiff(tr$tip.label, assembly_stats.meta$species)
+setdiff(assembly_stats.meta$species, tr$tip.label)
+
+
+```
+
+
+```{r NGx}
+plot.NGx <- assembly_stats.meta %>% 
+  filter(stat == "NGx",
+         contig==T
+         ) %>% 
+  ggplot(aes(x=v1, y=v2, color=Origin, group=name)) + 
+  labs(x="NGx", y = "bp", title = "Contig Contiguity") + 
+  geom_point() + 
+  geom_line() + 
+  ylim(1e4,NA) + 
+  scale_color_brewer(palette = "Dark2") + 
+  # scale_y_log10(limits=c(1e0,NA)) +
+  # scale_y_continuous(limits=c(1e0,NA)) +
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+plot.NGx
+```
+
+```{r AuNG}
+plot.auNG <- assembly_stats.meta %>% 
+  filter(stat == "auNG",
+         contig==T
+         ) %>% 
+  arrange(desc(v2)) %>% 
+  mutate(name = factor(name, levels = name %>% unique)) %>% 
+  ggplot(aes(x=v2, y=name, color=Origin)) + 
+  labs(x="auNG", y = "Assembly", title = "auNG") + 
+  geom_point() + 
+  scale_color_brewer(palette = "Dark2") + 
+  # scale_y_log10(limits=c(1e0,NA)) +
+  # scale_y_continuous(limits=c(1e0,NA)) +
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+plot.auNG
+```
+
+```{r phylo plus auNG}
+auNG <- assembly_stats.meta %>% 
+  filter(stat == "auNG",
+         contig==T
+         ) %>% 
+  select(species, Origin, v2, v1) %>% 
+  rename(label=species, auNG=v2, genomeSize=v1) %>% 
+  filter(!(str_detect(label, "lucifugus") & Origin=="Other"))
+
+color_scale_origin = RColorBrewer::brewer.pal(n=auNG %>% pull(Origin) %>% unique %>% length, name="Dark2") %>% set_names(., auNG %>% pull(Origin) %>% unique)
+
+# tr.auNG <- full_join(tr,auNG)
+
+## Sometimes I hate ggtree
+nodes_ourgenomes <- tr %>% 
+  as_tibble %>% 
+  filter(label %in% our_genomes) %>% 
+  select(label, node) %>% 
+  deframe()
+
+
+p.tr.auNG <- tr %>% 
+  ggtree() + 
+  geom_tiplab(
+    aes(
+      subset = (node %in% nodes_ourgenomes)
+    ),
+    align = T,
+    fontface="bold"
+    ) +
+  geom_tiplab(
+    aes(
+      subset = !(node %in% nodes_ourgenomes)
+    ),
+    align = T
+    ) +
+  xlim_tree(c(NA,250)) +
+  geom_facet(
+    panel = "auNG (bar)",
+    data = auNG,
+    geom = geom_col,
+    mapping=aes(
+      # x = log(1),
+      x = log(auNG),
+      color=Origin,
+      fill=Origin
+    ),
+    orientation = 'y',
+    width = .6
+  )+
+  geom_facet(
+    panel = "auNG (point)", 
+    data = auNG, 
+    geom = geom_point, 
+    mapping=aes(
+      # x = log(1),
+      x = log(auNG),
+      color=Origin,
+      fill=Origin
+    ), 
+    size=2
+  )+
+  theme_tree2() +
+  scale_color_manual("Origin", values = color_scale_origin) +
+  scale_fill_manual("Origin", values = color_scale_origin) +
+  # geom_facet(panel = "Genome Size", data = auNG %>% select(label, genomeSize, Origin), geom = geom_point, 
+  #              mapping=aes(x = genomeSize, color=Origin))+ 
+  theme(legend.position = "bottom")
+
+p.tr.auNG
+```
+
+```{r phylo auNG circular}
+
+auNG.fancy <- auNG %>% 
+  mutate(
+    label_fancy = sapply(label, . %>% if_else(. %in% our_genomes, str_c("**",.,"**"), .)) %>% 
+      str_remove("_mesoamericanus") %>% 
+      str_replace_all("_", " ")
+  )
+
+angle_rotate <- function(angle){
+    # subset1 <- "(angle < 90 | angle > 270)"
+    # subset2 <- "(angle >= 90 & angle <=270)"
+    if (angle < 90 | angle > 270){
+      return(angle)
+    } else {
+      return(angle+180)
+    }
+}
+h_readjust <- function(angle){
+    if (angle < 90 | angle > 270){
+      return(0)
+    } else {
+      return(1)
+    }
+}
+
+p.tr.auNG.circ <-
+  tr %>%
+  ggtree(layout = "fan", open.angle=180) +
+  xlim_tree(c(NA,100))+ 
+  geom_fruit(
+    data = auNG.fancy,
+    geom = geom_col,
+    mapping=aes(
+      y= label,
+      x = log(auNG),
+      color=Origin,
+      fill=Origin
+    ),
+    orientation = 'y',
+    width = .6
+  ) +
+  geom_fruit(
+    data = auNG.fancy,
+    geom = geom_richtext, 
+    mapping = aes(
+      y=label,
+      label=label_fancy,
+      color=Origin,
+      angle=sapply(angle,angle_rotate),
+      hjust=sapply(angle,h_readjust)
+    ),
+    fill = NA, 
+    label.color = NA, 
+    label.padding = grid::unit(rep(0, 4), "pt"),
+    
+  ) + 
+  scale_color_manual("Origin", values = color_scale_origin, guide="none") +
+  scale_fill_manual("Origin", values = color_scale_origin,
+                    guide = guide_legend(nrow = 2, ncol=6, title.position = "left")) +
+  theme(legend.position = c(0.6,0.3), plot.margin = unit(c(4,0,0,0),"cm"))
+  
+p.tr.auNG.circ
+
+```
+
+```{r phylo auNG circular map color}
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
+auNG.fancy.color <- auNG.fancy %>% 
+  mutate(color_me = sapply(label, . %>% ifelse(. %in% our_genomes, ., "Other")))
+
+p.tr.auNG.circ.altcolor <-
+  tr %>%
+  ggtree(layout = "fan", open.angle=180) +
+  xlim_tree(c(NA,100))+ 
+  geom_fruit_list(
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_col,
+      mapping=aes(
+        y= label,
+        x = log(auNG),
+        color=color_me,
+        fill=color_me
+      ),
+      orientation = 'y',
+      width = .6
+    ),
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_point,
+      mapping=aes(
+        y= label,
+        x = log(17.7),
+        angle=angle
+      ),
+      color="black",
+      shape = "-",
+      size=2,
+      vjust = 1,
+      hjust = 1
+    ),
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_point,
+      mapping=aes(
+        y= label,
+        x = log(max(auNG)),
+        angle=angle
+      ),
+      color="blue",
+      shape = "-",
+      size=2,
+      vjust = 1,
+      hjust = 1
+    )
+  ) +
+  geom_fruit(
+    data = auNG.fancy.color,
+    geom = geom_richtext, 
+    mapping = aes(
+      y=label,
+      label=label_fancy,
+      color=color_me,
+      angle=sapply(angle,angle_rotate),
+      hjust=sapply(angle,h_readjust)
+    ),
+    fill = NA, 
+    label.color = NA, 
+    label.padding = grid::unit(rep(0, 4), "pt"),
+  ) + 
+  scale_color_manual("Origin", values = species_color, guide="none") +
+  scale_fill_manual("Origin", values = species_color, guide="none") +
+  theme(plot.margin = unit(c(4,0,0,0),"cm"))
+  
+p.tr.auNG.circ.altcolor
+
+```
