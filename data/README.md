@@ -31,3 +31,4 @@ other published bat and select other genomes.
 
 - `tree/`: Contains trees used in this project, either published or generated in `analyses/phylogeny`.
   - `species_timetree.nwk`: Original species tree pulled from [timetree.org](https://timetree.org)
+  - 'Myotis_orthofinder.nwk`: Tree generated from orthofinder
