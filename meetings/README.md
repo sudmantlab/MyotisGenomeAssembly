@@ -47,3 +47,30 @@
     - Saba and Elise interested in looking @ PKR locus
 
 
+## 2023/04/10
+- Next meeting April 24
+- David
+    - David and Lucie found some problems w/ the gene annotations, specifically w/ the naming of genes and some being dropped. 
+    - *action item* David will fix this and send around updates. 
+    - David is downloading all available bat genomes and BLAT-ing our genes to them to find out when the DNA virus enrichment appears
+    - *action item* David will present at the next meeting
+- Manny
+    - Manny has run model fitting / testing for all genes 
+    - David suggests CONFIRMING all results using only gene trees that match the species topologies 
+    - manny ran ASTRAL, identifies same tree as David has found w/ orthofinder
+    - branch lengths look funky
+    - *action item* fix the trees... the branch lengths should make sense at the tips
+    - *action item* Try integrating IQ tree perhaps as per rockfish?
+- Lucie
+    - Sarah ran the transcriptomics
+    - went on the sequencing platform
+    - Sarah is curious "how pure are the cells that Manny has sent?"
+    - do we know the cellular makeup? there is cell specificity of many of the viral responses
+    - Yuma for eg. looks very different than velifer
+    - *Lucie and sarah* will follow up on figuring out cell proportions
+- Elise
+    - running BISER... it seems to suck...
+
+
+
+
