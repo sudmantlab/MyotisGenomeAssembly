@@ -14,6 +14,11 @@ rule genome_file:
     output: "data/genomes/{genome}.genome"
     shell: "cut -f1,2 {input} > {output}"
 
+rule faToTwoBit:
+    input: "data/genomes/{genome}.fa"
+    output: "data/2bit/{genome}.2bit"
+    shell: "faToTwoBit {input} {output}"
+
 rule nbed:
     input: "data/2bit/{genome}.2bit"
     output: "data/nBed/{genome}_N.bed"

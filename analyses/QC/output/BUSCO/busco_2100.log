@@ -1,0 +1,25 @@
+2022-07-05 15:27:08 DEBUG:busco.run_BUSCO	Command line: /usr/local/bin/busco -f --in /global/scratch2/mvazquez/projects/BatGenomeAnalysis/QC/data/genomes/mMyoLuc1.fa --out mMyoLuc1 -l /global/scratch2/mvazquez/projects/BatGenomeAnalysis/QC//global/scratch2/mvazquez/projects/annocomba/data/funannotate_database/mammalia --mode genome -c 20
+2022-07-05 15:27:08 INFO:busco.run_BUSCO	***** Start a BUSCO v5.2.2 analysis, current time: 07/05/2022 15:27:08 *****
+2022-07-05 15:27:08 DEBUG:busco.ConfigManager	Getting config file
+2022-07-05 15:27:08 INFO:busco.ConfigManager	Configuring BUSCO with local environment
+2022-07-05 15:27:08 INFO:busco.BuscoConfig	Mode is genome
+2022-07-05 15:27:08 INFO:busco.BuscoConfig	'Force' option selected; overwriting previous results directory
+2022-07-05 15:27:08 ERROR:busco.BuscoRunner	Input /global/scratch2/mvazquez/projects/BatGenomeAnalysis/QC/data/genomes/mMyoLuc1.fa does not exist
+2022-07-05 15:27:08 DEBUG:busco.BuscoRunner	Input /global/scratch2/mvazquez/projects/BatGenomeAnalysis/QC/data/genomes/mMyoLuc1.fa does not exist
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/busco/run_BUSCO.py", line 103, in run
+    self.load_config()
+  File "/usr/local/lib/python3.9/site-packages/busco/run_BUSCO.py", line 94, in load_config
+    self.config_manager.load_busco_config_main(sys.argv)
+  File "/usr/local/lib/python3.9/site-packages/busco/BuscoLogger.py", line 62, in wrapped_func
+    self.retval = func(*args, **kwargs)
+  File "/usr/local/lib/python3.9/site-packages/busco/ConfigManager.py", line 58, in load_busco_config_main
+    self.config_main.validate()
+  File "/usr/local/lib/python3.9/site-packages/busco/BuscoConfig.py", line 411, in validate
+    self._check_required_input_exists()
+  File "/usr/local/lib/python3.9/site-packages/busco/BuscoConfig.py", line 605, in _check_required_input_exists
+    raise BatchFatalError(
+busco.Exceptions.BatchFatalError: Input /global/scratch2/mvazquez/projects/BatGenomeAnalysis/QC/data/genomes/mMyoLuc1.fa does not exist
+2022-07-05 15:27:08 ERROR:busco.BuscoRunner	BUSCO analysis failed !
+2022-07-05 15:27:08 ERROR:busco.BuscoRunner	Check the logs, read the user guide (https://busco.ezlab.org/busco_userguide.html), and check the BUSCO issue board on https://gitlab.com/ezlab/busco/issues
+
