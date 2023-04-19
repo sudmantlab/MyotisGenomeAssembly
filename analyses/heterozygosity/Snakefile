@@ -1,0 +1,2 @@
+include: "rules/minimap2.smk"
+include: "rules/freebayes.smk"

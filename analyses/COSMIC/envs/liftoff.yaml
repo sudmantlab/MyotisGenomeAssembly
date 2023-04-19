@@ -1,0 +1,8 @@
+name: liftoff
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - liftoff
+  - liftofftools

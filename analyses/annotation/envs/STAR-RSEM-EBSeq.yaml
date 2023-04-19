@@ -1,0 +1,15 @@
+name: STAR-RSEM-EBSeq
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - star
+  - rsem
+  - bioconductor-ebseq
+  - samtools
+  - bzip2
+  - bcftools
+  - bedtools
+  - pandas
+  - snakemake-minimal

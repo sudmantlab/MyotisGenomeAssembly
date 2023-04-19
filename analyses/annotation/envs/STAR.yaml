@@ -1,0 +1,16 @@
+name: STAR-RSEM
+channels:
+  - anaconda
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - rsem
+  - samtools
+  - star
+  - bzip2
+  - bcftools
+  - bedtools
+  - pandas
+
+prefix: /global/home/users/mvazquez/miniconda3/envs/STAR-RSEM

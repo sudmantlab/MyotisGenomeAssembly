@@ -1,0 +1,1 @@
+include: "rules/minimap2.smk"

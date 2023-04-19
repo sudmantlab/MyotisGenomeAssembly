@@ -15,31 +15,7 @@ generator*
 cluster_config.yml
 test*
 .Rproj.user
-analyses/makeHub/code/MakeHub
-## masking from git for commit 2023-01-23
-./.git/objects/pack/pack-44dac9575be2df552bfbfbae737f382d6bc7d1a6.pack
-./.git/objects/pack/tmp_pack_x1Jh1m
-./analyses/annotation/output/funannotate/mMyoLuc1_withBAM/predict_results/Myotis_lucifugus.gbk
-./analyses/annotation/output/funannotate/mMyoLuc1_withBAM/predict_results/Myotis_lucifugus.scaffolds.fa
-./analyses/mMyoLuc1/mMyoLuc1/mMyoLuc1.gc5Base.bw
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_brain.bam
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_pancreas.bam
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_heart.bam
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_testis.bam
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_lung.bam
-./analyses/makeHub/data/gff_temp/mMyoVel1/mMyoVel1_kidney.bam
-./analyses/makeHub/data/genomes/Artibeus_jamaicensis.contigs.fa
-./analyses/makeHub/data/genomes/Hipposideros_galeritus.contigs.fa
-./analyses/makeHub/data/genomes/mMyoVel1.fa
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_2.s.bam
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/mMyoVel1.gc5Base.bw
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_3.s.bam
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_1.bw
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_1.s.bam
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_6.s.bam
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_3.bw
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_4.bw
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_4.s.bam
-./analyses/makeHub/output/makehub/mMyoVel1/mMyoVel1/mMyoVel1/rnaseq_6.bw
-./analyses/tmp-mMyoLuc1/mMyoLuc1.gc5Base.wigVarStep.gz
-./R_workflowr/.RData
+### EVERY FOLDER HAS ITS OWN .GITIGNORE
+./R_workflowr/.R*
+test*
+**/*test*

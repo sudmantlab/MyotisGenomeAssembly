@@ -1,0 +1,3 @@
+#include: "rules/minimap2.smk"
+include: "rules/samtools_view.smk"
+include: "rules/freebayes.smk"

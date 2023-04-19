@@ -1,0 +1,7 @@
+name: hapcut2
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - hapcut2
+

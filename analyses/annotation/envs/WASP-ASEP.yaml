@@ -1,0 +1,29 @@
+name: WASP-ASEP
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake-minimal
+  - python
+  - pysam
+  - scipy
+  - hdf5
+  - numpy
+  - pytables
+  - pyvcf
+  - bedtools
+  - ensembl-vep
+  - r-base
+  - r-devtools
+  - r-tidyverse 
+  - r-ape 
+  - r-broom.mixed 
+  - r-gghighlight
+  - r-ggplotify
+  - r-plotly
+  - r-workflowr
+  - r-biocmanager
+  - bioconductor-ggtree
+  - bioconductor-treeio
+  - r-tidytree

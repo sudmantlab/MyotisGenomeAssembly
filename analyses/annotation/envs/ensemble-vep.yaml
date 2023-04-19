@@ -1,0 +1,7 @@
+name: ensembl-vep
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - ensembl-vep

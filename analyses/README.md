@@ -4,6 +4,14 @@ Bat Genome Analyses
 Folder Structure
 ------------------
 
+- `.gitignore`
+
+  Everything should have its own .gitignore file to track what not to include. As a 
+  helpful hint, run `find . -type f -size 50MB` to see what files are a big no-no from
+  GitHub.
+  
+  If you add a huge file to your git commit, see [this helpful guide](https://medium.com/analytics-vidhya/tutorial-removing-large-files-from-git-78dbf4cf83a) for fixing it.
+
 - `data`
 
   All the raw and final/clean data should be symlinked or copied into the `data` folder. 
