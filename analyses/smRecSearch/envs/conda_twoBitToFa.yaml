@@ -1,0 +1,7 @@
+name: twoBitToFa
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - ucsc-twobittofa

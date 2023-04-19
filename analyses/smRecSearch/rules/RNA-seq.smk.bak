@@ -1,0 +1,219 @@
+import pandas as pd
+
+
+########################################################################################################################
+######## Config
+########################################################################################################################
+
+
+wildcard_constraints:
+    genome="((([A-Za-z]{1,3})([A-Za-z]{3})+)((\d{1,2}m?|[A-Z])(\.\d+)?(\.softmask)?)?(\d\.[a-z]{3}\.[a-z]{3}\.\d{8})?(-[A-Z][A-Za-z0-9]*([_.][A-Za-z]+){0,2})?(_\d{2}[A-Z][a-z]{2}\d{4}_[A-Za-z0-9]{0,6})?([-_][Vv]?\d{1,2}(\.\d{1,2}){0,2}k?)?(_HiC)?)|(mm10)|(rn6)|(hg19)|(hg38(_maskRep_noVarChr_fragWithGenes)?)|(dm6)|(fr2)",
+    sra="[SED]RR\d+"
+
+
+def get_SRA_list(sra_file):
+    """Reads a .tsv SRA file and returns a dataframe indexed by SRA Run accessions"""
+    return pd.read_table(sra_file).set_index("Run", drop=False)
+
+
+def get_SRA_acc(species, dir_sra, suffix="_SraRunTable.tsv"):
+    """Returns a list of SRA Run Accession numbers from a SraRunTable"""
+    try:
+        species = species.replace(" ", "_")
+        sra_table = species + suffix
+        sra_file = dir_sra.rstrip("/") + "/" + sra_table
+        df = get_SRA_list(sra_file)
+        return list(df.index)
+    except FileNotFoundError:
+        return ""
+    except AttributeError:
+        return ""
+
+
+def generate_genome_SRA_list(genome_df, dir_sra, suffix="_SraRunTable.tsv"):
+    """Generates a set of species-SRA strings from a list of species"""
+    genome_sra="{genome}_{sra}"
+    final_list = []
+    for species, genome in zip(genome_df.index, genome_df):
+        sra_list = get_SRA_acc(species, dir_sra, suffix)
+        if sra_list:
+            final_list.extend(map(lambda sra: (genome, sra), sra_list))
+        else:
+            continue
+    if final_list == []:
+        raise Exception("There's no SRAs for the selected species!")
+    return [genome_sra.format(genome=i[0], sra=i[1]) for i in final_list]
+
+def sra_from_wildcards(wildcards, genome_df = pt, suffix="_SraRunTable.tsv"):
+    return get_SRA_acc(genome_df.loc[genome_df['Genome'] == wildcards.genome].index[0], dir_sra, suffix)
+
+def stmerge_inputs(wildcards, genome_df = pt, suffix="_SraRunTable.tsv"):
+    sras = sra_from_wildcards(wildcards, genome_df = pt, suffix="_SraRunTable.tsv")
+    final_list = ["{path}/{genome}/{genome}_{sra}.denovo.gff3".format(path = dir_gff3,
+                                                genome=wildcards.genome,
+                                                sra=s)
+                for s in sras
+           ]
+    if final_list == []:
+        raise Exception("There's no SRAs for the selected species!")
+    else:
+        return final_list
+
+def stmerge_final_inputs(wildcards, genome_df = pt, suffix="_SraRunTable.tsv"):
+    sras = sra_from_wildcards(wildcards, genome_df = pt, suffix="_SraRunTable.tsv")
+    final_list = ["{path}/{genome}/{genome}_{sra}-final.gff3".format(path = dir_stringtie,
+                                                genome=wildcards.genome,
+                                                sra=s)
+                for s in sras
+           ]
+    if final_list == []:
+        raise Exception("There's no SRAs for the selected species!")
+    else:
+        return final_list
+
+loxAfr_genomes = pt[pt.Genome.isin(["loxAfr3","loxAfr4"])].Genome
+
+########################################################################################################################
+######## Rules
+########################################################################################################################
+
+rule all_alignments:
+    input:
+        expand("data/BED/{genome}-finalGuide.bed", genome=genomes)
+
+rule loxAfr_alignments:
+    """Useful for troubleshooting"""
+    input:
+        expand("data/BED/{genome}-finalGuide.bed", genome=loxAfr_genomes)
+#    output:
+#       "./loxAfr_alignments.list"
+#    shell:
+#        "echo {input} >> {output}"
+
+
+rule hisat2_index:
+    input:
+        "{path}/{genome}{extension}".format(genome='{genome}', path=dir_genome, extension = ".fa")
+    output:
+        temp("{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_idx, extension = ".{dataset,\d+}.ht2"))
+    params:
+        real_output="{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_idx, extension = "")
+    threads: 20
+    conda: "../envs/conda_tuxedo.yaml"
+    log: "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=log_idx, extension = "{dataset,\d+}.log")
+    shell:
+        "hisat2-build -p {threads} {input} {params.real_output}"
+
+rule hisat2:
+    input:
+        idx_fake = "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_idx, extension = ".1.ht2")
+    output:
+        bam = temp("{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_bam, extension = ".bam"))
+    log:
+        "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=log_bam, extension = ".bam.log")
+    params:
+        summary = "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=log_bam, extension = ".bam.summary"),
+        idx = "{path}/{genome}/{genome}".format(genome='{genome}', path=dir_idx)
+    threads: 20
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "hisat2 -p {threads} "
+        "-x {params.idx} "
+        "--dta "
+        "--summary-file {params.summary} "
+        "--met-stderr "
+        "--sra-acc {wildcards.sra} "
+        "2> {log} | "
+        "samtools view -b -u | "
+        "samtools sort - "
+        "--threads {threads} "
+        "-o {output}"
+
+rule samtools_index:
+    input:
+        bam = "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_bam, extension = ".bam")
+    output:
+        bai = temp("{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_bam, extension = ".bai"))
+    log: "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=log_bam, extension = ".bai.log")
+    threads: 10
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "samtools index {input.bam}"
+
+rule stringtie_denovo:
+    input:
+        "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_bam, extension = ".bam")
+    output:
+        temp("{path}/{genome}/{genome}_{sra}.denovo{extension}".format(genome='{genome}', sra='{sra}', path=dir_gff3, extension = ".gff3"))
+    log: "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=log_gff3, extension = ".gff3.log")
+    params:
+    threads: 10
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "stringtie {input} "
+        "-p {threads} "
+        "-l {wildcards.genome}_{wildcards.sra} "
+        "-v "
+        "-o {output} "
+        "2> {log}"
+
+rule stringtie_merge:
+    input: stmerge_inputs
+    output: "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_stringtieMerge, extension = "-guide.gff3")
+    log: "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=log_stringtie, extension = "-guide.gff3.log")
+    threads: 10
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "stringtie --merge "
+        "{input} "
+        "-l {wildcards.genome} "
+        "-v "
+        "-o {output} "
+        "2> {log}"
+
+rule stringtie_final:
+    input:
+        bam = "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_bam, extension = ".bam"),
+        guide = "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_stringtieMerge, extension = "-guide.gff3")
+    output:
+        protected("{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=dir_stringtie, extension = "-final.gff3"))
+    log: "{path}/{genome}/{genome}_{sra}{extension}".format(genome='{genome}', sra='{sra}', path=log_stringtie, extension = "-final.gff3.log")
+    conda: "../envs/conda_tuxedo.yaml"
+    threads: 10
+    shell:
+        "stringtie {input.bam} "
+        "-p {threads} "
+        "-G {input.guide} "
+        "-l {wildcards.genome} "
+        "-vBAC "
+        "-o {output} "
+        "2> {log}"
+
+rule stringtie_merge_final:
+    input: stmerge_final_inputs
+    output: "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_stringtieMergeFinal, extension = "-finalGuide.gff3")
+    log: "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=log_stringtieMergeFinal, extension = "-finalGuide.gff3.log")
+    threads: 10
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "stringtie --merge "
+        "{input} "
+        "-l {wildcards.genome} "
+        "-v "
+        "-o {output} "
+        "2> {log}"
+
+
+rule GFF3ToBed:
+    input:
+        "{path}/{genome}/{genome}{extension}".format(genome='{genome}', path=dir_stringtieMergeFinal, extension = "-finalGuide.gff3")
+    output:
+        "output/BED/{genome}/{file}{extension}".format(file="{file}", genome="{genome}", extension = ".bed")
+    conda: "../envs/conda_tuxedo.yaml"
+    shell:
+        "gff2bed < {input} > {output}"
+
+rule linkBed:
+    input: "output/BED/{genome}/{file}.bed"
+    output: "data/BED/{file}.bed"
+    shell: "ln -sf ../{input} {output}"

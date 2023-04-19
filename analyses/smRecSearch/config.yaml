@@ -1,0 +1,26 @@
+# General
+port_table: "data/portTable.csv"
+sra_file: "data/SraRunTable/SraRunTable.csv"
+
+## Do you want to use an annotation table to match whether or not the Reciprocal Best Hit matches the known gene?
+## If yes: anno_table points to a file with the gene annotations: 
+# anno_table: "output/recBlastDBPrep/hg38_geneAcc_hashTable.tsv"
+## If no: place an empty string
+anno_table: ""
+
+## For verbosity, add more V's. Special points to whomever inputs 50 V's.
+verbose: "vv"
+
+## Query and reverse types should be either "prot" or "dna" for now
+### Note: this was the state-of-the-art for BLAT v35; its possible that a future BLAT update implemenets the missing types of search (eg: dnax to dnax)
+query_type: "prot"
+reverse_type: "dna"
+
+## Also need to know the nature of the imput query
+forward_db_type: "dna"
+reverse_db_type: "dna"
+
+## BLAT is best-implemented; BLAST has also been implemented, but hasn't been thoroughly tested
+forward_algo: "blat"
+reverse_algo: "blat"
+

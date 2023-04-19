@@ -1,0 +1,7 @@
+name: faToTwoBit
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - ucsc-fatotwobit

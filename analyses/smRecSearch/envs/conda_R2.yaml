@@ -1,0 +1,21 @@
+name: R-GeneLists
+channels:
+  - r
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconductor-iranges
+  - bioconductor-plyranges
+  - blas
+  - r-base
+  - bioconductor-ebseq
+  - bioconductor-complexheatmap
+  - r-biocmanager
+  - r-essentials
+  - r-devtools
+  - r-tidyverse
+  - snakemake-minimal
+  - pandas
+  - python
+  - r-data.table

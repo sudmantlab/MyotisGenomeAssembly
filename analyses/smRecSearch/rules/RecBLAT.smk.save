@@ -1,0 +1,144 @@
+import pandas as pd
+from snakemake.exceptions import WorkflowError
+
+def get_port_for_genome(df, genome, translated = True):
+    if translated:
+        return int(df.loc[df["Genome"]==genome].Translated_BLAT_Port)
+    else:
+        return int(df.loc[df["Genome"]==genome].Untranslated_BLAT_Port)
+
+def get_species_port_translated(df):
+    return ["{{path}}/translated-{0}-{1}".format(i, j) for i, j in zip(df.Translated_BLAT_Port, df.Genome)]
+
+def get_species_port_untranslated(df):
+    return ["{{path}}/untranslated-{0}-{1}".format(i, j) for i, j in zip(df.Untranslated_BLAT_Port, df.Genome)]
+
+def get_species_port_closed(df):
+    l = []
+    l += ["{{path}}/translated-{0}-{1}-closed".format(j, i) for i, j in zip(df.Genome, df.Translated_BLAT_Port)]
+    l += ["{{path}}/untranslated-{0}-{1}-closed".format(j, i) for i, j in zip(df.Genome, df.Untranslated_BLAT_Port)]
+    return l
+
+def get_port(f):
+    with open(f) as infile:
+        return int(infile.read())
+
+def filtered_beds(wildcards):
+    t = glob_wildcards("data/BED/{genome}-{{type}}.bed".format(genome=wildcards.genome)).type
+    has_SRA = species_hasSRA(wildcards.genome)
+    if has_SRA:
+        finalguide = expand("output/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_intersected-finalGuide.bed",
+                      genome = wildcards.genome, query = wildcards.query, pc_score = wildcards.pc_score, pc_ident=wildcards.pc_ident, pc_qspan = wildcards.pc_qspan, rgenome = wildcards.rgenome
+                      )
+    else:
+       finalguide = []
+    if t:
+        n expand("output/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_intersected-{type}.bed",
+                      genome = wildcards.genome, query = wildcards.query, pc_score = wildcards.pc_score, pc_ident=wildcards.pc_ident, pc_qspan = wildcards.pc_qspan, rgenome = wildcards.rgenome,
+                      type = t) + finalguide
+    else:
+        return expand("output/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/RBB/{genome}_RecBlastOutput.bed.rbb",
+                      genome = wildcards.genome, query = wildcards.query, pc_score = wildcards.pc_score, pc_ident=wildcards.pc_ident, pc_qspan = wildcards.pc_qspan, rgenome = wildcards.rgenome)
+
+# Parameters
+
+wildcard_constraints:
+    genome="((([A-Za-z]{1,3})([A-Za-z]{3})+)((\d{1,2}m?|[A-Z])(\.\d+)?(\.softmask)?)?(\d\.[a-z]{3}\.[a-z]{3}\.\d{8})?(-[A-Z][A-Za-z0-9]*([_.][A-Za-z]+){0,2})?(_\d{2}[A-Z][a-z]{2}\d{4}_[A-Za-z0-9]{0,6})?([-_][Vv]?\d{1,2}(\.\d{1,2}){0,2}k?)?(_HiC)?)|(mm10)|(rn6)|(hg19)|(hg38(_maskRep_noVarChr_fragWithGenes)?)|(dm6)|(fr2)",
+    rgenome="((([A-Za-z]{1,3})([A-Za-z]{3})+)((\d{1,2}m?|[A-Z])(\.\d+)?(\.softmask)?)?(\d\.[a-z]{3}\.[a-z]{3}\.\d{8})?(-[A-Z][A-Za-z0-9]*([_.][A-Za-z]+){0,2})?(_\d{2}[A-Z][a-z]{2}\d{4}_[A-Za-z0-9]{0,6})?([-_][Vv]?\d{1,2}(\.\d{1,2}){0,2}k?)?(_HiC)?)|(mm10)|(rn6)|(hg19)|(hg38(_maskRep_noVarChr_fragWithGenes)?)|(dm6)|(fr2)"
+
+
+# Output Directories
+
+
+# Log Directories
+
+rule RBHB:
+    input:
+        expand("output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_evidenced.bed",
+               genome="loxAfr3", query="AvA", pc_score = 0.1, pc_ident = 0.8, pc_qspan = 0.5, rgenome = "hg38_maskRep_noVarChr_fragWithGenes")
+
+rule start_translated_gfServer:
+    input:
+        twoBitFile=ancient("{path}/{{genome}}{extension}".format(path=dir_2bit, extension = ".2bit"))
+    output:
+        "{path}/translated-{{genome}}".format(path=dir_flags)
+    log:
+        "{path}/translated-{{genome}}.log".format(path=log_flags)
+    group: "recBlat"
+    shell:
+        "./code/start_Translated_gfServer.sh {wildcards.genome} > {output} 2>{log}"
+
+rule start_untranslated_gfServer:
+    input:
+        twoBitFile=ancient("{path}/{{genome}}{extension}".format(path=dir_2bit, extension = ".2bit"))
+    output:
+        "{path}/untranslated-{{genome}}".format(path=dir_flags)
+    log:
+        "{path}/untranslated-{{genome}}.log".format(path=log_flags)
+    group: "recBlat"
+    shell:
+        "./code/start_Untranslated_gfServer.sh {wildcards.genome} > {output} 2>{log}"
+
+rule RecBlat:
+    input:
+        qfile = ancient("data/input/{query}.fa"),
+        twoBitFile=ancient("{path}/{{genome}}{extension}".format(path=dir_2bit, extension = ".2bit")),
+        tportfile = ancient("{path}/translated-{{genome}}".format(path=dir_flags)),
+        utportfile = ancient("{path}/untranslated-{{rgenome}}".format(path=dir_flags)),
+        annoTable = ancient("output/recBlastDBPrep/hg38_geneAcc_hashTable.tsv")
+    output:
+        protected("output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/output/{genome}_RecBlastOutput.bed")
+    params:
+        tport = lambda wildcards, df=pt: get_port_for_genome(df, wildcards.genome, translated=True),
+        utport = lambda wildcards, df=pt: get_port_for_genome(df, wildcards.rgenome, translated=False)
+    threads: 10
+    log: "logs/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/output/{genome}_RecBlastOutput.log"
+    group: "recBlat"
+    conda: "../envs/conda_recBlat.yaml"
+    shell:
+        "( ( ./code/rbb.py "
+        "--query-file {input.qfile} "
+        "--forward-port {params.tport} "
+        "--reverse-port {params.utport} "
+        "--forward-species {wildcards.genome} "
+        "--forward-twobit {input.twoBitFile} "
+        "--reverse-species 'Homo sapiens' "
+        "--reverse-twobit 'hg38_maskRep_noVarChr_fragWithGenes.2bit' "
+        "--annotation_lookup_tsv {input.annoTable} "
+        "--perc-score {wildcards.pc_score} "
+        "--perc-identity {wildcards.pc_ident} "
+        "--perc-query-span {wildcards.pc_qspan} "
+        "--max-processes {threads} ) ; "
+        "gfServer stop localhost {params.tport} && "
+        "rm {input.tportfile} ) 2> {log}"
+
+rule reciprocalBestHits:
+    input:
+        ancient("output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/output/{genome}_RecBlastOutput.bed")
+#        "output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/output/{genome}_RecBlastOutput.bed"
+    output:
+        "output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/RBB/{genome}_RecBlastOutput.bed.rbb"
+    shell:
+        "../code/rbhb_from_bed.py {input}"
+
+rule filterRBHBbyBED:
+    input:
+        a=ancient("output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/RBB/{genome}_RecBlastOutput.bed.rbb"),
+        b=ancient("data/BED/{genome}-{type}.bed")
+    output:
+        "output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_intersected-{type}.bed"
+    log:
+        "logs/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_intersected_{type}.log"
+    shell:
+        "bedtools intersect -u -a {input.a} -b {input.b} | bedtools sort > {output} 2>{log}"
+
+rule evidencedRBHB:
+    input:
+        filtered_beds
+    output:
+        "output/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_evidenced.bed"
+    log:
+        "logs/RBB/{genome}/{query}-pcScore{pc_score}_pcIdent{pc_ident}_pcQuerySpan{pc_qspan}_reverse-{rgenome}/filtered/{genome}_evidenced.log"
+    shell:
+        "cat {input} | sort | uniq | bedtools sort > {output}"
+        #"echo {input} > {output}"

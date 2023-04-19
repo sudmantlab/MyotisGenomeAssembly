@@ -1,0 +1,23 @@
+name: RecBlat
+channels:
+  - bioconda
+  - conda-forge
+  - r
+dependencies:
+  - snakemake-minimal
+  - python =3.6
+  - gffutils 
+  - bedtools
+  - Click 
+  - biopython 
+  - dill 
+  - multiprocess 
+  - mygene 
+  - nose 
+  - pandas 
+  - parallel 
+  - ucsc-fatotwobit
+  - ucsc-twobittofa
+  - pip 
+  - pip:
+    - "-e git+https://github.com/docmanny/RecBlast#egg=RecBlast"
