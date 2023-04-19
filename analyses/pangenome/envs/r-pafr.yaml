@@ -1,0 +1,9 @@
+name: r_pafr
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - R
+  - r-pafr
+  - r-tidyverse

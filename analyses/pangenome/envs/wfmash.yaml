@@ -1,0 +1,7 @@
+name: wfmash
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - wfmash

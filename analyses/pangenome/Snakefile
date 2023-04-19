@@ -1,0 +1,3 @@
+include: "rules/standardize.smk"
+#include: "rules/wfmash.smk"
+include: "rules/wfmash.cleaned.smk"
