@@ -1,0 +1,8 @@
+name: phylo
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - iqtree
+  - astral-tree
