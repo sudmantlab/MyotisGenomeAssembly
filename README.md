@@ -11,6 +11,13 @@ genetic and phenotypic differences between long- and short-lived species. To ove
 we are creating cell lines, reference genomes, and population genetic data from a clade of nine 
 closely-related bats, both long- and short-lived relative to body size. 
 
+Website
+---------
+
+All analyses in the `R_workflowr` folder that are compiled and pushed here are automatically posted to 
+[https://myotisgenomeanalysis.netlify.app/](https://myotisgenomeanalysis.netlify.app/). For more info on
+this, see [the workflowr documentation](https://jdblischak.github.io/workflowr/) or talk to Manny.
+
 
 Collaborators
 -------
