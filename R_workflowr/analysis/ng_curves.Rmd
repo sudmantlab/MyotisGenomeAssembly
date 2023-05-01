@@ -22,13 +22,14 @@ library(ggsci)
 ```
 
 ```{r assembly_stats}
-assembly_stats <- read_tsv("~/projects/MyotisGenomeAssembly/data/chiroptera.contig.assembly_stats.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
+assembly_stats <- read_tsv("../../data/assembly_stats/all_assembly_stats.contigs.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
   mutate(contig = str_detect(genomeName, "contig")) %>% 
   filter(str_detect(genomeName, "M_|mmyo|\\.chr", negate=T)) %>%
   filter(str_detect(genomeName, "mMyo.+1(?!_unmasked)", negate=T)) %>%
   separate(genomeName, c("name", "scaffold"), sep="\\.") %>% 
   arrange(name, contig) %>% 
-  select(-scaffold)
+  select(-scaffold) %>% 
+  mutate(name=name %>% str_remove("_unmasked"))
 
 our_genomes = c(
   "Myotis_auriculus",
@@ -44,24 +45,16 @@ our_genomes = c(
 ```
 
 ```{r metadata}
-meta <- read_tsv("../data/chiroptera_genomes_20220627.tsv") %>% 
-  filter(!is.na(`Assembly BioProject Lineage Parent Accessions`)) %>% 
+meta <- read_tsv("../../data/chiropteraGenomes-20230427.tsv") %>% 
   mutate(`Organism Name` = `Organism Name` %>% str_replace_all(" ", "_"))
 
 meta.origin <- meta %>% 
-  filter(str_detect(`Assembly BioProject Lineage Title`, "[Aa]ssembl", negate = T)) %>%
-  filter(str_detect(`Assembly BioProject Lineage Title`, "Myotis myotis", negate = T)) %>% 
-  filter(str_detect(`Assembly BioProject Lineage Title`, "Pipistrellus", negate = T)) %>% 
-  select(name=`Organism Name`, `Assembly BioProject Lineage Title`) %>% 
+  select(name=`Organism Name`, Origin=Group, Citation) %>% 
   group_by(name) %>% 
-  summarize(Origin = `Assembly BioProject Lineage Title` %>% unique %>% sort %>%  paste(collapse=",")) %>% 
-  mutate(Origin = Origin %>% 
-           str_replace("The European Reference Genome Atlas,Vertebrate Genomes Project", "Vertebrate Genomes Project") %>% 
-           str_replace("Bat1K Project,Vertebrate Genomes Project", "Bat1K Project") %>% 
-           str_replace("Genome sequencing for Pteropus vampyrus", "Other") %>% 
-           str_replace("Eptesicus fuscus Genome Sequencing", "Other")
-         ) %>% 
-  bind_rows(assembly_stats %>% filter(str_detect(name, "mMyo")) %>% select(name) %>% distinct %>% mutate(Origin="This Paper"))
+  mutate(
+    Origin = ifelse(Origin %in% c('Zoonomia', 'Bat1K', 'DNAZoo', 'CCGP'), Origin, 'Other')
+  ) %>% 
+  bind_rows(assembly_stats %>% filter(str_detect(name, "mMyo")) %>% select(name) %>% distinct %>% mutate(Origin="This Paper", Citation = "This Paper", name = name %>% str_remove("_unmasked")))
 
 assembly_stats.meta <- assembly_stats %>% 
   left_join(meta.origin, by="name") %>% 
@@ -82,14 +75,31 @@ assembly_stats.meta <- assembly_stats %>%
   )
 
 assembly_stats.meta[str_detect(assembly_stats.meta$name, "T2T"),"Origin"] <- "T2T"
-assembly_stats.meta[str_detect(assembly_stats.meta$name, "Yum"),"Origin"] <- "CCGP"
 
 
 ```
+### Notes about the tree
+
+In order to get TimeTree to play nicely with the phylogeny, a few changes were needed:
+  - Murina aurata feae (replaced with Murina aurata)
+  - Pteropus pselaphon (replaced with Pteropus mariannus)
+  - Miniopterus schreibersii (replace with Miniopterus schreibersii orianae)
+  - Myotis occultus (replaced with Myotis lucifugus lucifugus)
+  - Myotis lucifugus (replaced with Myotis lucifugus carissima)
+  - Hipposideros pendleburyi (replaced with Hipposideros turpis)
+  - TimetreeV5 has split Eptesicus and broken its nomenclature/link to NCBI, so you can't find "Eptesicus fuscus" anymore.
+    Instead, you have to look for all of Chiroptera or Vespertilliodinae and then look for Eptesicus fuscus hispaniolae.
+
+If you do all these changes, then undo the changes in post, you get this tree. 
+Note that it was very annoying to splice the two trees together by eye so avoid needing to redo this.
 
 ```{r some phylogeny sprinkled in}
-tr <- treeio::read.newick("~/projects/MyotisGenomeAssembly/data/tree/species_timetree2.nwk") %>% 
-  ape::drop.tip("Rhinolophus_sinicus")
+# This tree is gone now
+#tr <- treeio::read.newick("~/projects/MyotisGenomeAssembly/data/tree/species_timetree2.nwk") %>% 
+#  ape::drop.tip("Rhinolophus_sinicus") 
+
+
+tr <- treeio::read.newick("../../data/tree/genomeSpecies.timetree.nwk")
 
 setdiff(tr$tip.label, assembly_stats.meta$species)
 setdiff(assembly_stats.meta$species, tr$tip.label)
@@ -302,34 +312,34 @@ p.tr.auNG.circ.altcolor <-
       orientation = 'y',
       width = .6
     ),
-    geom_fruit(
-      data = auNG.fancy.color,
-      geom = geom_point,
-      mapping=aes(
-        y= label,
-        x = log(17.7),
-        angle=angle
-      ),
-      color="black",
-      shape = "-",
-      size=2,
-      vjust = 1,
-      hjust = 1
-    ),
-    geom_fruit(
-      data = auNG.fancy.color,
-      geom = geom_point,
-      mapping=aes(
-        y= label,
-        x = log(max(auNG)),
-        angle=angle
-      ),
-      color="blue",
-      shape = "-",
-      size=2,
-      vjust = 1,
-      hjust = 1
-    )
+    # geom_fruit(
+    #   data = auNG.fancy.color,
+    #   geom = geom_point,
+    #   mapping=aes(
+    #     y= label,
+    #     x = log(17.7),
+    #     angle=angle
+    #   ),
+    #   color="black",
+    #   shape = "-",
+    #   size=2,
+    #   vjust = 1,
+    #   hjust = 1
+    # ),
+    # geom_fruit(
+    #   data = auNG.fancy.color,
+    #   geom = geom_point,
+    #   mapping=aes(
+    #     y= label,
+    #     x = log(max(auNG)),
+    #     angle=angle
+    #   ),
+    #   color="blue",
+    #   shape = "-",
+    #   size=2,
+    #   vjust = 1,
+    #   hjust = 1
+    # )
   ) +
   geom_fruit(
     data = auNG.fancy.color,
@@ -352,3 +362,21 @@ p.tr.auNG.circ.altcolor <-
 p.tr.auNG.circ.altcolor
 
 ```
+```{r}
+
+t2t.base = p.tr.auNG.circ.altcolor$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
+t2t.bartop = p.tr.auNG.circ.altcolor$layers[[5]]$data %>% filter(label == 'Homo_sapiens') %>% pull(new_xtmp)
+t2t.start = min(p.tr.auNG.circ.altcolor$data$y)
+t2t.end = max(p.tr.auNG.circ.altcolor$data$y)
+
+p.tr.auNG.circ.altcolor + 
+  geom_segment(
+    aes(
+      x = t2t.base + t2t.bartop,
+      xend = t2t.base + t2t.bartop,
+      y = t2t.start, 
+      yend = t2t.end
+    )
+  )
+```
+
