@@ -32,10 +32,18 @@ rule miniprot_fix_inheritance:
 
 rule miniprot_getFASTA:
     input: 
-        gff="output/miniprot_0.6-r194-dirty/{genome}_{variant}.gff",
+        gff="output/miniprot_0.6-r194-dirty/{genome}_{variant}.gff3",
         genome="data/genomes/{genome}.fa"
     output: "output/miniprot_0.6-r194-dirty/{genome}_{variant}.faa"
-    shell: 'agat_sp_extract_sequences.pl -f {input.genome} -p -g {input.gff} -o {output} '
+    wildcard_constraints:
+        genome = "[A-Z][a-z]+_[a-z]+",
+        #variant = "uniprot-sprot.fixedinheritance.diamond_rbh"
+    shell: 
+        'agat_sp_extract_sequences.pl '
+        ' -f {input.genome} '
+        ' -p '
+        ' -g {input.gff} '
+        ' -o {output} '
 
 rule miniprot_gtf:
     version: "0.6-r194-dirty"
