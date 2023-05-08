@@ -1,0 +1,13 @@
+Set	Dup	Count
+COSMIC	noDup	445
+COSMIC	1Dup	59
+COSMIC	2+Dup	33
+COSMIC	Total	537
+OrthoGroup	noDup	18106
+OrthoGroup	1Dup	2527
+OrthoGroup	2+Dup	1812
+OrthoGroup	Total	22445
+OrthoGroup537rando	noDup	421
+OrthoGroup537rando	1Dup	62
+OrthoGroupr537rando	2+Dup	54
+OrthoGroup536rando	Total	537
