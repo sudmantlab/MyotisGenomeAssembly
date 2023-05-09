@@ -18,7 +18,79 @@ library(GenomicRanges)
 ```
 
 
-```{r data}
+## BUSCO
+
+```{r BUSCOs}
+
+col.busco <- c(
+  Complete = 'black',
+  Single = "#91C7B1",
+  Duplicated = "#E3D081",
+  Fragmented = "#B33951",
+  Missing = "#54494B"
+  
+)
+  
+busco <- read_tsv("../../data/BUSCOs.tsv") %>% 
+  pivot_longer(-Genome) %>% 
+  mutate(name = name %>% factor(levels=rev(c('Complete', 'Single', 'Duplicated', 'Fragmented', 'Missing', 'N'))))
+
+scale.completeness <- busco %>% 
+  filter(name == "Complete") %>% 
+  select(Genome, value) %>% 
+  arrange(desc(value)) %>% 
+  pull(Genome)
+
+busco <- busco %>% 
+  mutate(Genome = Genome %>% factor(levels=scale.completeness))
+
+p.busco <- busco %>% 
+  filter(!name %in% c("N", "Complete")) %>% 
+  ggplot(
+    aes(
+      x = Genome,
+      fill = name,
+      y = value
+    )
+  ) + 
+  geom_bar(position="stack", stat = "identity") + 
+  geom_text(
+    data = busco %>% filter(name == "Complete"), 
+    mapping = aes(label=value %>% str_c(., "%"), y=0),
+    hjust=0,
+    # family='helvetica',
+    fontface='bold'
+  ) + 
+  geom_errorbar(
+    data = busco %>% filter(name == "Complete"), 
+    mapping = aes(
+      x = Genome, 
+      color=name,
+      y=value,
+      ymin=value,
+      ymax=value
+    ),
+    stat= 'identity',
+    fill=NA,
+    inherit.aes = F,
+    show.legend = F
+  ) + 
+  scale_fill_manual("Category", values = col.busco) + 
+  scale_y_continuous("Percentage", labels = scales::percent_format(scale = 1, accuracy=1)) + 
+  coord_flip() + 
+  theme_pubr() +
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+
+p.busco
+
+p.busco %>% ggsave(plot=., filename = "../output/BUSCO.pdf", width = 6, height = 3.71, dpi=900, units = "in")
+```
+
+
+
+## Annotation Graphs
+```{r data, eval=F, include=F}
 myoMyo.gb <- import.gff("../../data/gff/GCA_014108235.1_mMyoMyo1.p_genomic.gff.gz")
 df.myoMyo.gb <- rtracklayer::as.data.frame(myoMyo.gb) %>% as_tibble
 myoMyo.gb.genes <- df.myoMyo.gb %>% filter(type == 'gene')
@@ -29,7 +101,7 @@ myoVel.toga.genes <- df.myoVel.toga %>% filter(type == 'gene')
 
 ```
 
-```{r}
+```{r, eval=F, include=F}
 p.myoMyo.genbank.hist <- myoMyo.gb.genes %>% 
   ggplot(
     aes(
@@ -45,7 +117,7 @@ p.myoMyo.genbank.hist <- myoMyo.gb.genes %>%
 p.myoMyo.genbank.hist %>% ggplotly()
 ```
 
-```{r}
+```{r, eval=F, include=F}
 p.myoVel.toga.hist <- myoVel.toga.genes %>% 
   ggplot(
     aes(
@@ -61,7 +133,7 @@ p.myoVel.toga.hist <- myoVel.toga.genes %>%
 p.myoVel.toga.hist %>% ggplotly()
 ```
 
-```{r}
+```{r, eval=F, include=F}
 p.overlay.myoVel.myoMyo.hist <-  ggplot(
   ) + 
   geom_histogram(aes(

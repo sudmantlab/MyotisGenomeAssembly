@@ -1,7 +1,7 @@
-name: "R_workflowr"
+name: "Myotis Genome Analyses"
 output_dir: ../docs
 navbar:
-  title: "R_workflowr"
+  title: "Myotis Genome Analyses"
   left:
   - text: Home
     href: index.html

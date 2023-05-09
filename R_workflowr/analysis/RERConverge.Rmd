@@ -1,0 +1,264 @@
+---
+title: "RERConverge"
+author: "docmanny"
+date: "2023-05-08"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(RERconverge)
+library(tidyverse)
+library(ggpubr)
+```
+
+
+```{r}
+toytreefile = "subsetMammalGeneTrees.txt"
+toyTrees=readTrees(paste(rerpath,"/extdata/",toytreefile,sep=""), max.read = 200)
+
+```
+
+```{r}
+master.tree = root.phylo(read.tree(text="(Myotis_auriculus:0.0049530287,(Myotis_californicus:0.0059138183,(((Myotis_lucifugus:0.0030514562,Myotis_occultus:0.0032471934)100/100:0.0020768353,(Myotis_velifer:0.0029764851,Myotis_yumanensis:0.0029904558)100/100:0.0038364895)100/100:0.0009882682,(Myotis_myotis:0.0131977455,Myotis_volans:0.0055379826)100/100:0.0012340035)100/100:0.0023012371)100/100:0.0009098871,(Myotis_evotis:0.0017915030,Myotis_thysanodes:0.0018269795)100/100:0.0020219079);"), outgroup = "Myotis_myotis", resolve.root = T)
+```
+
+```{r}
+
+trees <- read.tree("../../data/mhcr_trees.tail.txt")
+  
+batTrees <- readTrees(
+  file = "../../data/mhcr_trees.head.txt",
+  max.read = 9, 
+  # masterTree = master.tree,
+  # minSpecs = 10
+)
+```
+
+```{r}
+# function (tree) 
+# {
+    dd = dist.nodes(master)
+    allD = double()
+    nn = matrix(nrow = 0, ncol = 2)
+    nA = length(master$tip.label) + master$Nnode
+    matIndex = matrix(nrow = nA, ncol = nA)
+    index = 1
+    destinNode = vector("integer", 0)
+    ancNode = vector("integer", 0)
+    for (i in 1:nA) {
+        ia = RERconverge:::getAncestors(master, i)
+        destinNode = c(destinNode, rep(i, length(ia)))
+        ancNode = c(ancNode, ia)
+        if (length(ia) > 0) {
+            allD = c(allD, dd[i, ia])
+            nn = rbind(nn, cbind(rep(i, length(ia)), ia))
+            for (j in ia) {
+                matIndex[i, j] = index
+                index = index + 1
+            }
+        }
+    }
+    return(list(dist = allD, nodeId = nn, matIndex = matIndex, 
+        destinNode = destinNode, ancNode = ancNode))
+# }
+```
+
+
+```{r}
+# function (file, max.read = NA, masterTree = NULL, minTreesAll = 20, 
+#     reestimateBranches = F, minSpecs = NULL) 
+# {
+    tmp = scan(file, sep = "\t", what = "character", quiet = T)
+    message(paste0("Read ", length(tmp)/2, " items", collapse = ""))
+    trees = vector(mode = "list", length = min(length(tmp)/2, 
+        max.read, na.rm = T))
+    treenames = character()
+    maxsp = 0
+    allnames = NA
+    for (i in 1:min(length(tmp), max.read * 2, na.rm = T)) {
+        if (i%%2 == 1) {
+            treenames = c(treenames, tmp[i])
+        } else {
+            trees[[i/2]] = tryCatch(unroot(read.tree(text = tmp[i])), 
+                error = function(e) {
+                  message("Cannot parse tree for the following gene: ", 
+                    treenames[i/2])
+                  stop()
+                })
+            if (!is.null(masterTree)) {
+                trees[[i/2]] = pruneTree(trees[[i/2]], intersect(trees[[i/2]]$tip.label, 
+                  masterTree$tip.label))
+            }
+            if (sum(trees[[i/2]]$tip.label %in% allnames == F) > 
+                0) {
+                allnames = unique(c(allnames, trees[[i/2]]$tip.label))
+                maxsp = length(allnames) - 1
+            }
+        }
+    }
+    allnames = allnames[!is.na(allnames)]
+    names(trees) = treenames
+    treesObj = vector(mode = "list")
+    treesObj$trees = trees
+    treesObj$numTrees = length(trees)
+    treesObj$maxSp = maxsp
+    message(paste("max is", maxsp))
+    report = matrix(nrow = treesObj$numTrees, ncol = maxsp)
+    colnames(report) = allnames
+    rownames(report) = treenames
+    for (i in 1:nrow(report)) {
+        ii = match(allnames, trees[[i]]$tip.label)
+        report[i, ] = 1 - is.na(ii)
+    }
+    treesObj$report = report
+    ii = which(rowSums(report) == maxsp)
+    if (length(ii) == 0 & is.null(masterTree)) {
+        stop("no tree has all species - you must supply a master tree")
+    }
+    if (is.null(masterTree)) {
+        master = trees[[ii[1]]]
+        master$edge.length[] = 1
+        treesObj$masterTree = master
+    }    else {
+        master = pruneTree(masterTree, intersect(masterTree$tip.label, 
+            allnames))
+        master$edge.length[] = 1
+        master = unroot(pruneTree(masterTree, intersect(masterTree$tip.label, 
+            allnames)))
+        treesObj$masterTree = master
+    }
+    treesObj$masterTree = rotateConstr(treesObj$masterTree, sort(treesObj$masterTree$tip.label))
+    tiporder = RERconverge:::treeTraverse(treesObj$masterTree)
+    message("Rotating trees")
+    for (i in 1:treesObj$numTrees) {
+        treesObj$trees[[i]] = rotateConstr(treesObj$trees[[i]], 
+            tiporder)
+    }
+    ap = RERconverge:::allPathsTrackBranches(master)
+    treesObj$ap = ap
+    matAnc = (ap$matIndex > 0) + 1 - 1
+    matAnc[is.na(matAnc)] = 0
+    paths = matrix(nrow = treesObj$numTrees, ncol = length(ap$dist))
+    for (i in 1:treesObj$numTrees) {
+        paths[i, ] = tryCatch(RERconverge:::allPathMasterRelativeTrackBranches(treesObj$trees[[i]], 
+            master, ap), error = function(err) NA)
+    }
+    paths = paths + min(paths[paths > 0], na.rm = T)
+    treesObj$paths = paths
+    treesObj$matAnc = matAnc
+    treesObj$matIndex = ap$matIndex
+    treesObj$lengths = unlist(lapply(treesObj$trees, function(x) {
+        sqrt(sum(x$edge.length^2))
+    }))
+    ii = intersect(which(rowSums(report) == maxsp), which(is.na(paths[, 
+        1]) == FALSE))
+    if (is.null(minSpecs)) {
+        minSpecs = maxsp
+    }
+    if (!is.null(masterTree) && !reestimateBranches) {
+        message("Using user-specified master tree")
+    }
+    if (minSpecs == maxsp) {
+        if (is.null(masterTree)) {
+            if (length(ii) >= minTreesAll) {
+                message(paste0("estimating master tree branch lengths from ", 
+                  length(ii), " genes"))
+                tmp = lapply(treesObj$trees[ii], function(x) {
+                  x$edge.length
+                })
+                allEdge = matrix(unlist(tmp), ncol = 2 * maxsp - 
+                  3, byrow = T)
+                allEdge = scaleMat(allEdge)
+                allEdgeM = apply(allEdge, 2, mean)
+                treesObj$masterTree$edge.length = allEdgeM
+            } else {
+                message("Not enough genes with all species present: master tree has no edge.lengths")
+            }
+        } else {
+            message("Must specify minSpecs when supplying a master tree: master tree has no edge.lengths")
+        }
+    } else {
+        treeinds = which(rowSums(report) >= minSpecs)
+        message(paste0("estimating master tree branch lengths from ", 
+            length(treeinds), " genes"))
+        if (length(treeinds) >= minTreesAll) {
+            pathstouse = treesObj$paths[treeinds, ]
+            colnames(pathstouse) = ap$destinNode
+            colBranch = vector("integer", 0)
+            unq.colnames = unique(colnames(pathstouse))
+            for (i in 1:length(unq.colnames)) {
+                ind.cols = which(colnames(pathstouse) == unq.colnames[i])
+                colBranch = c(colBranch, ind.cols[1])
+            }
+            allEdge = pathstouse[, colBranch]
+            allEdgeScaled = allEdge
+            for (i in 1:nrow(allEdgeScaled)) {
+                allEdgeScaled[i, ] = scaleDistNa(allEdgeScaled[i, 
+                  ])
+            }
+            colnames(allEdgeScaled) = unq.colnames
+            edgelengths = vector("double", ncol(allEdgeScaled))
+            edge.master = treesObj$masterTree$edge
+            for (i in 1:nrow(edge.master)) {
+                destinNode.i = edge.master[i, 2]
+                col.Node.i = allEdgeScaled[, as.character(destinNode.i)]
+                edgelengths[i] = mean(na.omit(col.Node.i))
+            }
+            treesObj$masterTree$edge.length = edgelengths
+        } else {
+            message("Not enough genes with minSpecs species present: master tree has no edge.lengths")
+        }
+    }
+    message("Naming columns of paths matrix")
+    colnames(treesObj$paths) = namePathsWSpecies(treesObj$masterTree)
+    class(treesObj) = append(class(treesObj), "treesObj")
+    # treesObj
+# }
+```
+
+
+```{r}
+if (is.null(node)) {
+        rt = RERconverge:::getRoot(tree)
+        ic = RERconverge:::getChildren(tree, rt)
+        return(c(treeTraverse(tree, ic[1]), treeTraverse(tree, 
+            ic[2]),treeTraverse(tree, ic[3])))
+    } else {
+        if (node <= length(tree$tip)) {
+            return(tree$tip[node])
+        } else {
+            ic = RERconverge:::getChildren(tree, node)
+            return(c(treeTraverse(tree, ic[1]), treeTraverse(tree, 
+                ic[2])))
+        }
+    }
+
+treeTraverse = function (tree, node = NULL) 
+{
+    if (is.null(node)) {
+        rt = RERconverge:::getRoot(tree)
+        ic = RERconverge:::getChildren(tree, rt)
+        return(c(treeTraverse(tree, ic[1]), treeTraverse(tree, 
+            ic[2]),treeTraverse(tree, ic[3])))
+    }
+    else {
+        message(paste0(c("Node:", node)))
+        if (node <= length(tree$tip)) {
+            message(paste0(c("hit node: ", node, "\t", tree$tip[node])))
+            return(tree$tip[node])
+        }
+        else {
+            ic = RERconverge:::getChildren(tree, node)
+            message(paste0(c("ic_len:", length(ic))))
+            message(paste0(c("ic:", paste0(ic, collapse=", "))))
+            return(c(treeTraverse(tree, ic[1]), treeTraverse(tree, 
+                ic[2])))
+        }
+    }
+}
+```
+

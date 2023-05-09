@@ -1,0 +1,65 @@
+---
+title: "phylogeny"
+author: "Juan Manuel Vazquez"
+date: "2023-05-01"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(tidytree)
+library(ggtree)
+library(ape)
+library(naturalsort)
+```
+
+```{r tree dataframe}
+df.chr.tr <- read_tsv('../../analyses/phylo/output/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
+
+tip_order = c(
+  "Myotis_lucifugus",
+  "Myotis_occultus",
+  "Myotis_yumanensis",
+  "Myotis_velifer",
+  "Myotis_thysanodes",
+  "Myotis_evotis",
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_volans",
+  "Myotis_myotis"
+)
+
+
+# df.chr.tr.withPhylo<- df.chr.tr %>% mutate(tree = df.chr.tr$phylo %>% {ifelse(is.na(.), NA, read.tree(file=NULL, text=.))})
+l.chr.tr <- df.chr.tr %>% select(Chr, phylo) %>% split(.,.$phylo) %>% set_names(., sapply(., . %>% pull(Chr))) %>% lapply(., . %>% pull(phylo) %>% read.tree(file=NULL, text=.) %>% ape::root.phylo(., 'Myotis_myotis', resolve.root=T))
+
+
+
+
+
+class(l.chr.tr) <- "multiPhylo"
+
+```
+
+```{r}
+p.chr.trees <- l.chr.tr %>% 
+  ggtree() + 
+  theme_tree() + 
+  geom_tiplab() +
+  coord_cartesian(clip = 'off') + 
+  facet_wrap(~naturalfactor(.id), scales='free')
+```
+
+```{r}
+p.chr.trees
+```
+
+
+
+
+

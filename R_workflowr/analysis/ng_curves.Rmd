@@ -2,7 +2,9 @@
 title: "QC Plots"
 author: "Juan Manuel Vazquez"
 date: "6/27/2022"
-output: html_document
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE, warning=F, echo=F}
@@ -93,18 +95,11 @@ In order to get TimeTree to play nicely with the phylogeny, a few changes were n
 If you do all these changes, then undo the changes in post, you get this tree. 
 Note that it was very annoying to splice the two trees together by eye so avoid needing to redo this.
 
-```{r some phylogeny sprinkled in}
-# This tree is gone now
-#tr <- treeio::read.newick("~/projects/MyotisGenomeAssembly/data/tree/species_timetree2.nwk") %>% 
-#  ape::drop.tip("Rhinolophus_sinicus") 
-
-
+```{r phylogeny}
 tr <- treeio::read.newick("../../data/tree/genomeSpecies.timetree.nwk")
 
-setdiff(tr$tip.label, assembly_stats.meta$species)
-setdiff(assembly_stats.meta$species, tr$tip.label)
-
-
+# setdiff(tr$tip.label, assembly_stats.meta$species)
+# setdiff(assembly_stats.meta$species, tr$tip.label)
 ```
 
 
@@ -127,6 +122,55 @@ plot.NGx <- assembly_stats.meta %>%
 plot.NGx
 ```
 
+```{r NGx alt log}
+
+col.source <- c(
+  "This Paper" = "#FFBA08",
+  Bat1K = "#B33951",
+  T2T = "#d1b1c8",
+  Zoonomia = "#4357AD",
+  Other = "#6f7c12"
+)
+
+plot.NGx.altCol.log <- assembly_stats.meta %>% 
+  mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
+  filter(stat == "NGx",
+         contig==T
+         ) %>% 
+  ggplot(aes(x=v1, y=v2, color=Origin, group=name)) + 
+  labs(x="NGx", y = "bp", title = "Contig Contiguity") + 
+  # geom_point() + 
+  geom_line(linewidth=0.5) + 
+  scale_y_log10(lim=c(1e4,NA))+
+  scale_color_manual(values=col.source) + 
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+plot.NGx.altCol.log
+```
+
+```{r NGx alt log}
+
+plot.NGx.altCol <- assembly_stats.meta %>% 
+  mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
+  filter(stat == "NGx",
+         contig==T
+         ) %>% 
+  ggplot(aes(x=v1, y=v2, color=Origin, group=name)) + 
+  labs(x="NGx", y = "bp", title = "Contig Contiguity") + 
+  # geom_point() + 
+  geom_line(linewidth=0.5) + 
+  ylim(1e4,NA) +
+  scale_color_manual(values=col.source) + 
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+plot.NGx.altCol
+
+plot.NGx.altCol %>% ggsave(plot=., filename = "../output/NGx_curves.pdf", width = 6, height = 3.71, dpi=900, units = "in")
+```
+
+
 ```{r AuNG}
 plot.auNG <- assembly_stats.meta %>% 
   filter(stat == "auNG",
@@ -146,7 +190,7 @@ plot.auNG <- assembly_stats.meta %>%
 plot.auNG
 ```
 
-```{r phylo plus auNG}
+```{r setup phylo plus auNG}
 auNG <- assembly_stats.meta %>% 
   filter(stat == "auNG",
          contig==T
@@ -165,8 +209,10 @@ nodes_ourgenomes <- tr %>%
   filter(label %in% our_genomes) %>% 
   select(label, node) %>% 
   deframe()
+```
 
 
+```{r phylo plus auNG}
 p.tr.auNG <- tr %>% 
   ggtree() + 
   geom_tiplab(
@@ -299,7 +345,7 @@ p.tr.auNG.circ.altcolor <-
   tr %>%
   ggtree(layout = "fan", open.angle=180) +
   xlim_tree(c(NA,100))+ 
-  geom_fruit_list(
+  # geom_fruit_list(
     geom_fruit(
       data = auNG.fancy.color,
       geom = geom_col,
@@ -311,50 +357,23 @@ p.tr.auNG.circ.altcolor <-
       ),
       orientation = 'y',
       width = .6
-    ),
-    # geom_fruit(
-    #   data = auNG.fancy.color,
-    #   geom = geom_point,
-    #   mapping=aes(
-    #     y= label,
-    #     x = log(17.7),
-    #     angle=angle
-    #   ),
-    #   color="black",
-    #   shape = "-",
-    #   size=2,
-    #   vjust = 1,
-    #   hjust = 1
-    # ),
-    # geom_fruit(
-    #   data = auNG.fancy.color,
-    #   geom = geom_point,
-    #   mapping=aes(
-    #     y= label,
-    #     x = log(max(auNG)),
-    #     angle=angle
-    #   ),
-    #   color="blue",
-    #   shape = "-",
-    #   size=2,
-    #   vjust = 1,
-    #   hjust = 1
-    # )
-  ) +
-  geom_fruit(
-    data = auNG.fancy.color,
-    geom = geom_richtext, 
-    mapping = aes(
-      y=label,
-      label=label_fancy,
-      color=color_me,
-      angle=sapply(angle,angle_rotate),
-      hjust=sapply(angle,h_readjust)
-    ),
-    fill = NA, 
-    label.color = NA, 
-    label.padding = grid::unit(rep(0, 4), "pt"),
-  ) + 
+    ) + 
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_richtext, 
+      mapping = aes(
+        y=label,
+        label=label_fancy,
+        color=color_me,
+        angle=sapply(angle,angle_rotate),
+        hjust=sapply(angle,h_readjust)
+      ),
+      fill = NA, 
+      label.color = NA, 
+      # offset=0.2,
+      label.padding = grid::unit(rep(0,4), "pt"),
+    ) + 
+  # ) +
   scale_color_manual("Origin", values = species_color, guide="none") +
   scale_fill_manual("Origin", values = species_color, guide="none") +
   theme(plot.margin = unit(c(4,0,0,0),"cm"))
@@ -362,14 +381,15 @@ p.tr.auNG.circ.altcolor <-
 p.tr.auNG.circ.altcolor
 
 ```
-```{r}
+```{r with T2T line}
 
 t2t.base = p.tr.auNG.circ.altcolor$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
-t2t.bartop = p.tr.auNG.circ.altcolor$layers[[5]]$data %>% filter(label == 'Homo_sapiens') %>% pull(new_xtmp)
+t2t.bartop = p.tr.auNG.circ.altcolor$layers[[4]]$data %>% filter(label == 'Homo_sapiens') %>% pull(new_xtmp) +
+  p.tr.auNG.circ.altcolor$layers[[4]]$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
 t2t.start = min(p.tr.auNG.circ.altcolor$data$y)
 t2t.end = max(p.tr.auNG.circ.altcolor$data$y)
 
-p.tr.auNG.circ.altcolor + 
+p.tr.auNG.circ.altcolor.withLine <- p.tr.auNG.circ.altcolor + 
   geom_segment(
     aes(
       x = t2t.base + t2t.bartop,

@@ -2,12 +2,12 @@
 title: "Sample Collection Distribution"
 author: "Juan Manuel Vazquez"
 date: "2022-11-08"
-output: html_document
+output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
 ---
   
-```{r setup, include=FALSE}
+```{r library mapping, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sf)
@@ -100,20 +100,48 @@ sheet_cols <- c(
   'AltID' = 'c'
 )
 
+
 # datasheet <- read_sheet("https://docs.google.com/spreadsheets/d/1DJctPKAd9TQOLNnmGXP8t0TPAEe4-CICus9QZ7IYsCU/edit#gid=915133740", col_types = sheet_cols %>% paste0(collapse=""))
 # datasheet %>% write_tsv("../data/collection_datasheet_2022-11-15.tsv")
-datasheet <- read_tsv("../data/collection_datasheet_2022-11-15.tsv", , col_types = sheet_cols %>% paste0(collapse=""))
+datasheet <- read_tsv("../../data/collection_datasheet_2022-11-15.tsv", col_types = sheet_cols %>% paste0(collapse=""))
 ```
 ```{r Species Shapefiles, results=F, warning=F}
-shape.myoAui <- st_read("../data/USGS_SpeciesRanges/Myotis_auriculus/mSWMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_auriculus") %>% st_make_valid()
-shape.myoCai <- st_read("../data/USGS_SpeciesRanges/Myotis_californicus/mCAMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_californicus") %>% st_make_valid()
-shape.myoOcc <- st_read("../data/USGS_SpeciesRanges/Myotis_occultus/mARMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_occultus") %>% st_make_valid()
-shape.myoLuc <- st_read("../data/USGS_SpeciesRanges/Myotis_lucifugus/mLBMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_lucifugus") %>% st_make_valid()
-shape.myoYum <- st_read("../data/USGS_SpeciesRanges/Myotis_yumanensis/mYUMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_yumanensis") %>% st_make_valid()
-shape.myoVol <- st_read("../data/USGS_SpeciesRanges/Myotis_volans/mLLMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_volans") %>% st_make_valid()
-shape.myoVel <- st_read("../data/USGS_SpeciesRanges/Myotis_velifer/mCVMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_velifer") %>% st_make_valid()
-shape.myoEvo <- st_read("../data/USGS_SpeciesRanges/Myotis_evotis/mLEMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_evotis") %>% st_make_valid()
-shape.myoThy <- st_read("../data/USGS_SpeciesRanges/Myotis_thysanodes/mFRMYx_CONUS_Range_2001v1.shp") %>% mutate(species = "Myotis_thysanodes") %>% st_make_valid()
+shape.myoAui <- dir(path="../../data/USGS_SpeciesRanges/Myotis_auriculus/", pattern = ".shp$", full.names=T) %>% 
+  st_read() %>% 
+  mutate(species = "Myotis_auriculus") %>% 
+  st_make_valid()
+shape.myoCai <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_californicus/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_californicus") %>% 
+  st_make_valid()
+shape.myoOcc <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_occultus/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_occultus") %>% 
+  st_make_valid()
+shape.myoLuc <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_lucifugus/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_lucifugus") %>% 
+  st_make_valid()
+shape.myoYum <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_yumanensis/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_yumanensis") %>% 
+  st_make_valid()
+shape.myoVol <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_volans/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_volans") %>% 
+  st_make_valid()
+shape.myoVel <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_velifer/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_velifer") %>% 
+  st_make_valid()
+shape.myoEvo <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_evotis/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_evotis") %>% 
+  st_make_valid()
+shape.myoThy <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_thysanodes/", pattern = ".shp$", full.names=T) %>%
+  st_read() %>% 
+  mutate(species = "Myotis_thysanodes") %>% 
+  st_make_valid()
 ```
 
 
@@ -124,23 +152,40 @@ northAmerica <- ne_countries(scale = "medium", returnclass = "sf", country = c("
 # class(world)
 states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
 west <- subset(states, ID %in% c("california", "arizona", "nevada", "new mexico", "idaho", "oregon", "washington", "montana", "nebraska", "colorado", "utah", "wyoming"))
-notwest <- west <- subset(states, !(ID %in% c("california", "arizona", "nevada", "new mexico", "idaho", "oregon", "washington", "montana", "nebraska", "colorado", "utah", "wyoming")))
+notwest <- subset(states, !(ID %in% c("california", "arizona", "nevada", "new mexico", "idaho", "oregon", "washington", "montana", "nebraska", "colorado", "utah", "wyoming")))
 cal <- subset(states, ID == "california")
 calaz <- subset(states, ID %in% c("california", "arizona"))
+caaznv <- subset(states, ID %in% c("california", "arizona", "nevada"))
 notcalaz <- subset(states, !(ID %in% c("california", "arizona")))
 ```
 
 ```{r only collection points}
 datasheet.known <- datasheet %>% 
   filter(!is.na(Lattitude)) %>% 
-  select(species=FieldSpeciesID, Lattitude, Longitude) %>% 
-  mutate(species = species %>% str_replace_all(" ", "_"))
+  select(species=FieldSpeciesID, Lattitude, Longitude) #%>% 
+  # mutate(species = species %>% str_replace_all(" ", "_"))
 p.map.collections <- ggplot() + 
   geom_sf(data= west, color = "#ABB0B8", fill = "#6F7378", size = 0.1) +
   geom_spatial_point(data= datasheet.known, aes(group=species, y=Lattitude, x=Longitude, color=species), size=4, position="jitter") + 
-  geom_spatial_label_repel(data= datasheet.known, aes(label=species,group=species, y=Lattitude, x=Longitude, color=species)) + 
-  # scale_color_manual(values = species_color %>% set_names(., names(.) %>% str_replace_all("_", " ")))
-  scale_color_manual(values = species_color)
+  geom_spatial_label_repel(data= datasheet.known, aes(label=species,group=species, y=Lattitude, x=Longitude, color=species), show.legend=F) + 
+  scale_color_manual(values = species_color %>% set_names(., names(.) %>% str_replace_all("_", " "))) +
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "none")
+
+p.map.collections
+```
+
+```{r Minimal collections map}
+p.map.collections.caaznv <- ggplot() + 
+  geom_sf(data= caaznv, color = "#ABB0B8", fill = "#6F7378", size = 0.1) +
+  geom_spatial_point(data= datasheet.known, aes(group=species, y=Lattitude, x=Longitude, fill=species), size=4, pch=21, position="jitter") + 
+  geom_spatial_label_repel(data= datasheet.known, aes(label=species,group=species, y=Lattitude, x=Longitude, fill=species), show.legend=F, color='black', nudge_x=-0.5) + 
+  scale_color_manual(values = species_color %>% set_names(., names(.) %>% str_replace_all("_", " "))) +
+  scale_fill_manual(values = species_color %>% set_names(., names(.) %>% str_replace_all("_", " "))) +
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "none")
+
+p.map.collections.caaznv
 ```
 
 
@@ -429,37 +474,4 @@ p.mapPic.calaz
 
 
 
-```{r [old] MVZ plot world, eval=F, include=F}
-species.seq %>% 
-  dplyr::select(SPECIES, latitude, longitude) %>% 
-  {tibble(type = c("min", "max"), latitude=c(min(.$latitude, na.rm = T), max(.$latitude, na.rm = T)), 
-          longitude = c(min(.$longitude, na.rm = T), max(.$longitude, na.rm = T)))}
-plot.dist.point <- 
-  ggplot(data = cal) +
-  geom_sf(data=cal)+
-  geom_point(data = species.seq,
-             mapping=aes(x=longitude, y=latitude, color=SPECIES, shape=HQ), inherit.aes = F) +
-  coord_sf(xlim = c(-124, -114.4), ylim=c(32, 42.1)) + 
-  ggsci::scale_color_d3("Species", palette ="category20", alpha=0.3) + 
-  theme_pubr() + 
-  theme(legend.position = "right")
-plot.dist.point %>% plotly::ggplotly()
-```
 
-```{r [old] MVZ Time plot, eval=F, include=F}
-species.seq %>% 
-  ggplot(
-    aes(
-      x= YEAR_COLLECTED,
-      color = SPECIES, 
-      fill = SPECIES
-    )
-  ) + 
-  geom_histogram() +
-  geom_histogram(data=species.seq %>% filter(HQ), color="black") + 
-  ggsci::scale_color_d3("Species", palette ="category20", alpha=0.3) + 
-  ggsci::scale_fill_d3("Species", palette ="category20", alpha=0.3) + 
-  facet_wrap(~SPECIES, scales = "free_y")+
-  theme_pubr() + 
-  theme(legend.position = "right")
-```
