@@ -96,7 +96,7 @@ If you do all these changes, then undo the changes in post, you get this tree.
 Note that it was very annoying to splice the two trees together by eye so avoid needing to redo this.
 
 ```{r phylogeny}
-tr <- treeio::read.newick("../../data/tree/genomeSpecies.timetree.nwk")
+tr <- treeio::read.newick("../../data/tree/TimeTree.org/genomeSpecies.timetree.nwk")
 
 # setdiff(tr$tip.label, assembly_stats.meta$species)
 # setdiff(assembly_stats.meta$species, tr$tip.label)
@@ -168,6 +168,31 @@ plot.NGx.altCol <- assembly_stats.meta %>%
 plot.NGx.altCol
 
 plot.NGx.altCol %>% ggsave(plot=., filename = "../output/NGx_curves.pdf", width = 6, height = 3.71, dpi=900, units = "in")
+```
+
+```{r, onlyT2T}
+assembly_stats.plotme <- assembly_stats.meta %>% 
+  mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
+  filter(stat == "NGx",
+         contig==T
+         )
+plot.NGx.altCol.t2tzoo <- assembly_stats.plotme %>% 
+  ggplot(aes(x=v1, y=v2, color=Origin, group=name)) + 
+  labs(x="NGx", y = "bp", title = "Contig Contiguity") + 
+  # geom_point() + 
+  geom_line(
+    data=assembly_stats.plotme %>% filter(Origin %in% c("T2T", "Zoonomia")),
+    linewidth=0.5
+  ) + 
+  ylim(1e4,NA) +
+  scale_color_manual(values=col.source) + 
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+plot.NGx.altCol.t2tzoo
+
+plot.NGx.altCol.t2tzoo %>% ggsave(plot=., filename = "../output/NGx_curves_onlyT2TZoonomia.pdf", width = 6, height = 3.71, dpi=900, units = "in")
+
 ```
 
 

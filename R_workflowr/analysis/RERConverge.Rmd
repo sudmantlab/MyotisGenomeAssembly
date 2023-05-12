@@ -28,11 +28,13 @@ master.tree = root.phylo(read.tree(text="(Myotis_auriculus:0.0049530287,(Myotis_
 
 ```{r}
 
-trees <- read.tree("../../data/mhcr_trees.tail.txt")
+# trees <- read.tree("../../data/mhcr_trees.tail.txt")
+
+trees <- read.tree("../../data/gene_trees/gene_trees_constrained.nwk")
   
 batTrees <- readTrees(
-  file = "../../data/mhcr_trees.head.txt",
-  max.read = 9, 
+  file = "../../data/gene_trees/gene_trees_constrained.nwk",
+  max.read = 9,
   # masterTree = master.tree,
   # minSpecs = 10
 )
