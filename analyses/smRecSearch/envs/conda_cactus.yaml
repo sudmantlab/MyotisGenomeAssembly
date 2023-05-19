@@ -1,0 +1,13 @@
+name:
+    cactus
+channels:
+    - bioconda
+    - conda-forge
+    - default
+dependencies:
+    - cactus
+    - comparative-annotation-toolkit
+    - bedtools
+    - python
+    - pandas
+    - parallel

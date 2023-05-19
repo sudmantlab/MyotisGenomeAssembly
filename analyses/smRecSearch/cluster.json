@@ -1,0 +1,41 @@
+{
+    "__default__" :
+    {
+        "mem" : 32000,
+        "n" : 1,
+        "tasks" : 20
+        #"name" : "JMV-{rule}-{wildcards}",
+        #"logfile": "logs/snake-{rule}-{wildcards}-%j.out"
+    },
+    "hisat2-build" : 
+    {
+        "mem" : 120000,
+        "tasks" : 20
+    },
+    "RecBlat":
+    {
+        "mem" : 120000,
+        "n" : 1,        
+        "tasks" : 100
+    }, 
+    "start_translated_gfServer" : 
+    {
+        "mem" : 120000
+    },
+    "start_untranslated_gfServer" : 
+    {
+        "mem" : 120000
+    },
+    "GeneCopyTableRBB" : 
+    {
+        "mem" : 24000,
+        "tasks" : 10,
+        "n" : 2
+    },
+    "GeneCopyTableRBB_filtered" : 
+    {
+        "mem" : 2000,
+        "tasks" : 1,
+        "n" : 1
+    }
+}

@@ -20,3 +20,10 @@ test*
 *.fa*
 *.txt
 *.stats
+.Rproj.user
+### EVERY FOLDER HAS ITS OWN .GITIGNORE
+./R_workflowr/.R*
+test*
+**/*test**
+*.log
+**/*.log

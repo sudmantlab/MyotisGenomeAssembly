@@ -1,0 +1,17 @@
+
+wildcard_constraints:
+    # binSize_bp = get_binsize_bp,  ## rules/cooler.smk
+    # chunk="\d{1,2}",  ## rules/CCS_split.smk
+    isDefault="(defaults-)?",
+    genometype = "(hap[12].)?[pr]_[cu]tg",
+    contigtype = "[pr]_[cu]tg",
+    species="[A-Z]_[a-z]+",
+    hic = "(bp)|(hic)(-purgedDups)?(_mapq[0-9]+)?(_noContigEC_minQ[0-9]+)?(_scaffolds_final)?(-purgedDups)?(_mapq[0-9]+)?(_manualCuration)?",
+    mapq = "[0-9]+",
+    minmapq = "[0-9]+",
+    unit = "bp|kb|mb"
+
+
+include: "rules/assembly_stats.smk"
+include: "rules/getcontigsfromNCBI.smk"
+include: "rules/busco.smk"

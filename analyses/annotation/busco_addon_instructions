@@ -1,0 +1,16 @@
+cp -a output/BUSCO/{genome}/{species}_genome_eutheria_augustus output/funannotate/{genome}_TOGA_Prot/predict_misc/busco
+
+rename eutheria_odb10 Bat1K output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run*
+rename .tsv _Bat1K.tsv output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run_Bat1K/*
+rename .txt _Bat1K.txt output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run_Bat1K/*
+
+mkdir -p output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K
+cp -a output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run_Bat1K/hmmer_output output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K/
+cp output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run_Bat1K/*.tsv output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K/
+cp output/funannotate/{genome}_TOGA_Prot/predict_misc/busco/run_Bat1K/*.txt output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K/
+
+cat output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K/_full_table_Bat1K.tsv | \
+ awk -v IFS="\t" -v OFS="\t" '{ print $1, $2, $3 ":" $4 "-" $5 "(" $6 ")", $7, $8 }' \
+ > output/funannotate/{genome}_TOGA_Prot/predict_misc/busco_proteins/run_Bat1K/full_table_Bat1K.tsv
+ 
+ 

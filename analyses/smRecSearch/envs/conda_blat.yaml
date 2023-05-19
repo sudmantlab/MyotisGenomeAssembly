@@ -1,0 +1,10 @@
+name: blat
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - ucsc-blat
+  - bedops
+  - bedtools
+  - snakemake-minimal

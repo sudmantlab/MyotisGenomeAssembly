@@ -1,0 +1,90 @@
+---
+title: "Figure 1 Sketchpad"
+author: "docmanny"
+date: "2023-05-05"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r library, include=F, echo=F, message=F, warning=F, error=F}
+library(tidyverse)
+library(ggpubr)
+library(patchwork)
+```
+
+
+
+# Candidate Subplots
+
+## Figure 1a: State of the bat sequencing union
+
+
+```{r, include=F, echo=F}
+### Doesn't work
+# knitr::read_chunk("ng_curves.Rmd", labels = c("assembly_stats", "metadata", "phylogeny", "setup phylo plus auNG", "phylo auNG circular map color", "with T2T line"))
+# knitr::read_chunk("ng_curves.Rmd")
+```
+
+```{r, include=F, echo=F, results='hide', child="ng_curves.Rmd" }
+```
+
+```{r F1A}
+p.tr.auNG.circ.altcolor
+```
+```{r}
+p.tr.auNG.circ.altcolor %>% ggsave(plot = ., "../output/phylo_auNG_circ_col.pdf")
+```
+
+## Figure 1b: Collection Sites
+
+```{r, include=F, echo=F, results='hide', child="sample_map.Rmd" }
+```
+
+```{r F1B}
+p.map.collections.caaznv
+```
+
+```{r}
+p.map.collections.caaznv %>% ggsave(plot = ., "../output/Collection_map_CAAZNV.pdf")
+```
+
+
+# Figure 1:
+
+## Version 1
+
+```{r Figure 1 V1}
+
+f1v1.layout <- "
+AAAAAA
+AAAAAA
+BB####
+BB####
+"
+
+f1a <- p.tr.auNG.circ.altcolor + 
+  theme(
+    text=element_text(
+      family='helvetica', 
+      size=10
+    )
+  )
+
+f1b <- p.map.collections.caaznv + 
+  coord_sf(clip = 'off') + 
+  theme(
+    text=element_text(
+      family='helvetica', 
+      size=10
+    )
+  )
+
+# f1c <- 
+
+f1v1 <- f1a + f1b + plot_layout(design = f1v1.layout)
+
+f1v1
+```
+

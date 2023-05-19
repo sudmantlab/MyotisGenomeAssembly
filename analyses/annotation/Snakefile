@@ -1,0 +1,21 @@
+# Trinity
+include: "rules/trimmomatic.smk"
+include: "rules/trinity.smk"
+
+# RNA-seq
+include: "rules/STAR_index.smk"
+include: "rules/STAR_map_and_quantify.smk"
+include: "rules/make_RSEM_index.smk"
+include: "rules/STAR_map_and_quantify_withGFF.smk"
+
+# BUSCO
+include: "rules/BUSCO.smk"
+
+# funannotate
+include: "rules/funannotate_docker_clean.smk"
+include: "rules/interproscan_manual.smk"
+include: "rules/miniprot.smk"
+
+# TOGA
+include: "rules/toga.smk"
+include: "rules/evm_toga.smk"

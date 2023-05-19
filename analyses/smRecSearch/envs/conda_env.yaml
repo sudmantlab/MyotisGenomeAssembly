@@ -1,0 +1,62 @@
+name: RecBlat
+channels:
+  - bioconda
+  - conda-forge
+  - r
+dependencies:
+  - snakemake-minimal
+  - python =3.6
+  - r-base =3.6.1
+  - r-essentials
+  - r-reshape2 
+  - r-ape 
+  - r-rcolorbrewer
+  - r-viridis 
+  - r-upsetr 
+  - r-tidyverse 
+  - r-workflowr 
+  - r-optparse 
+  - bioconductor-ballgown 
+  - r-biocmanager 
+  - bioconductor-biocgenerics 
+  - bioconductor-genomicranges 
+  - bioconductor-biomart 
+  - bioconductor-annotationhub
+  - bioconductor-ggbio 
+  - bioconductor-ggtree
+  - r-tidytree
+  - r-ggpubr 
+  - r-plotly
+  - r-ggplotify
+  - r-geiger 
+  - r-ape
+  - rpy2 
+  - r-reticulate 
+  - rstudio 
+  - r-git2r 
+  - gffutils 
+  - jinja2 
+  - networkx 
+  - matplotlib 
+  - graphviz 
+  - bcftools 
+  - samtools 
+  - bamtools 
+  - hisat2 
+  - stringtie 
+  - sra-tools 
+  - Click 
+  - biopython 
+  - dill 
+  - multiprocess 
+  - mygene 
+  - nose 
+  - pandas 
+  - wget
+  - ucsc-fatotwobit 
+  - ucsc-blat 
+  - parallel 
+  - pip 
+  - pip:
+    - "-e git+https://github.com/docmanny/RecBlast#egg=RecBlast"
+  - bioconda::cafe

@@ -1,0 +1,820 @@
+---
+title: "phylogeny"
+author: "Juan Manuel Vazquez"
+date: "2023-05-01"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(tidytree)
+library(ggtree)
+library(ape)
+library(phytools)
+library(naturalsort)
+library(taxize)
+library(nlme)
+library(broom.mixed)
+library(ggnewscale)
+```
+
+## Phylogeny 
+
+
+```{r species tree }
+tip_order = c(
+  "Myotis_lucifugus",
+  "Myotis_occultus",
+  "Myotis_yumanensis",
+  "Myotis_velifer",
+  "Myotis_thysanodes",
+  "Myotis_evotis",
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_volans",
+  "Myotis_myotis"
+)
+
+tr.species <- root.phylo(read.tree(text="(Myotis_auriculus:0.0049530287,(Myotis_californicus:0.0059138183,(((Myotis_lucifugus:0.0030514562,Myotis_occultus:0.0032471934)100/100:0.0020768353,(Myotis_velifer:0.0029764851,Myotis_yumanensis:0.0029904558)100/100:0.0038364895)100/100:0.0009882682,(Myotis_myotis:0.0131977455,Myotis_volans:0.0055379826)100/100:0.0012340035)100/100:0.0023012371)100/100:0.0009098871,(Myotis_evotis:0.0017915030,Myotis_thysanodes:0.0018269795)100/100:0.0020219079);"), outgroup = "Myotis_myotis", resolve.root = T)
+```
+
+
+
+```{r Upham 2019 4098 mammals}
+upham.ml <- read.tree("../../data/tree/UphamEtAl2019_Dryad_doi_10.5061/Data_S3_globalRAxML_files/RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick")
+
+upham.ml$tip.label <- upham.ml$tip.label %>% str_remove("_[A-Z]+_[A-Z]+$")
+
+upham.ml.ourbats <- upham.ml %>% 
+  keep.tip(tip_order[str_detect(tip_order, "occultus", negate = T)])
+
+upham.ml.ourbats$tip.label <- upham.ml.ourbats$tip.label %>% 
+  str_remove("_VESPERTILIONIDAE_CHIROPTERA")
+
+upham.tr <- read.nexus("../../data/tree/UphamEtAl2019_Dryad_doi_10.5061/Data_S7_Mammalia_credibleTreeSets_tipDR/DNAonly_MCCs/MamPhy_fullPosterior_BDvr_DNAonly_4098sp_topoFree_NDexp_MCC_v2_target.tre")
+
+upham.tr$tip.label <- upham.tr$tip.label %>% str_remove("_[A-Z]+_[A-Z]+$")
+
+upham.tr.ourbats <- upham.tr %>% 
+  keep.tip(tip_order[str_detect(tip_order, "occultus", negate = T)])
+
+upham.tr.ourbats$tip.label <- upham.tr.ourbats$tip.label %>% 
+  str_remove("_VESPERTILIONIDAE_CHIROPTERA")
+
+
+```
+
+
+```{r Wilkinson & Adams 2019 (Amador et al 2018)}
+
+## this tree topo is reconstructed from Wilkinson et al
+wilkinson.tr <- read.tree(text="((((((Myotis_lucifugus,Myotis_thysanodes),((Myotis_yumanensis,Myotis_velifer),(Myotis_grisescens,Myotis_nigricans))),Myotis_vivesi),Myotis_brandti),(((Myotis_evotis,Myotis_keenii),(Myotis_volans,Myotis_sodalis)),Myotis_leibii)),((Myotis_emarginatus,Myotis_dasycneme),((Myotis_nattereri,(Myotis_blythii,Myotis_myotis)),(Myotis_bechsteini,Myotis_daubentoni)),Myotis_mystacinus));")
+
+wilkinson.tr.ourbats <- wilkinson.tr %>% 
+  keep.tip(tip_order[str_detect(tip_order, "occultus|auriculus|californicus", negate = T)])
+
+cophylo(
+  wilkinson.tr.ourbats, 
+  tr.species ,
+  assoc = cbind(tr.species$tip.label,tr.species$tip.label),
+  rotate=T
+) %>% 
+  plot(ylim=c(-0.3,1))
+  text(-0.25,-0.1, substitute(paste(bold("Amador "), bolditalic("et al"), bold(" (2018)"))))
+  text(0.25,-0.1, substitute(paste(bold("Our Phylogeny "))))
+
+```
+
+```{r Lack et al 2010}
+## According to Amador, their analysis recapitulates the topology in this tree for Myotis
+
+lack.tr <- read.nexus('../../data/tree/Lack2010.nexorg')[[2]] # 2nd tree is timetree
+
+## Somehow they didn't have lucifugus????
+
+lack.tr.ourbats <- lack.tr %>% 
+  keep.tip(tip_order[str_detect(tip_order, "lucifugus|evotis|occultus|auriculus|californicus", negate = T)])
+
+cophylo(
+  lack.tr.ourbats, 
+  tr.species, 
+  rotate = T,
+  assoc = cbind(tr.species$tip.label, tr.species$tip.label)
+) %>% 
+  plot(ylim=c(-0.3,1))
+  text(-0.25,-0.1, substitute(paste(bold("Lack "), bolditalic("et al"), bold(" (2010)"))))
+  text(0.25,-0.1, substitute(paste(bold("Our Phylogeny "))))
+```
+
+
+I have no clue why Amador says they agree with Lack, cause they don't - at least not according to Wilkinson:
+
+```{r Lack vs Wilkinson/Amador}
+cophylo(
+  lack.tr.ourbats,
+  wilkinson.tr.ourbats, 
+  assoc = cbind(wilkinson.tr.ourbats$tip.label,wilkinson.tr.ourbats$tip.label)
+) %>% 
+  plot(ylim=c(-0.3,1))
+ text(-0.25,-0.1, substitute(paste(bold("Lack "), bolditalic("et al"), bold(" (2010)"))))
+ text(0.25,-0.1, substitute(paste(bold("Amador "), bolditalic("et al"), bold(" (2018)"))))
+```
+
+Upham and Amador also don't agree:
+
+```{r Upham vs Amador}
+cophylo(
+  upham.ml %>% keep.tip(intersect(upham.ml$tip.label, wilkinson.tr$tip.label)),
+  wilkinson.tr, 
+  assoc = cbind(wilkinson.tr$tip.label,wilkinson.tr$tip.label)
+) %>% 
+  plot(ylim=c(-0.3,1))
+ text(-0.25,-0.1, substitute(paste(bold("Upham "), bolditalic("et al"), bold(" (2019)"))))
+ text(0.25,-0.1, substitute(paste(bold("Amador "), bolditalic("et al"), bold(" (2018)"))))
+```
+
+Upham and Lack broadly agree, with some exceptions:
+
+```{r Upham vs Lack - Full}
+upham_lack <- intersect(upham.ml$tip.label, lack.tr$tip.label)
+cophylo(
+  upham.ml %>% keep.tip(upham_lack),
+  lack.tr %>% keep.tip(upham_lack), 
+  rotate=T,
+  assoc = cbind(upham_lack,upham_lack)
+) %>% 
+  plot(ylim=c(-0.3,1),ftype="off")
+ text(-0.25,-0.1, substitute(paste(bold("Upham "), bolditalic("et al"), bold(" (2019)"))))
+ text(0.25,-0.1, substitute(paste(bold("Lack "), bolditalic("et al"), bold(" (2010)"))))
+```
+
+
+```{r Upham vs Lack - our bats}
+cophylo(
+  upham.ml.ourbats,
+  lack.tr.ourbats, 
+  assoc = cbind(upham.ml.ourbats$tip.label,upham.ml.ourbats$tip.label)
+) %>% 
+  plot(ylim=c(-0.3,1))
+ text(-0.25,-0.1, substitute(paste(bold("Upham "), bolditalic("et al"), bold(" (2019)"))))
+ text(0.25,-0.1, substitute(paste(bold("Lack "), bolditalic("et al"), bold(" (2010)"))))
+```
+
+
+```{r Upham vs Our Phylo - ggtree}
+
+uphamtree <- upham.ml.ourbats %>% 
+  rotate(14) %>%  # Luc-Thy-Evo -> Thy-Luc-Evo
+  rotate(15) %>%  # Thy-Luc-Evo -> Thy-Evo-Luc
+  rotate(16) #%>%  # Cai-Aui-Vol -> Vol-Cai-Aui
+
+p1 <- uphamtree %>% 
+  # groupOTU(breakup) %>% 
+  ggtree(
+    # aes(color=group), 
+    branch.length = "none", 
+    ladderize = F
+  ) +
+  # scale_color_manual(values = c("0"="black", LucThyEvo="red", ""))+
+  geom_tiplab() + 
+  # geom_tiplab(aes(label=node), offset=3)
+  # geom_nodelab(aes(label=node)) + 
+  xlim_tree(c(NA,10))# + geom_highlight(node=14, fill='lightgreen', col='lightgreen')
+
+
+
+ourtree <- tr.species %>% 
+  drop.tip("Myotis_occultus") %>%
+  rotateConstr(upham.ml.ourbats$tip.label) %>% 
+  rotate(15)  # Evo-Thy -> Thy-Evo 
+
+p2 <- ourtree %>% 
+  # groupOTU(breakup) %>% 
+  ggtree(
+    # aes(color=group), 
+    branch.length = "none", 
+    ladderize = F
+  ) + 
+  # scale_color_manual(values = c("0"="black", LucThyEvo="red", ""))+
+  geom_tiplab() #+ 
+  # geom_nodelab(aes(label=node)) + xlim_tree(c(NA,10))
+
+d1 <- p1$data
+d2 <- p2$data
+
+d2$x <- max(d2$x) - d2$x + max(d1$x) + 6
+
+pp <- p1 + 
+  geom_tree(data=d2, branch.length="none", ladderize=F) + 
+  geom_tiplab(data=d2, hjust=1)# + 
+  #   geom_hilight(
+  #        data = d2, 
+  #        node=15,
+  #        fill='lightgreen', col='lightgreen'
+  #   ) + 
+  # geom_hilight(
+  #        data = d2, 
+  #        node=3,
+  #        fill='lightgreen', col='lightgreen'
+  #   )
+
+dd <- bind_rows(d1, d2) %>% 
+  filter(!is.na(label))
+
+pp #+ geom_line(aes(x, y, group=label), data=dd, color='grey') 
+
+
+```
+
+
+```{r Upham vs Our Phylo - cophyloplot}
+cophylo(
+  upham.ml.ourbats,
+  ourtree, 
+  assoc = cbind(ourtree$tip.label,ourtree$tip.label)
+) %>% 
+  plot(ylim=c(-0.3,1))
+ text(-0.25,-0.1, substitute(paste(bold("Upham "), bolditalic("et al"), bold(" (2019)"))))
+ text(0.25,-0.1, substitute(paste(bold("Our phylogeny"))))
+```
+
+## Phylogeny by chromosome
+
+```{r tree dataframe, eval=F}
+df.chr.tr <- read_tsv('../../analyses/phylo/output/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
+
+# df.chr.tr.withPhylo<- df.chr.tr %>% mutate(tree = df.chr.tr$phylo %>% {ifelse(is.na(.), NA, read.tree(file=NULL, text=.))})
+l.chr.tr <- df.chr.tr %>% select(Chr, phylo) %>% split(.,.$phylo) %>% set_names(., sapply(., . %>% pull(Chr))) %>% lapply(., . %>% pull(phylo) %>% read.tree(file=NULL, text=.) %>% ape::root.phylo(., 'Myotis_myotis', resolve.root=T))
+
+class(l.chr.tr) <- "multiPhylo"
+
+```
+
+
+```{r plot chrom trees, eval=F}
+p.chr.trees <- l.chr.tr %>% 
+  ggtree() + 
+  theme_tree() + 
+  geom_tiplab() +
+  coord_cartesian(clip = 'off') + 
+  facet_wrap(~naturalfactor(.id), scales='free')
+```
+
+```{r, eval=F}
+p.chr.trees
+```
+
+## PGLS stuff
+
+```{r Data: AnAge}
+anage <- read_tsv('../../data/lifehistory/anage_data.txt') %>% 
+  mutate(label = str_c(Genus, "_", Species)) %>% 
+  rename(size = `Adult weight (g)`,
+         lifespan = `Maximum longevity (yrs)`) %>% 
+  filter(Class == 'Mammalia')  # I only want mammals
+```
+
+```{r Data: panTheria}
+panTheria <- read_tsv("../../data/lifehistory/PanTHERIA_1-0_WR05_Aug2008.txt") %>% 
+  mutate(label = MSW05_Binomial %>% str_replace_all(" ", "_"),
+         lifespan = `17-1_MaxLongevity_m` %>% divide_by(12)) %>% 
+  rename(size = `5-1_AdultBodyMass_g`)
+```
+
+```{r Data harmonization: AnAge+Pantheria, eval=F}
+taxa.source.title <- gnr_datasources() %>% .[c(12,42),] %>% pull(title)
+taxa.source.id <- gnr_datasources() %>% filter(title %in% taxa.source.title) %>% pull(id)
+
+anage.taxa <- anage %>% pull(label) %>% str_replace_all('_', " ")
+pantheria.taxa <- panTheria %>% pull(label) %>% str_replace_all('_', " ")
+#setdiff(panTheria$label, anage$label)
+#setdiff(anage$label,panTheria$label)
+
+taxa.anage <- gnr_resolve(
+  sci = anage.taxa,
+  data_source_ids = taxa.source.id,
+  with_context = T
+)
+
+taxa.pantheria <- gnr_resolve(
+  sci = pantheria.taxa,
+  data_source_ids = taxa.source.id,
+  with_context = T
+)
+
+taxa.upham <- gnr_resolve(
+  sci = upham.ml$tip.label,
+  data_source_ids = taxa.source.id,
+  with_context = T
+)
+
+
+taxa.pantheria.best <- taxa.pantheria %>% filter(!is.na(score), str_detect(matched_name, 'virus', negate=T)) %>% mutate(matched_name = str_extract(matched_name,"^[A-Z][a-z]+ [A-Z]?[a-z]+")) %>%  select(-starts_with("user_supplied"), -data_source_title)%>% group_by(submitted_name) %>% filter(score == max(score)) %>% distinct %>% filter(!is.na(matched_name))
+
+taxa.anage.best <- taxa.anage %>% filter(data_source_title != 'AnAge') %>% filter(!is.na(score), str_detect(matched_name, 'virus', negate=T)) %>% mutate(matched_name = str_extract(matched_name,"^[A-Z][a-z]+ [A-Z]?[a-z]+")) %>%  select(-starts_with("user_supplied"), -data_source_title)%>% group_by(submitted_name) %>% filter(score == max(score)) %>% distinct %>% filter(!is.na(matched_name))
+
+taxa.upham.best <- taxa.upham %>% filter(data_source_title != 'AnAge') %>% filter(!is.na(score), str_detect(matched_name, 'virus', negate=T)) %>% mutate(matched_name = str_extract(matched_name,"^[A-Z][a-z]+ [A-Z]?[a-z]+")) %>%  select(-starts_with("user_supplied"), -data_source_title)%>% group_by(submitted_name) %>% filter(score == max(score)) %>% distinct %>% filter(!is.na(matched_name))
+
+resolve_me <- dplyr::full_join(
+  taxa.pantheria.best %>% mutate(org='pantheria'),
+  taxa.anage.best %>% mutate(org='anage'),
+  by=c('matched_name'), suffix = c('_pantheria', '_anage')
+)
+
+tt <- resolve_me %>% 
+  select(submitted_name_pantheria,submitted_name_anage,matched_name) %>% 
+  distinct %>% 
+  mutate(submitted_name_pantheria = submitted_name_pantheria %>% str_replace(" ", "_"),
+         submitted_name_anage = submitted_name_anage %>% str_replace(" ", "_"))
+
+tt.pantheria <- full_join(
+  tt, 
+  panTheria %>% select(label, size, lifespan, Order = MSW05_Order), 
+  by = c("submitted_name_pantheria"="label")
+)
+tt.anage <- full_join(
+  tt, 
+  anage %>% select(label, size, lifespan, Order), 
+  by = c("submitted_name_anage"="label")
+)
+
+agedata <- full_join(tt.pantheria, tt.anage, by="matched_name", suffix = c(".pantheria", ".anage")) %>% 
+  group_by(matched_name) %>% 
+  mutate(size = max(size.anage, size.pantheria, na.rm=T), 
+         lifespan = max(lifespan.anage, lifespan.pantheria, na.rm=T),
+         label = matched_name %>% str_replace(" ", "_")) %>% 
+  select(label, size, lifespan, everything())
+
+agedata.order <- agedata %>% 
+  select(matched_name, Order.pantheria, Order.anage) %>% 
+  pivot_longer(-matched_name) %>% 
+  filter(!is.na(value)) %>% 
+  select(matched_name, Order=value) %>% 
+  distinct
+
+agedata <- agedata %>% 
+  select(-Order.pantheria, -Order.anage) %>% 
+  left_join(agedata.order)
+
+agedata$lifespan[agedata$lifespan<0] <- NA
+agedata$size[agedata$size<0] <- NA
+
+agedata %>% write_tsv("../../data/lifehistory/manny_mammal_agedata_harmonized.tsv")
+
+tt.upham <- taxa.upham.best %>% 
+  select(-score) %>% 
+  mutate(label = matched_name %>% str_replace(" ", "_"))
+
+tt.upham %>% write_tsv('../../data/tree/UphamEtAl2019_harmonizednames.tsv')
+```
+
+
+```{r Data harmonization: load data that was harmonized}
+agedata <- read_tsv("../../data/lifehistory/manny_mammal_agedata_harmonized.tsv")
+
+
+# Fill in a gap for Occultus
+agedata$lifespan[agedata$label=="Myotis_occultus"] <- 31 #Harris (1990)
+
+# Not dealing with nosize species
+
+nosize = agedata %>% filter(is.na(size)) %>% pull(label)
+nolifespan = agedata %>% filter(is.na(lifespan)) %>% pull(label)
+
+
+agedata.hassize <- agedata %>% filter(!label %in% nosize)
+
+agedata.hassizelifespan <- agedata.hassize %>% filter(!label %in% nolifespan)
+
+
+```
+
+
+```{r Data: DBatVir}
+vir <- readxl::read_xls("../../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
+  mutate(
+    label = `From bat` %>% 
+      str_replace("^Myotis$", "Myotis_spc.") %>% 
+      str_replace_all("Myotis cf. californicus/ciliolabrum BL-2021", "Myotis californicus") %>% 
+      str_replace_all("Myotis ciliolabrum", "Myotis californicus") %>% 
+      str_replace_all(" ", "_")
+  )
+
+vir.summary.familyCount <- vir %>% group_by(label, `Viral family`) %>% dplyr::summarize(n=n())
+vir.summary.allCount <- vir %>% group_by(label) %>% dplyr::summarize(n=n())
+```
+
+```{r}
+p.spc <- tr.species %>% 
+  ggtree(branch.length = F) + 
+  geom_tiplab() + 
+  theme_tree2() + 
+  xlim_tree(c(NA, 0.02)) + 
+  coord_cartesian(clip='off')
+
+vir.summary.allCount.onlyOurs <- vir.summary.allCount %>% filter(label %in% tr.species$tip.label)
+age <- anage %>% 
+  filter(label %in% tr.species$tip.label) %>% 
+  select(label, lifespan)
+
+dat <- full_join(vir.summary.allCount.onlyOurs, age)
+
+p.spc.data <- p.spc + 
+  geom_facet(panel = "N.viruses", data = dat, geom = geom_col, 
+               mapping=aes(x = n), orientation = 'y', width = .6) +
+  geom_facet(panel = "age", data = dat, geom = geom_col, 
+               mapping=aes(x = lifespan), orientation = 'y', width = .6)
+p.spc.data
+```
+
+```{r}
+dat %>% 
+  ggplot(
+    aes(x=n,
+        y=lifespan)
+  ) + 
+  geom_point() +
+  geom_smooth(method = 'lm')
+```
+
+```{r LQ using my data}
+lq.model  <- agedata.hassizelifespan %>% 
+  ungroup %>% 
+  filter(Order != "Chiroptera") %>% 
+  mutate(lnLifespan = log(lifespan),
+         lnsize = log(size)) %>% 
+  select(label, lnsize, lnLifespan) %>% 
+  lm(data=., formula=lnLifespan ~ lnsize)
+
+agedata.lq <- broom::augment(
+  lq.model,
+  newdata = agedata.hassizelifespan %>% 
+    ungroup %>% 
+    mutate(lnLifespan = log(lifespan),
+           lnsize = log(size))
+) %>% 
+  select(label, size, lifespan, .fitted, .resid, Order) %>% 
+  mutate(
+    lifespan.expected = exp(.fitted),
+    LQ = lifespan/lifespan.expected
+  )
+
+agedata.lq %>% 
+  ggplot(
+    aes(
+      x=log10(size),
+      y=LQ,
+      fill=ifelse(Order == "Chiroptera", "gold", "black")
+    )
+  ) + 
+  geom_point(pch=21) +  
+  scale_fill_identity() + 
+  theme_pubclean() + 
+  labs_pubr() + 
+  theme(legend.position = "bottom")
+
+```
+
+```{r}
+lq.model.anage  <- anage %>% select(label,size,lifespan,Order) %>% 
+  filter(!is.na(lifespan), !is.na(size)) %>% 
+  filter(Order != "Chiroptera") %>% 
+  mutate(lnLifespan = log(lifespan),
+         lnsize = log(size)) %>% 
+  select(label, lnsize, lnLifespan) %>% 
+  lm(data=., formula=(lnLifespan) ~ lnsize)
+
+anage.lq <- broom::augment(
+  lq.model.anage,
+  newdata = anage %>% select(label,size,lifespan,Order) %>% 
+  filter(!is.na(lifespan), !is.na(size)) %>%  
+    mutate(lnLifespan = log(lifespan),
+           lnsize = log(size))
+) %>% 
+  select(label, size, lifespan, .fitted, .resid, Order) %>% 
+  mutate(
+    lifespan.expected = exp(.fitted),
+    LQ = lifespan/lifespan.expected
+  )
+
+anage.lq %>% 
+  ggplot(
+    aes(
+      x=log10(size),
+      y=LQ,
+      color=Order
+    )
+  ) + 
+  geom_point() + 
+  # scale_color_d3(palette = 'category30') + 
+  theme_pubclean() + 
+  theme(legend.position = "bottom")
+
+
+```
+
+```{r}
+tr.lq.dat <- tr.species %>% 
+  as_tibble() %>% 
+  left_join(agedata.lq) 
+
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 3,4), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(3,4),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 6,5), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(6,5),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 10,9), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(10,9),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 17,16), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(17,16),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 18,1), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(18,1),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 12,2), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(12,2),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 15,13), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(15,13),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 14,8), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(14,8),] %>% pull(LQ))
+tr.lq.dat[tr.lq.dat$node==MRCA(tr.species, 19,7), "LQ"] <- mean(tr.lq.dat[tr.lq.dat$node %in% c(19,7),] %>% pull(LQ))
+
+p.tr.lq.dat <- tr.lq.dat %>% 
+  as.treedata() %>% 
+  ggtree(
+    aes(color=LQ,
+        fill=LQ),
+    branch.length = 'none',
+    size=2
+  ) + 
+  geom_tiplab(aes(label=label %>% str_replace("_", " ")), color='black', align=T, offset=1) +
+  geom_tiplab(aes(subset = (LQ > 5.9), label=LQ %>% round(digits=1)), color='black', geom = "label") + 
+  geom_tiplab(aes(subset = (LQ <= 5.9),label=LQ %>% round(digits=1)), color='white', geom = "label") + 
+  # geom_tiplab(aes(label=node), color='black') + 
+  geom_nodelab(aes(subset = (LQ > 5.9), label=LQ %>% round(digits=1)), color='black', geom = "label", hjust=-0.1) + 
+  geom_nodelab(aes(subset = (LQ <= 5.9), label=LQ %>% round(digits=1)), color='white', geom = "label", hjust=-0.1) + 
+  scale_color_viridis_c(option = "A")+
+  scale_fill_viridis_c(option = "A", guide = guide_none())+
+  xlim_tree(c(NA,10)) + 
+  theme(legend.position = c(0.1,0.8))
+  
+  
+  
+```
+
+```{r Wilkinson LQ redux}
+
+wa.tr.ourbats.lq <- wilkinson.tr.ourbats %>% 
+  rotateConstr(11) %>% 
+  rotateConstr(13) %>% 
+  as_tibble() %>% 
+  left_join(agedata.lq) 
+
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 3,4), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(3,4),] %>% pull(LQ))
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 1,2), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(1,2),] %>% pull(LQ))
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 6,5), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(6,5),] %>% pull(LQ))
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 12,11), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(12,11),] %>% pull(LQ))
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 13,10), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(13,10),] %>% pull(LQ))
+wa.tr.ourbats.lq[wa.tr.ourbats.lq$node==MRCA(wilkinson.tr.ourbats, 9,7), "LQ"] <- mean(wa.tr.ourbats.lq[wa.tr.ourbats.lq$node %in% c(9,7),] %>% pull(LQ))
+
+p.wa.tr.ourbats.lq <- wa.tr.ourbats.lq %>% 
+  as.treedata() %>% 
+  ggtree(
+    aes(color=LQ,
+        fill=LQ),
+    branch.length = 'none',
+    # ladderize=F,
+    size=2
+  ) + 
+  geom_tiplab(aes(label=label %>% str_replace("_", " ")), color='black', align=T, offset=1) +
+  geom_tiplab(aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label") +
+  geom_tiplab(aes(subset = (LQ <= 5.99),label=LQ %>% round(digits=1)), color='white', geom = "label") +
+  # geom_tiplab(aes(label=node), color='black', hjust=-1) +
+  # geom_nodelab(aes(label=node), color='black', hjust=-1) +
+  geom_nodelab(aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label", hjust=-0.1) +
+  geom_nodelab(aes(subset = (LQ <= 5.99), label=LQ %>% round(digits=1)), color='white', geom = "label", hjust=-0.1) +
+  scale_color_viridis_c(option = "A")+
+  scale_fill_viridis_c(option = "A", guide = guide_none())+
+  xlim_tree(c(NA,10)) + 
+  theme(legend.position = c(0.1,0.8))
+```
+
+
+```{r wilkinson vs Our Phylo - ggtree}
+t1 <- wa.tr.ourbats.lq %>% as.treedata()
+
+t2 <- tr.lq.dat
+t2$label[tr.lq.dat$label=="100/100"] <- tr.lq.dat$node[tr.lq.dat$label=="100/100"]
+t2$label[tr.lq.dat$label==""] <- tr.lq.dat$node[tr.lq.dat$label==""]
+
+t2.dat <- t2 %>% 
+  as.treedata() %>%
+  as.phylo() %>% 
+  keep.tip(wilkinson.tr.ourbats$tip.label) #%>% 
+  # rotateConstr(13)
+
+
+t2 <- t2.dat %>% 
+  as_tibble %>% 
+  left_join(t2 %>% select(label,LQ)) %>% 
+  as.treedata()
+  
+p1 <- wa.tr.ourbats.lq %>% 
+  as.treedata() %>% 
+  ggtree(
+    aes(color=LQ,
+        fill=LQ),
+    branch.length = 'none',
+    # ladderize=F,
+    size=2
+  ) + 
+  geom_tiplab(aes(label=label %>% str_replace("_", " ")), color='black', align=T, offset=1) +
+  geom_tiplab(aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label") +
+  geom_tiplab(aes(subset = (LQ <= 5.99),label=LQ %>% round(digits=1)), color='white', geom = "label") +
+  # geom_tiplab(aes(label=node), color='black', hjust=-1) +
+  # geom_nodelab(aes(label=node), color='black', hjust=-1) +
+  geom_nodelab(aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label", hjust=-0.1) +
+  geom_nodelab(aes(subset = (LQ <= 5.99), label=LQ %>% round(digits=1)), color='white', geom = "label", hjust=-0.1) +
+  scale_color_viridis_c(option = "A")+
+  scale_fill_viridis_c(option = "A", guide = guide_none())+
+  xlim_tree(c(NA,10))
+
+p2 <- t2 %>% 
+  ggtree(
+    aes(color=LQ,
+        fill=LQ),
+    branch.length = 'none',
+    # ladderize = F,
+    size=2
+  ) + 
+  geom_tiplab(aes(label=label %>% str_replace("_", " ")), color='black', align=T, offset=1) +
+  geom_tiplab(aes(subset = (LQ > 5.9), label=LQ %>% round(digits=1)), color='black', geom = "label") + 
+  geom_tiplab(aes(subset = (LQ <= 5.9),label=LQ %>% round(digits=1)), color='white', geom = "label") + 
+  # geom_tiplab(aes(label=node), color='black') + 
+  geom_nodelab(aes(subset = (LQ > 5.9), label=LQ %>% round(digits=1)), color='black', geom = "label", hjust=-0.1) + 
+  geom_nodelab(aes(subset = (LQ <= 5.9), label=LQ %>% round(digits=1)), color='white', geom = "label", hjust=-0.1) + 
+  scale_color_viridis_c(option = "A")+
+  scale_fill_viridis_c(option = "A", guide = guide_none())+
+  xlim_tree(c(NA,10))
+
+d1 <- p1$data
+d2 <- p2$data
+
+d2$x <- max(d2$x) - d2$x + max(d1$x) + 6
+
+pp <- p1 + 
+  geom_tree(
+    data=d2, 
+    aes(color=LQ,
+        fill=LQ),
+    branch.length = 'none',
+    size=2
+    ) + 
+  geom_tiplab(data=d2, aes(label=label %>% str_replace("_", " ")), color='black', offset=-2) +
+  geom_tiplab(data=d2, aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label") +
+  geom_tiplab(data=d2, aes(subset = (LQ <= 5.99),label=LQ %>% round(digits=1)), color='white', geom = "label") +
+  # geom_tiplab(aes(label=node), color='black') +
+  # geom_nodelab(aes(label=node), color='black', hjust=-.1) +
+  geom_nodelab(data=d2, aes(subset = (LQ > 5.99), label=LQ %>% round(digits=1)), color='black', geom = "label", hjust=1) +
+  geom_nodelab(data=d2, aes(subset = (LQ <= 5.99), label=LQ %>% round(digits=1)), color='white', geom = "label", hjust=1)
+
+dd <- bind_rows(d1, d2) %>% 
+  filter(!is.na(label))
+
+pp  + 
+  theme(legend.position = c(0.05,0.8))
+
+
+```
+
+
+```{r Data harmonization with Upham}
+tt.upham <-  read_tsv('../../data/tree/UphamEtAl2019_harmonizednames.tsv')
+
+upham.tr.cleanlabs <- upham.tr
+upham.tr.cleanlabs$tip.label <- recode(upham.tr.cleanlabs$tip.label, !!!setNames(tt.upham$submitted_name,tt.upham$label))
+
+upham.nosize <- setdiff(upham.tr.cleanlabs$tip.label, agedata.hassize$label)
+
+upham.nolife <-  setdiff(upham.tr.cleanlabs$tip.label, agedata.hassizelifespan$label)
+
+upham.tr.trimmed <- upham.tr.cleanlabs %>% 
+  drop.tip(upham.nosize)
+
+upham.tr.trimmed.withlife <- upham.tr.trimmed %>% 
+    drop.tip(upham.nolife)
+```
+
+```{r}
+dat.size.lifespan.upham.withLife <- agedata.hassizelifespan %>% ungroup %>% 
+  filter(!label %in% setdiff(agedata.hassizelifespan$label, upham.tr.trimmed.withlife$tip.label)) %>% 
+  mutate(lnSize = log(size)) %>% 
+  select(label, lnSize, Lifespan=lifespan) %>% 
+  as.data.frame()
+
+rownames(dat.size.lifespan.upham.withLife) <- dat.size.lifespan.upham.withLife$label
+
+dat.slawl.min <- dat.size.lifespan.upham.withLife %>% select(label, Lifespan, lnSize)
+rownames(dat.slawl.min) <- dat.slawl.min$label
+
+size.lifespan.upham.lm <- gls(
+  Lifespan ~ lnSize,
+  data=dat.slawl.min,
+  correlation = corBrownian(1, upham.tr.trimmed.withlife)
+)
+
+### Predict new lifespans
+
+d.lifespan.upham.long <- agedata.hassize %>% ungroup %>% 
+  mutate(lnSize = log(size)) %>% 
+  dplyr::select(label, lnSize)
+
+d.lifespan.upham.long.predict <-  bind_cols(
+  d.lifespan.upham.long,
+  Lifespan=predict(
+    object = size.lifespan.upham.lm, 
+    newdata = d.lifespan.upham.long
+  ) #%>% exp
+) # %>% 
+  #mutate(name = str_replace(name, "lnSize", "Lifespan"))
+
+d.lifespan.upham <- 
+  # bind_rows(
+  #   d.lifespan.upham.long, 
+  #   d.lifespan.atlantogenata.long.predict
+  # ) %>% 
+  # pivot_wider(id_cols = node, names_from=name, values_from = lnSize)
+  left_join(
+    d.lifespan.upham.long.predict %>% rename(Lifespan.predict = Lifespan), 
+    agedata.hassizelifespan %>% mutate(lnSize = log(size)) %>% ungroup %>% select(label, lnSize, Lifespan=lifespan, Order), 
+    by = c("label", "lnSize")
+  )
+```
+
+
+```{r}
+d.lifespan.upham %>% 
+  filter(!is.na(Order)) %>% 
+  group_by(Order) %>% 
+  filter(n_distinct(label) > 50) %>% 
+  ungroup %>% 
+  ggplot(
+    aes(
+      x=Lifespan,
+      y=Lifespan.predict,
+      color=Order
+    )
+  )+ 
+  geom_point() + 
+  labs(x="Lifespan (yrs)",
+       y="Predicted Lifespan (yrs)") + 
+  geom_smooth(method = 'lm') + 
+  scale_color_d3(palette = 'category20') + 
+  facet_wrap(~Order, scales="free") + 
+  theme_pubclean() + 
+  theme(legend.position = "none")
+```
+
+
+
+Need to have predictions at internal nodes for this
+
+```{r RICR, eval=F}
+tree.size.lifespan.upham.full.table <- upham.ml.trimmed %>% 
+  as_tibble %>% 
+  left_join(d.lifespan.upham, by='node') %>% 
+### Cancer Susceptibility
+  mutate(
+    K1 = (Lifespan)^6 * exp(lnSize),
+    lnK1 = 6*log(Lifespan) + lnSize
+  )
+
+cancerSucceptibility.Atlantogenata.table <- tree.size.lifespan.Atlantogenata.full.table %>% 
+  mutate(
+    Ancestor = label %>% 
+      sapply(
+        .,
+        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
+          if(is.na(n)){return(NA)}
+          #print(n)
+          #print(length(n))
+          p.node <- d %>% filter(label==n) %>% pull(parent) %>% unique
+          d %>% filter(node == p.node) %>% pull(label) %>% unique %>% return
+        }
+      ) %>% str_replace_all("\\.", " ") %>% 
+      str_replace("Root", "Atlantogenata"),
+    K2 = parent %>% 
+      sapply(
+        .,
+        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
+          d %>% filter(node==n) %>% pull(K1) %>% unique
+        }
+      ),
+    lnK2 = parent %>% 
+      sapply(
+        .,
+        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
+          d %>% filter(node==n) %>% pull(lnK1) %>% unique
+        }
+      ),
+    CancerSucceptabilityChange = K2/K1,
+    log2CancerSucceptabilityChange = log2(K2)-log2(K1),
+    label = label %>% str_replace_all("\\.", " ")
+  )
+
+```
+

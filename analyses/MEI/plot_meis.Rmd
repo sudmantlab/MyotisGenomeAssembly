@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-02-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(tidyverse)
+library(data.table)
+#names=c("SW_score","percent_div","percent_del","percent_ins","qseq","qbegin","qend","qleft","qstrand","repeat","repeat_class","rep_begin","rep_end","rep_end","ID","IDstar")
+#length(names)
+
+#t = read.table("/Users/petersudmant/tmp/bats/meis/input/global/scratch/users/mvazquez/projects/annocomba/results/mMyoAui1/REPEATMASKER/full/mMyoAui1_sorted.fas.out",skip=3,sep="",col.names = names,fill=TRUE)
+outdir="/Users/petersudmant/Documents/science/sudmantlab/projects/bats/analyses/meis/output"
+names=c("species","SW_score","percent_div","percent_del","percent_ins","qseq","qbegin","qend","qleft","qstrand","repeat","repeat_class","rep_begin","rep_end","rep_left","ID")
+#t = read.table("/Users/petersudmant/tmp/bats/meis/input/combined_mei.out.gz",col.names=names,sep=" ")
+t = fread("/Users/petersudmant/tmp/bats/meis/input/combined_mei.out.gz",col.names=names,sep=" ")
+
+t
+```
+```{r}
+
+filter_out = c("Simple_repeat","Low_complexity")
+
+repeat_sum = t %>% 
+  filter(!(repeat_class %in% filter_out)) %>%
+  group_by(repeat_class) %>%
+  summarize(n=n()) %>%
+  arrange(-n) 
+
+top_20 = repeat_sum$repeat_class[1:10]
+
+#g=ggplot(t %>% filter(!(repeat_class %in% filter_out))) +
+g=ggplot(t %>% filter(repeat_class %in% top_20))
+g=g+geom_histogram(aes(x=percent_div,fill=repeat_class))+
+  theme_bw(base_size=4)+
+  facet_wrap(~species,ncol=1)+
+  scale_fill_brewer(palette="Spectral")
+
+fn_out = paste(outdir,"/mei_distribution.pdf",sep="")
+pdf(fn_out,width=3,height=6)
+print(g)
+dev.off()
+
+```
+```{r}
+
+filter_out = c("Simple_repeat","Low_complexity")
+
+repeat_sum_recent = t %>% 
+  filter(percent_div<1.5) %>%
+  filter(!(repeat_class %in% filter_out)) %>%
+  group_by(repeat_class) %>%
+  summarize(n=n()) %>%
+  arrange(-n) 
+
+top_10 = repeat_sum_recent$repeat_class[1:10]
+
+#g=ggplot(t %>% filter(!(repeat_class %in% filter_out))) +
+g=ggplot(t %>% filter(percent_div<1.5) %>% filter(repeat_class %in% top_10))
+g=g+geom_histogram(aes(x=percent_div,fill=repeat_class))+
+  theme_bw(base_size=4)+
+  facet_wrap(~species,ncol=1)+
+  scale_fill_brewer(palette="Spectral")
+
+fn_out = paste(outdir,"/mei_distribution_recent.pdf",sep="")
+pdf(fn_out,width=3,height=6)
+print(g)
+dev.off()
+
+
+```

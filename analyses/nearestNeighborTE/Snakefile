@@ -1,0 +1,2 @@
+include: "rules/bedtools.smk"
+include: "rules/webgestalt.smk"

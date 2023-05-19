@@ -1,0 +1,47 @@
+Assembly Name	Assembly Accession	Organism Name	Organism Infraspecific Names Breed	Organism Infraspecific Names Strain	Organism Infraspecific Names Cultivar	Organism Infraspecific Names Isolate	Organism Infraspecific Names Ecotype	Annotation Name	Assembly Stats Total Sequence Length	Assembly Level	Assembly Submission Date
+L.cinereus_Cryan_1219_p1.0	GCA_011751065.1	'Lasiurus cinereus'				Cryan_1219			2149060452	Scaffold	2020-03-25
+AnoCau_v1_BIUU	GCA_004027475.1	'Anoura caudifer'				US021			2206589520	Scaffold	2019-01-16
+AntPal_v1_BIUU	GCA_007922775.1	'Antrozous pallidus'				US032			2597469403	Scaffold	2019-08-08
+WHU_Ajam_v2	GCF_014825515.1	'Artibeus jamaicensis'				1a		'NCBI Annotation Release 100'	2207601705	Scaffold	2020-09-30
+CarPer_v1_BIUU	GCA_004027735.1	'Carollia perspicillata'				US073			2689411905	Scaffold	2019-01-16
+CraTho_v1_BIUU	GCA_004027555.1	'Craseonycteris thonglongyai'				US097			2272093077	Scaffold	2019-01-16
+ASM979314v1	GCA_009793145.1	'Cynopterus brachyotis'				CB-01			1758935687	Scaffold	2019-12-23
+ASM294091v2	GCF_002940915.1	'Desmodus rotundus'				DRU21DN04		'NCBI Annotation Release 101'	2063791738	Scaffold	2018-02-23
+ASM46528v1	GCA_000465285.1	'Eidolon helvum'							1837754460	Scaffold	2013-09-13
+Espe.v1	GCA_003508835.1	'Eonycteris spelaea'				SIG01			1966861576	Contig	2018-09-07
+EptFus1.0	GCF_000308155.1	'Eptesicus fuscus'				BU_THK_EF1		'NCBI Annotation Release 101'	2026629342	Scaffold	2012-11-08
+ASM189008v1	GCF_001890085.1	'Hipposideros armiger'				ML-2016		'NCBI Annotation Release 100'	2236564388	Scaffold	2016-12-06
+HipGal_v1_BIUU	GCA_004027415.1	'Hipposideros galeritus'				US101			2440750851	Scaffold	2019-01-16
+ASM2146454v1	GCA_021464545.1	'Hipposideros pendleburyi'				ps2007241.1			2171761792	Scaffold	2022-01-14
+LasBor_v1_BIUU	GCA_004026805.1	'Lasiurus borealis'				US024			2857590849	Scaffold	2019-01-16
+MacSob_v1_BIUU	GCA_004027375.1	'Macroglossus sobrinus'				US102			1897644983	Scaffold	2019-01-16
+MacCal_v1_BIUU	GCA_007922815.1	'Macrotus californicus'				US035			2160653756	Scaffold	2019-08-08
+MegLyr_v1_BIUU	GCA_004026885.1	'Megaderma lyra'				US036			2620948449	Scaffold	2019-01-16
+MicHir_v1_BIUU	GCA_004026765.1	'Micronycteris hirsuta'				US037			2314654405	Scaffold	2019-01-16
+Mnat.v1	GCF_001595765.1	'Miniopterus natalensis'				MN2012-01		'NCBI Annotation Release 100'	1803099001	Scaffold	2016-03-22
+MinSch_v1_BIUU	GCA_004026525.1	'Miniopterus schreibersii'				US075			1775846775	Scaffold	2019-01-16
+mMolMol1.p	GCF_014108415.1	'Molossus molossus'				mMolMol1		'NCBI Annotation Release 100'	2315568481	Scaffold	2020-08-07
+MorMeg_v1_BIUU	GCA_004026545.1	'Mormoops blainvillei'				US096			2111750309	Scaffold	2019-01-16
+MurFea_v1_BIUU	GCA_004026665.1	'Murina aurata feae'				US074			2331551382	Scaffold	2019-01-16
+ASM41265v1	GCF_000412655.1	'Myotis brandtii'						'NCBI Annotation Release 101'	2107242811	Scaffold	2013-06-28
+ASM32734v1	GCF_000327345.1	'Myotis davidii'						'NCBI Annotation Release 101'	2059799708	Scaffold	2012-12-20
+Myoluc2.0	GCF_000147115.1	'Myotis lucifugus'						'NCBI Annotation Release 102'	2034575300	Scaffold	2010-09-14
+mMyoMyo1.p	GCF_014108235.1	'Myotis myotis'				mMyoMyo1		'NCBI Annotation Release 100'	2002780556	Scaffold	2020-08-07
+NocLep_v1_BIUU	GCA_004026585.1	'Noctilio leporinus'				US093			2098501394	Scaffold	2019-01-16
+NycHum_v1_BIUU	GCA_007922795.1	'Nycticeius humeralis'				US023			2779565143	Scaffold	2019-08-08
+mPhyDis1.pri.v3	GCF_004126475.2	'Phyllostomus discolor'				MPI-MPIP mPhyDis1		'NCBI Annotation Release 101'	2108832841	Chromosome	2020-05-12
+TTU_PhHast_1.1	GCF_019186645.2	'Phyllostomus hastatus'				PE091		'NCBI Annotation Release 100'	2089223459	Scaffold	2021-07-09
+mPipKuh1.p	GCF_014108245.1	'Pipistrellus kuhlii'				mPipKuh1		'NCBI Annotation Release 101'	1775688541	Scaffold	2020-08-07
+mPipPip1.1	GCA_903992545.1	'Pipistrellus pipistrellus'							1763422308	Chromosome	2020-08-06
+CSHL_Meso_final	GCA_021234165.1	'Pteronotus parnellii mesoamericanus'	'Mesoamerican mustached bat'			MK-2021			2074649091	Scaffold	2021-12-20
+ASM32557v1	GCF_000325575.1	'Pteropus alecto'						'NCBI Annotation Release 102'	1985958707	Scaffold	2013-12-04
+Ma_sr-lr_union100	GCF_902729225.1	'Pteropus giganteus'						'NCBI Annotation Release 100'	1985219947	Scaffold	2020-04-15
+P_pselaphon_scaffold_01	GCA_014363405.1	'Pteropus pselaphon'							1933220355	Scaffold	2020-08-23
+Pvam_2.0	GCF_000151845.1	'Pteropus vampyrus'				Shadow		'NCBI Annotation Release 101'	2198284804	Scaffold	2014-12-05
+mRhiFer1_v1.p	GCA_004115265.3	'Rhinolophus ferrumequinum'				MPI-CBG mRhiFer1			2075768562	Chromosome	2019-05-17
+mRouAeg1.p	GCF_014176215.1	'Rousettus aegyptiacus'				mRouAeg1		'NCBI Annotation Release 101'	1893602072	Scaffold	2020-08-07
+rouLes_1.0	GCA_015472975.1	'Rousettus leschenaultii'							1918041062	Scaffold	2020-10-30
+WHU_Shon_v2.1	GCF_014824575.2	'Sturnira hondurensis'				20B	Veracruz	'NCBI Annotation Release 100.20210611'	2096623354	Scaffold	2020-09-30
+TadBra_v1_BIUU	GCA_004025005.1	'Tadarida brasiliensis'				US034			2709928648	Scaffold	2019-01-15
+TonSau_v1_BIUU	GCA_004024845.1	'Tonatia saurophila'				US038			2105886965	Scaffold	2019-01-15
+

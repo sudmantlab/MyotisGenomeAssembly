@@ -1,0 +1,9 @@
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoAui1/REPEATMASKER/full/mMyoAui1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoCai1/REPEATMASKER/full/mMyoCai1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoEvo1/REPEATMASKER/full/mMyoEvo1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoLuc1/REPEATMASKER/full/mMyoLuc1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoOcc1/REPEATMASKER/full/mMyoOcc1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoThy1/REPEATMASKER/full/mMyoThy1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoVel1/REPEATMASKER/full/mMyoVel1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoVol1/REPEATMASKER/full/mMyoVol1_sorted.fas.out
+/global/scratch/users/mvazquez/projects/annocomba/results//mMyoYum1/REPEATMASKER/full/mMyoYum1_sorted.fas.out
