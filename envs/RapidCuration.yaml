@@ -10,3 +10,10 @@ dependencies:
   - pairix
   - h5py
   - tabix
+  - tidk
+  - ucsc-bigwigtobedgraph
+  - bedtools
+  - minimap2
+  - pyfastaq
+  - perl
+  - perl-bioperl

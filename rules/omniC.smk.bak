@@ -17,7 +17,7 @@ rule bwa_index:
     output:
         idx=multiext("data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     log:
-        "logs/bwa_index/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.log",
+        "logs/bwa_index/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{hic}.log",
     params:
         #algorithm="bwtsw",
     conda: "../envs/omni-c.yaml"
@@ -44,10 +44,10 @@ rule bwa_aln:
     input:
         reads= get_omnic_reads,
         # Index can be a list of (all) files created by bwa, or one of them
-        fasta="data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa",
-        idx=multiext("data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa", ".amb", ".ann", ".bwt", ".pac", ".sa")
+        fasta="output/hifiasm-fasta/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa",
+        idx=multiext("output/hifiasm-fasta/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa", ".amb", ".ann", ".bwt", ".pac", ".sa")
     output:
-        temp("output/Omni-C_BWAAligned/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.sam")
+        "output/Omni-C_BWAAligned/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.sam",
     params:
         extra="-5SP -T0"
     log:
@@ -59,38 +59,18 @@ rule bwa_aln:
     #    "v1.1.0/bio/bwa/mem"
 
 
-#rule pairtools_parse:
-#    input: 
-#        sam = "output/Omni-C_BWAAligned/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.sam",
-#        genome = "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.genome"
-#    output: 
-#        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq40.aligned.pairsam"
-#    log: 
-#        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq40.aligned.log"
-#    conda: "../envs/omni-c.yaml"
-#    threads: 32
-#    shell: "pairtools parse "
-#           "--min-mapq 40 "
-#           "--walks-policy 5unique "
-#           "--max-inter-align-gap 30 "
-#           "--nproc-in {threads} "
-#           "--nproc-out {threads} "
-#           "--chroms-path {input.genome} "
-#           "{input.sam} > {output} 2> {log}"
-
-
-rule pairtools_parse_mapq:
+rule pairtools_parse:
     input: 
         sam = "output/Omni-C_BWAAligned/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.sam",
-        genome = "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.genome"
+        genome = "output/hifiasm-fasta/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.genome"
     output: 
-        temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.aligned.pairsam")
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.pairsam"
     log: 
-        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.aligned.log"
+        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.log"
     conda: "../envs/omni-c.yaml"
     threads: 32
     shell: "pairtools parse "
-           "--min-mapq {wildcards.mapq} "
+           "--min-mapq 40 "
            "--walks-policy 5unique "
            "--max-inter-align-gap 30 "
            "--nproc-in {threads} "
@@ -101,11 +81,11 @@ rule pairtools_parse_mapq:
 
 rule pairtools_sort:
     input: 
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.aligned.pairsam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.aligned.pairsam"
     output: 
-        temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.pairsam")
+        temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.pairsam")
     log: 
-        "logs/pairtools_sort/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.log"
+        "logs/pairtools_sort/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.log"
     conda: "../envs/omni-c.yaml"
     threads: 32
     shell: 
@@ -121,11 +101,11 @@ rule pairtools_sort:
 
 rule pairtools_dedup:
     input: 
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.pairsam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.pairsam"
     output: 
-        temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.dedup.pairsam")
+        temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.dedup.pairsam")
     log: 
-        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.dedup.log"
+        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.dedup.log"
     conda: "../envs/omni-c.yaml"
     threads: 32
     shell: 
@@ -141,12 +121,12 @@ rule pairtools_dedup:
 
 rule pairtools_split:
     input: 
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.dedup.pairsam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.dedup.pairsam"
     output: 
-        bam = temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.bam"),
-        pairs = "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.pairs",
+        bam = temp("output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.bam"),
+        pairs = "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.pairs",
     log: 
-        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.split.log"
+        "logs/pairtools_parse/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.split.log"
     conda: "../envs/omni-c.yaml"
     threads: 32
     shell: 
@@ -162,9 +142,9 @@ rule pairtools_split:
 
 rule samtools_sort:
     input:
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.bam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.bam"
     output:
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.bam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.bam"
     params:
         #extra = "-m 100G"
     threads:  # Samtools takes additional threads through its option -@
@@ -175,11 +155,11 @@ rule samtools_sort:
 
 rule samtools_index:
     input:
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.bam"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.bam"
     output:
-        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.bam.bai"
+        "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.bam.bai"
     log:
-        "output/Omni-C_samtools_index/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.log"
+        "output/Omni-C_samtools_index/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.sorted.log"
     params:
         "" # optional params string
     threads:  # Samtools takes additional threads through its option -@

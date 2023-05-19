@@ -50,31 +50,29 @@ rule mitoHiFi_reads:
 
 rule mitoHiFi_fromContig:
     input: 
-    	genome = "output/hifiasm-fasta/{species}/{settings}/{opt}/{species}.p_ctg.hic.fa",
-    	mt_fa = get_mitoHiFi_mitogenome_fasta,
-    	mt_gb = get_mitoHiFi_mitogenome_gb    	
+    	genome = "data/genomes/{genome}.fa",
+    	mt_fa = 'data/mitoHiFi/{genome}.fasta', #get_mitoHiFi_mitogenome_fasta,
+    	mt_gb = 'data/mitoHiFi/{genome}.gb' #get_mitoHiFi_mitogenome_gb    	
     output: 
-        stats = "output/mitoHiFi/{species}/fromContig/{settings}/{opt}/contigs_stats.tsv",
-        final_genome_log = "output/mitoHiFi/{species}/fromContig/{settings}/{opt}/final_mitogenome.annotation_MitoFinder.log",
-        final_genome_fasta = "output/mitoHiFi/{species}/fromContig/{settings}/{opt}/final_mitogenome.fasta",
-        final_genome_genbank = "output/mitoHiFi/{species}/fromContig/{settings}/{opt}/final_mitogenome.gb"
-    #log: 
+        stats =                "output/mitoHiFi/fromContig/{genome}/contigs_stats.tsv",
+        final_genome_fasta =   "output/mitoHiFi/fromContig/{genome}/final_mitogenome.fasta",
+        final_genome_genbank = "output/mitoHiFi/fromContig/{genome}/final_mitogenome.gb"
     params:
-        output_dir = lambda wildcards: "output/mitoHiFi/{species}/fromContig/{settings}/{opt}/".format(species=wildcards.species,settings=wildcards.settings,opt=wildcards.opt),
-        pct_identity = 80,
+        output_dir = "output/mitoHiFi/fromContig/{genome}/",
+        pct_identity = 90,
         circSize = 20000,
         circOffset = 1
     threads: 32
-    singularity: "docker://docmanny/mitohifi:c06ed3e"
     shell: """
-        ROOTPROJDIR="$(pwd -P)"
+        export ROOTPROJDIR="$(pwd -P)"
         mkdir -p {params.output_dir}
         cd {params.output_dir}
-        python $ROOTPROJDIR/code/MitoHiFi/mitohifi_v2.py \\
+        singularity exec --bind $ROOTPROJDIR/:/lustre/ $ROOTPROJDIR/mitohifi_master.sif mitohifi.py \\
          -c  $ROOTPROJDIR/{input.genome} \\
          -f  $ROOTPROJDIR/{input.mt_fa} \\
          -g  $ROOTPROJDIR/{input.mt_gb} \\
          -t {threads} \\
+         -a animal \\
          --circular-size {params.circSize} \\
          --circular-offset {params.circOffset} \\
          -p {params.pct_identity} \\

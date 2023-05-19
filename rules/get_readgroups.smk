@@ -1,19 +1,14 @@
-configfile: "config_trimmed.json"
-
-def get_all_fastq(wildcards):
-    inputs = []
-    samples = list(config['sample_experiment'].keys())
-    for sample in samples:
-        for fastq in config['input_samples'][sample]:
-            inputs.append("{sample_path}/"
-                           "{sample_fastq}"
-                           "".format(sample_path=config['input_sample_path'],
-                                     sample_fastq=fastq))
-    return inputs
+def get_omnic_reads_allSpecies(wildcards):
+    import pandas as pd
+    path_trimmed = "output/trimmed-hic/{species}/{sample_name}-trimmed_{read}.fastq.gz"
+    #input_list = []
+    samples = pd.read_table("rna_pepsamples.tsv", index_col=False)
+    samples = samples[samples.type == "Hi-C"]
+    return samples.apply(lambda row: path_trimmed.format(**row), axis=1).tolist()
 
 rule get_readgroupinfo:
-    input: get_all_fastq
-    output: 'data/RNA-seq/seqinfo.tsv'
+    input: get_omnic_reads_allSpecies
+    output: 'data/Hi-C/seqinfo.tsv'
     shell: """
         echo -e "fastq\tlibrary\tinstrument_name\trun_id\tflowcell_id\tflowcell_lane" > {output} ; 
         ls {input} | 

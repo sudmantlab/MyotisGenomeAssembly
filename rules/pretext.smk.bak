@@ -1,0 +1,125 @@
+rule pretext_symlinks:
+    input: 
+        bam = "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}.sorted.bam",
+        fasta = "output/yahs/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}.fa"
+    output: 
+        bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.sorted.bam",
+        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/ref.fa",
+        fofn = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/cram.fofn"
+    conda: "../envs/RapidCuration.yaml"
+    threads: 2
+    shell: "ROOTDIR=$(pwd -P); "
+           "ln -sf $ROOTDIR/{input.bam} {output.bam}; "
+           "ln -sf $ROOTDIR/{input.fasta} {output.fasta}; "
+           "echo '{wildcards.species}.p_ctg.{wildcards.hic}.sorted.bam' >  {output.fofn} "
+
+
+rule pretext_map:
+    input: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.sorted.bam"
+    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.pretext"
+    conda: "../envs/RapidCuration.yaml"
+    #params:
+    #    outdir = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/"
+    threads: 2
+    shell: "samtools view -h {input} | "
+           " awk '{{print gensub(/scaff_([0123456789]+)_contig_tig([0123456789]+)[^\t]+(\s)/,\"\\1_\\2\\3\",\"g\")}}' | "
+           " PretextMap -o {output} --sortby 'length' --sortorder 'descend' --highRes"
+
+rule rapidcuration_Gap:
+    input: 
+        #bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.sorted.bam",
+        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/ref.fa",
+        #fofn = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/cram.fofn",
+    #output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}_gap.bedgraph",
+    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/gap.done",
+    params:
+        sample = "{species}.{genometype}.{hic}",
+        base_dir1 = "/global/scratch", 
+        base_dir2 = "/global/scratch2", 
+        base_dir3 = "/global/home/users/mvazquez",
+        nfs_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        lustre_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        data_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}",
+        output_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}"
+    conda: "../envs/RapidCuration.yaml"
+    shell: "ROOTDIR=$(pwd -P); "
+           "cd {params.output_dir} && "
+           "singularity run "
+           "-B {params.base_dir1} "
+           "-B {params.base_dir2} "
+           "-B {params.base_dir3} "
+           "-B {params.nfs_dir}:/nfs "
+           "-B {params.lustre_dir}:/lustre "
+           "-B {params.data_dir}:/data "
+           "-B {params.output_dir}:/output "
+           "$ROOTDIR/code/rapid-curation/rapid_hic_software/runGap.sif -t {params.sample}; "
+           "touch {output}"
+
+rule pt_addGap:
+    input: ""
+    output: 
+        gap = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/{species}.{genometype}.{hic}_gap.bedgraph",
+        pt = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.{genometype}.{hic}.pretext"
+
+rule rapidcuration_telo:
+    input: 
+        #bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.sorted.bam",
+        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/ref.fa",
+        #fofn = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/cram.fofn"
+    #output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}_gap.bedgraph_telomere.bedgraph",
+    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/telo.done",
+    params:
+        sample = "{species}.p_ctg.{hic}",
+        base_dir1 = "/global/scratch", 
+        base_dir2 = "/global/scratch2", 
+        base_dir3 = "/global/home/users/mvazquez",
+        nfs_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        lustre_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        data_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}",
+        output_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}"
+    conda: "../envs/RapidCuration.yaml"
+    shell: "ROOTDIR=$(pwd -P); "
+           "cd {params.output_dir} && "
+           "singularity run "
+           "-B {params.base_dir1} "
+           "-B {params.base_dir2} "
+           "-B {params.base_dir3} "
+           "-B {params.nfs_dir}:/nfs "
+           "-B {params.lustre_dir}:/lustre "
+           "-B {params.data_dir}:/data "
+           "-B {params.output_dir}:/output "
+           "$ROOTDIR/code/rapid-curation/rapid_hic_software/runTelo.sif -s {params.sample} -t {params.sample}; "
+           "touch {output}"
+
+
+rule rapidcuration_Repeat:
+    input: 
+        #bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}.sorted.bam",
+        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/ref.fa",
+        #fofn = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/cram.fofn"
+    #output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/{species}.p_ctg.{hic}_repeat_density.bw",
+    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}/repeat.done",
+    params:
+        sample = "{species}.p_ctg.{hic}",
+        base_dir1 = "/global/scratch", 
+        base_dir2 = "/global/scratch2", 
+        base_dir3 = "/global/home/users/mvazquez",
+        nfs_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        lustre_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly",
+        data_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}",
+        output_dir = "/global/scratch2/mvazquez/projects/BatGenomeAssembly/output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.p_ctg.{hic}"
+    conda: "../envs/RapidCuration.yaml"
+    shell: "ROOTDIR=$(pwd -P); "
+           "cd {params.output_dir} && "
+           "singularity run "
+           "-B {params.base_dir1} "
+           "-B {params.base_dir2} "
+           "-B {params.base_dir3} "
+           "-B {params.nfs_dir}:/nfs "
+           "-B {params.lustre_dir}:/lustre "
+           "-B {params.data_dir}:/data "
+           "-B {params.output_dir}:/output "
+           "$ROOTDIR/code/rapid-curation/rapid_hic_software/runRepeat.sif -t {params.sample}; "
+           "touch {output}"
+
+
