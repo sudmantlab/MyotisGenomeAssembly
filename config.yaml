@@ -22,6 +22,17 @@ species_abbr:
   Myotis_velifer: "M_velifer"
   Myotis_yumanensis: "M_yumanensis"
 
+ncbi_taxid:
+  Myotis_lucifugus: "59463"
+  Myotis_evotis: "257883"
+  Myotis_thysanodes: "153287"
+  Myotis_volans: "159335"
+  Myotis_californicus: "257882"
+  Myotis_auriculus: "321263"
+  Myotis_occultus: "2497118"
+  Myotis_velifer: "9435"
+  Myotis_yumanensis: "159337"
+
 ccs_opts:
   - "minPasses3_minRQ0.99"
 

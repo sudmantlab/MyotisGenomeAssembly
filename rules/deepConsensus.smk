@@ -1,4 +1,4 @@
-rule ccs_deepConsensus:
+rule ccs_all_minPasses_minRQ:
     input: "data/PacBio-HiFi/{species}/data2/pb/{pacbio1}/{pacbio2}/{id}.subreads.bam"
     output: 
         ccs="output/HiFi-CCS/{species}/all_minPasses{minPasses}_minRQ{minRQ}/{pacbio1}/{pacbio2}/{id}.ccs.bam",

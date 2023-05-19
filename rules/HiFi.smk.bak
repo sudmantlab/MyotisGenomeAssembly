@@ -7,7 +7,7 @@ rule ccs_consensus_noopts:
         ccs="output/HiFi-CCS/{species}/defaults/{pacbio1}/{pacbio2}/{id}.ccs.bam",
         report="output/HiFi-CCS/{species}/defaults/{pacbio1}/{pacbio2}/{id}.ccs_report.txt"
     log: "logs/HiFi-CCS/{species}/defaults/{pacbio1}/{pacbio2}/{id}.logs"
-    threads: 32
+    threads: 30
     conda: "../envs/HiFiAssembly.yml"
     shell: "ccs -j {threads} --report-file {output.report} --log-file {log} {input} {output.ccs}"
 
@@ -18,7 +18,7 @@ rule ccs_consensus_minPasses_minRQ:
         ccs="output/HiFi-CCS/{species}/minPasses{minPasses}_minRQ{minRQ}/{pacbio1}/{pacbio2}/{id}.ccs.bam",
         report="output/HiFi-CCS/{species}/minPasses{minPasses}_minRQ{minRQ}/{pacbio1}/{pacbio2}/{id}.ccs_report.txt"
     log: "logs/HiFi-CCS/minPasses{minPasses}_minRQ{minRQ}/{species}/{pacbio1}/{pacbio2}/{id}.logs"
-    threads: 32
+    threads: 30
     conda: "../envs/HiFiAssembly.yml"
     shell: "ccs -j {threads} --min-passes {wildcards.minPasses} --min-rq {wildcards.minRQ} --report-file {output.report} --log-file {log} {input} {output.ccs}"
 
@@ -122,7 +122,7 @@ rule hifiasm_noopts:
         ovlp_source = "output/hifiasm/{species}/{settings}/no_opts/{species}.asm.ovlp.source.bin"
     params:
         prefix = "output/hifiasm/{species}/{settings}/no_opts/{species}.asm"
-    threads: 32
+    threads: 30
     log: "output/hifiasm/{species}/{settings}/no_opts/{species}.asm.log"
     conda: "../envs/HiFiAssembly.yml"
     # shell: "hifiasm -l2 -o {params.prefix} -t {threads} {input} > {log} 2>&1"
@@ -143,7 +143,7 @@ rule hifiasm_l2:
         ovlp_source = "output/hifiasm/{species}/{settings}/l2/{species}.asm.ovlp.source.bin"
     params:
         prefix = "output/hifiasm/{species}/{settings}/l2/{species}.asm"
-    threads: 32
+    threads: 30
     log: "output/hifiasm/{species}/{settings}/l2/{species}.asm.log"
     conda: "../envs/HiFiAssembly.yml"
     shell: "hifiasm -l2 -o {params.prefix} -t {threads} {input} > {log} 2>&1"
@@ -190,7 +190,7 @@ rule hifiasm_noopts_HiC:
         ovlp_source = "output/hifiasm-HiC/{species}/{settings}/no_opts/{species}.asm.ovlp.source.bin"
     params:
         prefix = "output/hifiasm-HiC/{species}/{settings}/no_opts/{species}.asm"
-    threads: 32
+    threads: 30
     log: "output/hifiasm-HiC/{species}/{settings}/no_opts/{species}.asm.log"
     conda: "../envs/HiFiAssembly.yml"
     # shell: "hifiasm -o {params.prefix} --h1 {input.left} --h2 {input.right} -t {threads} -l2 {input.hifi} > {log} 2>&1"
@@ -212,7 +212,7 @@ rule hifiasm_l2_HiC:
         ovlp_source = "output/hifiasm-HiC/{species}/{settings}/l2/{species}.asm.ovlp.source.bin"
     params:
         prefix = "output/hifiasm-HiC/{species}/{settings}/l2/{species}.asm"
-    threads: 32
+    threads: 30
     log: "output/hifiasm-HiC/{species}/{settings}/l2/{species}.asm.log"
     conda: "../envs/HiFiAssembly.yml"
     shell: "hifiasm -o {params.prefix} --h1 {input.left} --h2 {input.right} -t {threads} -l2 {input.hifi} > {log} 2>&1"

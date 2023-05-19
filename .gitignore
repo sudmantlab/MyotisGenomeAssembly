@@ -14,3 +14,9 @@ generator*
 .ipynb*
 cluster_config.yml
 test*
+*.sif
+*.paf
+*.log
+*.fa*
+*.txt
+*.stats

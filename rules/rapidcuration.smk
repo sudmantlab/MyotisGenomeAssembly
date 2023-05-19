@@ -75,46 +75,25 @@ rule index_bams_rg:
         "samtools index -@ {threads} {input}"
 
 
-rule pretext_symlink_genome:
-    input: 
-        fasta = "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa"
-    output: 
-        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/ref.fa",
-    conda: "../envs/RapidCuration.yaml"
-    threads: 2
-    shell: "ROOTDIR=$(pwd -P); "
-           "ln -sf $ROOTDIR/{input.fasta} {output.fasta}; "
-
-
-rule pretext_symlinks_bam:
+rule pretext_symlinks:
     input: 
         bam = "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.bam",
+        fasta = "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa"
     output: 
-        #bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.rg.bam",
-        bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/bam.mapq{mapq}.sorted.rg.bam",
+        bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.rg.bam",
+        fasta = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/ref.fa",
+        fofn = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/cram.fofn"
     conda: "../envs/RapidCuration.yaml"
     threads: 2
     shell: "ROOTDIR=$(pwd -P); "
            "ln -sf $ROOTDIR/{input.bam} {output.bam}; "
-
-
-rule pretext_symlinks_fofn:
-    input: 
-        bam = "output/Omni-C_pairsam/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.bam",
-    output: 
-        bam = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/fofn.mapq{mapq}.cram",
-    params:
-        outdir = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/"
-    conda: "../envs/RapidCuration.yaml"
-    threads: 2
-    shell: "ROOTDIR=$(pwd -P); "
-           "echo '{wildcards.species}.{wildcards.genometype}.{wildcards.hic}.mapq{wildcards.mapq}.sorted.bam' > {output}"
-           "ln -sf fofn.mapq{mapq}.cram {params.outdir}/fofn.cram"
+           "ln -sf $ROOTDIR/{input.fasta} {output.fasta}; "
+           "echo '{wildcards.species}.{wildcards.genometype}.{wildcards.hic}.mapq{wildcards.mapq}.sorted.rg.bam' >  {output.fofn} "
 
 
 rule pretext_map:
-    input: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/bam.mapq{mapq}.sorted.rg.bam"
-    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/pretext.mapq{mapq}.pretext"
+    input: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/{species}.{genometype}.{hic}.mapq{mapq}.sorted.rg.bam"
+    output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/{species}.{genometype}.{hic}.mapq{mapq}.pretext"
     conda: "../envs/RapidCuration.yaml"
     #params:
     #    outdir = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output"
@@ -246,19 +225,3 @@ rule pt_alladded:
     input: ["output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/pt_addRep.done", "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/pt_addTelo.done", "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/pt_addGap.done"]
     output: "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/pt_addall.done"
     shell: "touch {output}"
-
-
-
-rule pt_rapid_join:
-    input: 
-        fa = "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}.fa",
-        pt_tpf = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/rapid_prtxt_XL.tpf",
-        pt_chrs = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output/chrs.csv",
-    output: "data/assemblies/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}_manualCuration.fa"
-    conda: "../envs/RapidCuration.yaml"
-    params:
-        pt_dir = "output/pretext_map/{species}/{ccs_opts}/{hifiasm_opts}/{species}.{genometype}.{hic}/output"
-    shell: "PROJDIR=$(pwd -P); "
-           "cd {params.pt_dir}; "
-           "/global/home/users/mvazquez/miniconda3/envs/RapidCuration/bin/perl $PROJDIR/code/rapid-curation/rapid_join.pl -fa $PROJDIR/{input.fa} -tpf $PROJDIR/{input.pt_tpf} -csv $PROJDIR/{input.pt_chrs} -out $PROJDIR/{output}; "
-           "cd - "

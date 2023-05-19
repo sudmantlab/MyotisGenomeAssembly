@@ -1,0 +1,102 @@
+# gather bam stats
+
+    foreach my $bam (@merge_bams,qq[$$self{outdir}/merge.bam])
+    {
+        $self->spawn('bamstats',"$bam.stats",$bam);
+    }
+("samtools stats -\@4 -F0xb00 $bam > $outfile.part")
+
+
+# mark duplicates
+
+    $self->spawn('mkdup2',qq[$$self{outdir}/merge.mkdup.bam],qq[$$self{outdir}/merge.bam]);
+    $self->wait();
+
+# all stats
+
+    $self->spawn('bamstats',qq[$$self{outdir}/merge.mkdup.bam.stats],qq[$$self{outdir}/merge.mkdup.bam]);
+
+# bam2bed
+
+    $self->spawn('bam2bed',qq[$$self{outdir}/merge.mkdup.bed],qq[$$self{outdir}/merge.mkdup.bam]);
+    $self->wait();
+    $self->cmd(qq[samtools view -\@4 -u -F0x400 $bam | bamToBed | sort -k4 --parallel=8 -S50G > $outfile.part]);
+
+
+
+# hic
+
+    $self->spawn('higlass',qq[$$self{outdir}/pre.bed],qq[$$self{outdir}/merge.mkdup.bed]);
+    $self->wait();
+
+
+    $self->spawn('make_mcool',qq[$$self{outdir}/$$self{hname}.mcool],qq[$$self{outdir}/pre.bed]);
+    $self->wait();
+
+    $self->cmd("touch $$self{finish_file}");
+    $self->all_done
+
+
+
+sub higlass
+{
+    my ($self,$outfile,$bed) = @_;
+    my $ref = qq[$$self{genome}];
+    my $ref_base = basename($ref);
+    my $ref_index = qq[$$self{outdir}/$ref_base.fai];
+    $self->cmd(qq[cut -f1,2 $ref_index | sed 's/-/_/g'|sort -k2,2 -nr > $$self{outdir}/$$self{hname}.genome]);
+    $self->cmd(qq[paste -d '\\t' - - < $bed | sed 's/-/_/g' | awk 'BEGIN {FS="\\t"; OFS="\\t"} {if (\$1 > \$7) {print 
+substr(\$4,1,length(\$4)-2),\$12,\$7,\$8,"16",\$6,\$1,\$2,"8",\$11,\$5} else { print 
+substr(\$4,1,length(\$4)-2),\$6,\$1,\$2,"8",\$12,\$7,\$8,"16",\$5,\$11} }' | tr '\\-+' '01'  | sort --parallel=8 -S10G -k3,3d 
+-k7,7d > $outfile.part]);
+    rename("$outfile.part",$outfile) or $self->throw("rename $outfile.part $outfile: $!");
+
+}
+
+{
+    my ($self,$outfile,$bam) = @_;
+    rename("$outfile.part",$outfile) or $self->throw("rename $outfile.part $outfile: $!");
+}
+
+
+sub read_list
+{
+    my ($self, $file) = @_;
+    my @list;
+    open(my $fh, "<$file") or $self->throw("Could not open file $file: $!");
+    while (<$fh>)
+    {
+        chomp;
+        next if (/^#/);
+        push(@list, $_);
+    }
+    close($fh) or $self->throw("Could not close $file: $!");
+    return \@list;
+}
+
+sub write_list
+{
+    my ($self, $file, $list) = @_;
+    open(my $fh, ">$file") or $self->throw("Could not open file $file: $!");
+    foreach my $item (@$list)
+    {
+        print $fh "$item\n";
+    }
+    close($fh) or $self->throw("Could not close $file: $!");
+}
+
+sub save_config
+{
+    my ($self,$name) = @_;
+    my $src = exists $$self{_config} ? $$self{_config} : '';
+    my $dst = "$$self{outdir}/$name.conf";
+    if ( -e $dst && $src && (stat($src))[9] <= (stat($dst))[9] ) { return; }
+    # if ( -e $dst && !$src) { return; }
+    if ( !-d $$self{outdir} ) { $self->cmd("mkdir -p $$self{outdir}"); }
+    open(my $fh,'>',$dst) or $self->throw("$dst: $!");
+    my $about = $$self{_about};
+    $about =~ s/\n/\n# /g;
+    print $fh "# $about";
+    close($fh);
+    $self->cmd("cat $src >> $dst") if $src;
+}

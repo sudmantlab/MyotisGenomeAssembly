@@ -52,6 +52,26 @@ rule merqury_run_haplotig:
         cd -
     """
 
+rule merqury_run_consensus:
+    input: 
+        meryl = "output/meryl/union-sum/{species}/{settings}/{species}.meryl",
+        consensus = "data/assemblies/{settings}/{opt}/{species}.asm.p_ctg.{hic}.fa",
+    output: directory("output/merqury/{species}/{settings}/{opt}/{species}.{hic}.consensus")
+    conda: "../envs/genomeQC.yml"
+    threads: 52
+    # shadow: "shallow"
+    shell: """
+        ROOTPROJDIR="$(pwd -P)"
+        echo $ROOTPROJDIR
+        mkdir -p {output}
+        cd {output}
+        pwd -P
+        #rmdir $ROOTPROJDIR/{output}
+        merqury.sh $ROOTPROJDIR/{input.meryl} $ROOTPROJDIR/{input.consensus} {wildcards.species}.{wildcards.hic}.consensus
+        cd -
+    """
+
+
 rule merqury_run_yahs:
     input: 
         meryl = "output/meryl/union-sum/{species}/{ccs_settings}/{species}.meryl",
@@ -167,12 +187,11 @@ rule genometools_yahs:
     input: 
         fasta = "output/yahs/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}_scaffolds_final.fa",
         gs2summary = "output/genomescope2/{species}/{ccs_opts}/{species}/log.txt"
-    output: "output/gt-seqstat/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}.scaffold.stats"
+    output: "output/gt-seqstat/{species}/{ccs_opts}/{hifiasm_opt}/{species}.{genometype}.{hic}.scaffold.stats"
     run: 
         shell("./code/bin/gt "
               "seqstat -contigs -genome "
               "{genomesize} "
-              "-nstats 10 20 30 40 50 60 70 80 90 100 -- "
               "{input} > "
               "{output}".format(input=input.fasta,
                                 output=output, 
@@ -202,14 +221,13 @@ rule symlink_assemblies:
 
 rule genometools_generalized:
     input: 
-        fasta = "data/assemblies/{ccs_settings}/{hifiasm_opts}/{species}.{assembly}.fa",
+        fasta = "data/assemblies/{species}/{ccs_settings}/{assembler}-{assembler_opts}/{species}.{assembly}.fa",
         gs2summary = "output/genomescope2/{species}/{ccs_settings}/{species}/log.txt"
-    output: "output/gt-seqstat/{ccs_settings}/{hifiasm_opts}/{species}.{assembly}.stats"
+    output: "output/gt-seqstat/{species}/{ccs_settings}/{species}.{assembler}.{assembler_opts}.{assembly}.stats"
     run: 
         shell("./code/bin/gt "
               "seqstat -contigs -genome "
               "{genomesize} "
-              "-nstats 10 50 90 -- "
               "{input} > "
               "{output}".format(input=input.fasta,
                                 output=output, 
