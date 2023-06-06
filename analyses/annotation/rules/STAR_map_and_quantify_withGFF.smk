@@ -108,12 +108,12 @@ def get_gene_id_table(fn_gtf):
 
 rule RSEM:
     output:
-        "output/rsem/{species}/{genome}-GFF/{sample}.isoforms.results",
-        "output/rsem/{species}/{genome}-GFF/{sample}.genes.results"
+        "output/rsem/{species}/{ref}-{type}-{id}/{sample}.isoforms.results",
+        "output/rsem/{species}/{ref}-{type}-{id}/{sample}.genes.results"
     input:
-        bam = "output/mapping/{species}/{genome}-GFF/{sample}/Aligned.toTranscriptome.out.bam",
-        gff = "output/funannotate/TOGA_Prot/{genome}_TOGA_Prot/predict_results/{species}.gff3",
-        rsem = "output/RSEM_indexes/funannotate/{species}/{genome}/{genome}.ngvec"
+        bam = "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.toTranscriptome.out.bam",
+        gff = "data/GFF_evidences/{type}/{ref}_{id}.gff3",
+        rsem = "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.ngvec"
     threads: 32
     params:
         rsem_opts = '' #config['rsem_opts']
@@ -126,14 +126,14 @@ rule RSEM:
            "--bam "
            "--paired-end "
            "{input.bam} "
-           "output/RSEM_indexes/funannotate/{wildcards.species}/{wildcards.genome}/{wildcards.genome} "
-           "output/rsem/{wildcards.species}/{wildcards.genome}-GFF/{wildcards.sample} "
+           "output/RSEM_indexes/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id}/{wildcards.ref} "
+           "output/rsem/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id}/{wildcards.sample} "
 
 rule index_bams_withGFF:
     input:
-        "output/mapping/{species}/{genome}-GFF/{sample}/Aligned.{type}.out.bam"
+        "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.{toType}.out.bam"
     output:
-        "output/mapping/{species}/{genome}-GFF/{sample}/Aligned.{type}.out.bam.bai"
+        "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.{toType}.out.bam.bai"
     threads: 13
     conda: '../envs/STAR-RSEM-EBSeq.yaml'
     shell:
@@ -148,8 +148,8 @@ def get_map_fastq_inputs_withGFF(wildcards):
     samples = samples[samples.Sample == wildcards.sample]
     input_dict = {"left": [], 
                   "right": [], 
-                  "index": "output/STAR_indexes/{species}/{genome}/SA",
-                  "gff": "output/funannotate/TOGA_Prot/{genome}_TOGA_Prot/predict_results/{species}.gff3"}
+                  "index": "output/STAR_indexes/{species}/{ref}-{type}-{id}/SA",
+                  "gff": "data/GFF_evidences/{type}/{ref}_{id}.gff3"}
     samples_grouped = samples.groupby(samples.Sample)
     for sample in set(samples["Sample"].tolist()):
         sample_subset = samples_grouped.get_group(sample)
@@ -176,24 +176,24 @@ def get_map_fastq_inputs_withGFF(wildcards):
 rule map_pe_withGFF:
     input: unpack(get_map_fastq_inputs_withGFF)
     output:
-        "output/mapping/{species}/{genome}-GFF/{sample}/Aligned.sortedByCoord.out.bam",
-        "output/mapping/{species}/{genome}-GFF/{sample}/Aligned.toTranscriptome.out.bam",
-        "output/mapping/{species}/{genome}-GFF/{sample}/Log.final.out"
+        "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.sortedByCoord.out.bam",
+        "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.toTranscriptome.out.bam",
+        "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Log.final.out"
     shadow: "shallow"
-    log: "logs/mapping/{species}/{genome}-GFF/{sample}/star.log"
+    log: "logs/mapping/{species}/{ref}-{type}-{id}/{sample}/star.log"
     params:
         map_opts = '' #config['map_opts']
     conda: "../envs/STAR-RSEM-EBSeq.yaml"
     threads: 40
     shell:
            "STAR runThreadN {threads} "
-           "--genomeDir output/STAR_indexes/{wildcards.species}/{wildcards.genome} "
+           "--genomeDir output/STAR_indexes/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id} "
            "--readFilesIn {input.left} {input.right} "
            "--readFilesCommand zcat "
            "--sjdbGTFfile {input.gff} "
            "--sjdbGTFtagExonParentTranscript Parent "
            "{params.map_opts} "
-           "--outFileNamePrefix output/mapping/{wildcards.species}/{wildcards.genome}-GFF/{wildcards.sample}/ "
+           "--outFileNamePrefix output/mapping/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id}/{wildcards.sample}/ "
            "--outSAMtype BAM SortedByCoordinate  "
            "--twopassMode Basic "
            "--quantMode GeneCounts TranscriptomeSAM "

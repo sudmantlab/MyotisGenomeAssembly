@@ -1,0 +1,32 @@
+# 1: Fa --> Phylip
+
+catfasta2phyml -c alignments/*.fa > alignments_concat_all/allBatGenes.phy 2> alignments_concat_all/allBatGenes.phy.partition
+
+# 2: Phy --> Nexus
+
+Manual until I find a better way.
+
+1. Read the first line of the PHYLIP file to get the NTAX and NCHAR and then
+create a new NEXUS file containing the following:
+
+```
+#NEXUS
+
+BEGIN DATA;
+	DIMENSIONS NTAX=25 NCHAR=1695;
+	FORMAT MISSING=? GAP=- DATATYPE=DNA;
+	MATRIX
+```
+
+2. Run: `tail -n +2 [phylip] >> [nexus]`
+
+3. Run: `echo -e "\n;\nEND;\n\nbegin assumptions;\n" >> [nexus]`
+[***INSERT PHYLIP HERE***]
+;
+END;
+
+begin assumptions;
+[INSERT CHARSET BLOCK FROM IQTREE HERE]
+
+
+end;

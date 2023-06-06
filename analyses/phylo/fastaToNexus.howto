@@ -1,0 +1,23 @@
+# 1: Fa --> Phylip
+
+catfasta2phyml -c alignments/*.fa > alignments_concat_all/allBatGenes.phy 2> alignments_concat_all/allBatGenes.phy.partition
+
+# 2: Phy --> Nexus
+
+Manual until I find a better way.
+
+#NEXUS
+
+BEGIN DATA;
+	DIMENSIONS NTAX=25 NCHAR=1695;
+	FORMAT MISSING=? GAP=- DATATYPE=DNA;
+	MATRIX
+[***INSERT PHYLIP HERE***]
+;
+END;
+
+begin assumptions;
+[INSERT CHARSET BLOCK FROM IQTREE HERE]
+
+
+end;
