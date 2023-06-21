@@ -1,0 +1,12 @@
+mMyoAui1	cellLine	output/rsem/Myotis_auriculus/mMyoAui1-gff_final_curated-finalAnnotation/MA_S118_L002.genes.results
+mMyoCai1	cellLine	output/rsem/Myotis_californicus/mMyoCai1-gff_final_curated-finalAnnotation/MC_S119_L002.genes.results
+mMyoEvo1	cellLine	output/rsem/Myotis_evotis/mMyoEvo1-gff_final_curated-finalAnnotation/E2R_S77_L002.genes.results
+mMyoOcc1	cellLine	output/rsem/Myotis_occultus/mMyoOcc1-gff_final_curated-finalAnnotation/MO_S117_L002.genes.results
+mMyoThy1	cellLine	output/rsem/Myotis_thysanodes/mMyoThy1-gff_final_curated-finalAnnotation/T3R_S76_L002.genes.results
+mMyoVel1	brain	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-brain.genes.results
+mMyoVel1	heart	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-heart.genes.results
+mMyoVel1	kidney	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-kidney.genes.results
+mMyoVel1	lung	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-lung.genes.results
+mMyoVel1	pancreas	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-pancreas.genes.results
+mMyoVel1	testis	output/rsem/Myotis_velifer/mMyoVel1-gff_final_curated-finalAnnotation/LE001-testis.genes.results
+mMyoVol1	cellLine	output/rsem/Myotis_volans/mMyoVol1-gff_final_curated-finalAnnotation/MV_S116_L002.genes.results

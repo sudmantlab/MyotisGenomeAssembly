@@ -109,12 +109,13 @@ def get_gene_id_table(fn_gtf):
 rule RSEM:
     output:
         "output/rsem/{species}/{ref}-{type}-{id}/{sample}.isoforms.results",
-        "output/rsem/{species}/{ref}-{type}-{id}/{sample}.genes.results"
+        "output/rsem/{species}/{ref}-{type}-{id}/{sample}.genes.results",
+        directory("output/rsem/{species}/{ref}-{type}-{id}/{sample}.stat")
     input:
         bam = "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.toTranscriptome.out.bam",
         gff = "data/GFF_evidences/{type}/{ref}_{id}.gff3",
         rsem = "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.ngvec"
-    threads: 32
+    threads: 56
     params:
         rsem_opts = '' #config['rsem_opts']
     shadow: 'full'
@@ -134,7 +135,7 @@ rule index_bams_withGFF:
         "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.{toType}.out.bam"
     output:
         "output/mapping/{species}/{ref}-{type}-{id}/{sample}/Aligned.{toType}.out.bam.bai"
-    threads: 13
+    threads: 56
     conda: '../envs/STAR-RSEM-EBSeq.yaml'
     shell:
         "samtools index -@ {threads} {input[0]}"
@@ -184,7 +185,7 @@ rule map_pe_withGFF:
     params:
         map_opts = '' #config['map_opts']
     conda: "../envs/STAR-RSEM-EBSeq.yaml"
-    threads: 40
+    threads: 56
     shell:
            "STAR runThreadN {threads} "
            "--genomeDir output/STAR_indexes/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id} "
