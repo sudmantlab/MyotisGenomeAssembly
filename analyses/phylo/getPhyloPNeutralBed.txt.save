@@ -1,0 +1,33 @@
+## 1: get PhyloP wig file
+
+hal4dExtract data/flipped_Myotis.hal myotis data/bed/mMyoMyo1_gffread.bed12 output/hal4dExtract/mMyoMyo1_gffread_hal4d.bed
+
+halPhyloPTrain.py --numProc 52 ../../../../phylo/data/flipped_Myotis.hal myotis ../../../../phylo/output/hal4dExtract/mMyoMyo1_gffread_hal4d.bed ../../../../phylo/output/halTrainphyloP/neutralmodel_myotis.mod
+halPhyloPMP.py --numProc 31 data/flipped_Myotis.hal velifer neutralmodel.mod velifer.wig
+
+## 2: split WIG file into quintiles, Q3 = neutral
+
+**ad lib r code using rtracklayer and data.table**
+
+## 3: merge neutral sites closer than 10bp
+
+bedtools sort -i output/phyloPWigs/myotis_phyloP_neutral.bed3 | bedtools merge -d 10 -i /dev/stdin > output/phyloPWigs/myotis_phyloP_neutral.merge10bp.bed3
+
+## 4: bed --> maf
+
+## This would create a MAF but it has duplicates:
+# singularity run ../cactus/cactus_v2.3.0.sif cactus-hal2maf --noAncestors --chunkSize 100000000 --gapFill 100000000 --onlyOrthologs --workDir /global/scratch/users/mvazquez/tmp/cactus --refGenome myotis --noAncestors maf-jobstore2 ../cactus/output/cactus/flipped_Myotis.hal output/maf/all.myotisanchored.long.noAnc.cactushal2maf.maf
+## Use Elise's de-dup MAF instead
+maf_build_index.py  /global/scratch/users/lauterbur/flipped_Myotis_nodupes_mMyotis.maf
+maf_extract_ranges_indexed.py /global/scratch/users/lauterbur/flipped_Myotis_nodupes_mMyotis.maf < \
+  output/phyloPWigs/myotis_phyloP_neutral.merge10bp.bed3 > \
+  output/flipped_Myotis_nodupes_mMyotis.neutral.merge10bp.maf
+
+## 5: maf --> concatenated fasta
+
+maf_to_concat_fasta.py "myotis,lucifugus,auriculus,thysanodes,evotis,californicus,velifer,volans,yumanensis,occultus" < output/flipped_Myotis_nodupes_mMyotis.neutral.merge10bp.maf > output/flipped_Myotis_nodupes_mMyotis.neutral.merge10bp.fa
+
+## 6: bedtools makewindow
+
+
+

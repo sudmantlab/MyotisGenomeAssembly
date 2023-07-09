@@ -32,28 +32,30 @@ import pdb
 
 rule rsem_make_ngvec:
     output:
-        "output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.ngvec"
+        #"output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.ngvec"
+        "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.ngvec"
     input:
-        ti = "output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.ti",
-        transcripts = "output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.transcripts.fa"
+        ti = "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.ti",
+        transcripts = "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.transcripts.fa"
     threads: 1
     conda: '../envs/STAR-RSEM-EBSeq.yaml'
     shell: "perl code/rsem-generate-ngvector "
            "{input.transcripts} "
-           "output/RSEM_indexes/funannotate/{wildcards.species}/{wildcards.ref}/{wildcards.ref} "
+           "output/RSEM_indexes/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id}/{wildcards.ref}"
 
 
 rule rsem_prepare_reference: 
     input:
-        gff = 'output/funannotate/TOGA_Prot/{ref}_TOGA_Prot/predict_results/{species}.gff3',
+        #gff = 'output/funannotate/TOGA_Prot/{ref}_TOGA_Prot/predict_results/{species}.gff3',
+        gff = "data/GFF_evidences/{type}/{ref}_{id}.gff3",
         fasta = 'data/genomes/{ref}.fa'
     output: 
-        "output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.ti",
-        "output/RSEM_indexes/funannotate/{species}/{ref}/{ref}.transcripts.fa"
+        "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.ti",
+        "output/RSEM_indexes/{species}/{ref}-{type}-{id}/{ref}.transcripts.fa"
     threads: 1
     conda: '../envs/STAR-RSEM-EBSeq.yaml'
     shell: "rsem-prepare-reference "
            " --gff3 {input.gff} "
            " {input.fasta} "
-           " output/RSEM_indexes/funannotate/{wildcards.species}/{wildcards.ref}/{wildcards.ref} "
+           " output/RSEM_indexes/{wildcards.species}/{wildcards.ref}-{wildcards.type}-{wildcards.id}/{wildcards.ref} "
 
