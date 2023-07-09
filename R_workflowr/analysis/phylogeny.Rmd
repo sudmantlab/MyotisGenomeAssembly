@@ -21,6 +21,8 @@ library(taxize)
 library(nlme)
 library(broom.mixed)
 library(ggnewscale)
+library(RcppRoll)
+library(ggpubr)
 ```
 
 ## Phylogeny 
@@ -41,6 +43,25 @@ tip_order = c(
 )
 
 tr.species <- root.phylo(read.tree(text="(Myotis_auriculus:0.0049530287,(Myotis_californicus:0.0059138183,(((Myotis_lucifugus:0.0030514562,Myotis_occultus:0.0032471934)100/100:0.0020768353,(Myotis_velifer:0.0029764851,Myotis_yumanensis:0.0029904558)100/100:0.0038364895)100/100:0.0009882682,(Myotis_myotis:0.0131977455,Myotis_volans:0.0055379826)100/100:0.0012340035)100/100:0.0023012371)100/100:0.0009098871,(Myotis_evotis:0.0017915030,Myotis_thysanodes:0.0018269795)100/100:0.0020219079);"), outgroup = "Myotis_myotis", resolve.root = T)
+
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
 ```
 
 
@@ -815,6 +836,318 @@ cancerSucceptibility.Atlantogenata.table <- tree.size.lifespan.Atlantogenata.ful
     log2CancerSucceptabilityChange = log2(K2)-log2(K1),
     label = label %>% str_replace_all("\\.", " ")
   )
+
+```
+
+## MAST
+
+```{r}
+
+
+tip_order = c("Myotis_auriculus", "Myotis_californicus", "Myotis_evotis", "Myotis_thysanodes", "Myotis_lucifugus", "Myotis_occultus", "Myotis_velifer", "Myotis_yumanensis", "Myotis_myotis", "Myotis_volans")
+
+
+gtr.freq = read_table("../../analyses/phylo/output/iqtree/2023_04_28_genes/gene_trees/allTrees.uniq.top25.noPoly.nwk", col_names = c("g.freq", "tree"))
+
+gtr.freq
+
+MAST.weights.chr1 <- read_table("../../analyses/phylo/output/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.treefilePlusWeights", col_names=c("weight", "tree.bl")) %>% 
+  mutate(tree = tree.bl %>% str_remove_all(":[0-9.]+"))
+
+MAST.full <- left_join(MAST.weights.chr1, gtr.freq) %>% 
+  mutate(pct = g.freq/sum(g.freq),
+         id = dplyr::row_number())
+```
+
+```{r, eval=F, include=F}
+{
+    if (!inherits(tr1, "phylo") || !inherits(tr2, "phylo")) 
+        stop("tr1 & tr2 should be objects of class \"phylo\".")
+    if (hasArg(methods)) {
+        methods <- list(...)$methods
+    }else methods <- "pre"
+    if ("exhaustive" %in% methods) {
+        methods <- "exhaustive"
+        }
+    tr1 <- untangle(tr1, "read.tree")
+    tr2 <- untangle(tr2, "read.tree")
+    # tr.list <- untangle(mast.trees, "read.tree")
+    if (is.null(assoc)) {
+        assoc <- intersect(tr1$tip.label, tr2$tip.label)
+        # l.assoc <- Reduce(intersect, lapply(tr.list, . %>% .$tip.label))
+        assoc <- if (length(assoc) > 0) {
+            cbind(assoc, assoc)
+        } else NULL
+        if (is.null(assoc)) {
+            cat("No associations provided or found.\n")
+            rotate <- FALSE
+        }
+    }
+    ii <- sapply(assoc[, 1], "%in%", tr1$tip.label)
+    if (any(!ii)) {
+        assoc <- assoc[ii, ]
+        cat("Some species in assoc[,1] not in tr1. Removing species & links.\n")
+    }
+    ii <- sapply(assoc[, 2], "%in%", tr2$tip.label)
+    if (any(!ii)) {
+        assoc <- assoc[ii, ]
+        cat("Some species in assoc[,2] not in tr2. Removing species & links.\n")
+    }
+    if (rotate) {
+        cat("Rotating nodes to optimize matching...\n")
+        flush.console()
+        if ("exhaustive" %in% methods) {
+            # tt.all <- lapply(tr.list, allRotations)
+            tt1 <- allRotations(tr1)
+            tt2 <- allRotations(tr2)
+            M1 <- M2 <- matrix(NA, length(tt1), length(tt2))
+            for (i in 1:length(tt1)) {
+                for (j in 1:length(tt2)) {
+                  x <- setNames(sapply(assoc[, 2], match, table = tt2[[j]]$tip.label), 
+                    assoc[, 1])
+                  y <- setNames(sapply(assoc[, 1], match, table = tt1[[i]]$tip.label), 
+                    assoc[, 2])
+                  M1[i, j] <- attr(tipRotate(tt1[[i]], x * Ntip(tr1)/Ntip(tr2), 
+                    methods = "just.compute"), "minRotate")
+                  M2[i, j] <- attr(tipRotate(tt2[[j]], y * Ntip(tr2)/Ntip(tr1), 
+                    methods = "just.compute"), "minRotate")
+                }
+            }
+            MM <- M1 + M2
+            ij <- which(MM == min(MM), arr.ind = TRUE)
+            obj <- list()
+            for (i in 1:nrow(ij)) {
+                tr1 <- tt1[[ij[i, 1]]]
+                attr(tr1, "minRotate") <- M1[ij[i, 1], ij[i, 
+                  2]]
+                tr2 <- tt2[[ij[i, 2]]]
+                attr(tr2, "minRotate") <- M2[ij[i, 1], ij[i, 
+                  2]]
+                tt <- list(tr1, tr2)
+                class(tt) <- "multiPhylo"
+                obj[[i]] <- list(trees = tt, assoc = assoc)
+                class(obj[[i]]) <- "cophylo"
+            }
+            if (length(obj) > 1) 
+                class(obj) <- "multiCophylo"
+            else obj <- obj[[1]]
+        }
+        else if ("all" %in% methods) {
+            tt1 <- allRotations(tr1)
+            tt2 <- allRotations(tr2)
+            obj <- vector(mode = "list", length = length(tt1) * 
+                length(tt2))
+            ij <- 1
+            for (i in 1:length(tt1)) {
+                for (j in 1:length(tt2)) {
+                  x <- setNames(sapply(assoc[, 2], match, table = tt2[[j]]$tip.label), 
+                    assoc[, 1])
+                  y <- setNames(sapply(assoc[, 1], match, table = tt1[[i]]$tip.label), 
+                    assoc[, 2])
+                  obj[[ij]] <- list(trees = c(tipRotate(tt1[[i]], 
+                    x * Ntip(tr1)/Ntip(tr2), methods = "just.compute"), 
+                    tipRotate(tt2[[j]], y * Ntip(tr2)/Ntip(tr1), 
+                      methods = "just.compute")), assoc = assoc)
+                  class(obj[[ij]]) <- "cophylo"
+                  ij <- ij + 1
+                }
+            }
+            class(obj) <- "multiCophylo"
+        }
+        else {
+            x <- setNames(sapply(assoc[, 2], match, table = tr2$tip.label), 
+                assoc[, 1])
+            tr1 <- tipRotate(tr1, x * Ntip(tr1)/Ntip(tr2), right = tr2, 
+                assoc = assoc, ...)
+            best.tr1 <- Inf
+            x <- setNames(sapply(assoc[, 1], match, table = tr1$tip.label), 
+                assoc[, 2])
+            tr2 <- tipRotate(tr2, x * Ntip(tr2)/Ntip(tr1), left = tr1, 
+                assoc = assoc, ...)
+            best.tr2 <- Inf
+            while ((best.tr2 - attr(tr2, "minRotate")) > 0 || 
+                (best.tr1 - attr(tr1, "minRotate")) > 0) {
+                best.tr1 <- attr(tr1, "minRotate")
+                best.tr2 <- attr(tr2, "minRotate")
+                x <- setNames(sapply(assoc[, 2], match, table = tr2$tip.label), 
+                  assoc[, 1])
+                tr1 <- tipRotate(tr1, x * Ntip(tr1)/Ntip(tr2), 
+                  right = tr2, assoc = assoc, ...)
+                x <- setNames(sapply(assoc[, 1], match, table = tr1$tip.label), 
+                  assoc[, 2])
+                tr2 <- tipRotate(tr2, x * Ntip(tr2)/Ntip(tr1), 
+                  left = tr1, assoc = assoc, ...)
+            }
+            tt <- list(tr1, tr2)
+            class(tt) <- "multiPhylo"
+            obj <- list(trees = tt, assoc = assoc)
+            class(obj) <- "cophylo"
+        }
+        cat("Done.\n")
+    }
+    else {
+        tt <- list(tr1, tr2)
+        class(tt) <- "multiPhylo"
+        obj <- list(trees = tt, assoc = assoc)
+        class(obj) <- "cophylo"
+    }
+    obj
+}
+```
+
+
+
+```{r}
+mast.trees <- MAST.full %>% 
+  mutate(label = str_c(id, ":\nWeight: ", scales::label_percent(accuracy=0.1, scale=100,)(weight), "\nGene Trees: ", scales::label_percent(accuracy=0.1, scale=100)(pct)) %>% factor(., levels=.)) %>% 
+  select(label, tree) %>% 
+  split(.,.$label) %>% 
+  lapply(.,. %>% pull(tree) %>% read.tree(text=.) %>% root("Myotis_myotis",resolve_root=T) %>% minRotate(tree=., x=tip_order))
+
+# mast.weights.pct <- MAST.full %>%
+#   split(.,.$id)
+
+class(mast.trees) <- "multiPhylo"
+
+mast.trees.rot <- lapply(mast.trees, function(x, t1 = mast.trees[[2]]){cophylo(t1, x)$trees[[2]]})
+
+class(mast.trees.rot) <- "multiPhylo"
+
+# mast.trees %>% 
+mast.trees.rot %>% 
+  ggtree() + 
+  geom_tiplab(aes(color=label)) + 
+  xlim_tree(c(NA,10)) + 
+  facet_wrap(~.id, strip.position = "bottom", scales="free") + 
+  scale_color_manual(values=species_color, guide=guide_none()) + 
+  theme_pubr() + 
+  theme(
+    axis.text = element_blank(),
+    rect = element_blank(),
+    axis.line.y = element_blank(), 
+    axis.line.x = element_line(linewidth = 1), 
+    axis.ticks = element_blank(),
+    strip.placement = "bottom"
+  )
+```
+
+Thinking about the MAST results: ILS/introgression results in a tree where two species are paired in a way that doesn't reflect the true species tree. If you have a species switching to a different node, it indicates that that species is sister to the common ancestor of that node. Taking Trees 1&2 as an example (Tr1 is the species tree), Tr2 is the result of the common ancestor of {Thy...Aui} reproducing with the common ancestor of {Luc,Occ}. Since this is codon data though, we have 2 processes that are clashing: ILS/Introgression and convergent evolution. So in conclusion, I really need neutral sites as a control.
+
+```{r MAST site likelihoods}
+library(data.table)
+sitelh <- fread("../../analyses/phylo/output/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.sitelh", skip = "#") %>% 
+  melt(id.vars="Site")
+
+partitions <- read_table("../../analyses/phylo/data/genes/2023_04_28_genes/alignments_noATG_concat_byChr/SUPER__1/SUPER__1.partition", col_names=F) %>% 
+  select(gene=X2, range=X4) %>% 
+  separate(range, c("start", "end"), sep="-") %>% 
+  mutate(start=as.numeric(start), end=as.numeric(end)) %>% 
+  as.data.table()
+
+sitelh[, end := Site]
+sitelh[, start := Site]
+setkeyv(partitions, c("start", "end"))
+
+sitelh.genes <- foverlaps(sitelh,partitions, by.x=c('start', 'end'))
+
+sitelh.genes.totalLL <- sitelh.genes[, sum(value), by=c('gene','variable')]
+
+sitelh.genes.totalLL.noLnL <- sitelh.genes.totalLL[variable != 'LnL']
+
+sitelh.genes.BestTree <- sitelh.genes.totalLL.noLnL[sitelh.genes.totalLL.noLnL[, .I[V1==max(V1)], by=c('gene')]$V1]
+
+sitelh.genes.BestTree[,.N,by=variable]
+```
+
+
+```{r Plot example of MAST siteLH: windowed average}
+# sitelh.smooth <- sitelh %>%
+#   group_by(name) %>%
+#   mutate(block = ntile(n=5e5)) %>% 
+#   group_by(name, block) %>% 
+#   transmute(window = mean(value)) %>%
+#   ungroup
+
+test.sitelh <- sitelh[
+ Site >=1 & Site <=25635,
+ window := roll_mean(value, n=500, na.rm=T, align="left",fill=NA),
+ by=variable
+][!is.na(window),]
+
+test.partitions <- partitions[
+  end <= 25635,
+][
+  ,
+  `:=`(
+    low = test.sitelh %>% pull(window) %>% min(.,na.rm=T), 
+    high = test.sitelh %>% pull(window) %>% max(.,na.rm=T)
+  )
+]
+
+gene_col <- set_names(x = rep(x = RColorBrewer::brewer.pal(6, "Dark2"), length.out=test.partitions %>% pull(gene) %>% length), value = test.partitions %>% pull(gene))
+
+(test.sitelh %>% 
+    ggplot(
+        aes(
+            x=Site,
+            y=window,
+            color=variable, 
+            group=variable
+        )
+    ) + 
+    geom_rect(data=test.partitions, mapping=aes(xmin=start, xmax=end, ymin=low, ymax=high, fill=gene), inherit.aes = F, alpha=0.5) + 
+    # scale_y_reverse() +
+    geom_line() + 
+    geom_hline(yintercept = sitelh %>% filter(Site >=1, Site <= 2151) %>% 
+                   filter(variable == "LnL") %>% pull(value) %>% mean()) + 
+    scale_color_d3(palette = "category20") + 
+    labs(x="Genes, Chr 1 (bp)", y="Log Likelihood (500bp sliding window)") +
+    scale_fill_manual(values=gene_col, guide=guide_none()) + 
+    theme_pubr()) %>% plotly::ggplotly()
+
+```
+
+```{r}
+test.sitelh2 <- test.sitelh[variable != "LnL",][
+  test.sitelh[variable != "LnL",][, .I[value==max(value)], by=c('Site')]$V1
+]
+
+test.sitelh2.speciestree <- test.sitelh[variable == "LnLW_1",]
+
+test.partitions2 <- partitions[
+  end <= 25635,
+][
+  ,
+  `:=`(
+    low = test.sitelh2 %>% pull(value) %>% min(.,na.rm=T), 
+    high = test.sitelh2 %>% pull(value) %>% max(.,na.rm=T)
+  )
+]
+
+
+gene_col2 <- set_names(x = rep(x = RColorBrewer::brewer.pal(8, "Dark2"), length.out=test.partitions2 %>% pull(gene) %>% length), value = test.partitions2 %>% pull(gene))
+
+
+(test.sitelh2 %>% 
+    ggplot(
+        aes(
+            x=Site,
+            y=value,
+            color=variable, 
+            group=variable
+        )
+    ) + 
+    geom_rect(data=test.partitions2, mapping=aes(xmin=start, xmax=end, ymin=low, ymax=high, fill=gene), inherit.aes = F, alpha=0.25) + 
+    geom_point(size=0.5, shape="|", alpha=0.5) +
+    # geom_segment(aes(x=Site,xend=Site, y=0, yend=-15)) + 
+    labs(x="Genes, Chr 1 (bp)", y="Maximum Log Likelihood") +
+    scale_color_d3(palette = "category20") + 
+    scale_fill_manual(values=gene_col2, guide=guide_none()) + 
+    theme_pubr()) %>% plotly::ggplotly()
+
+```
+
+```{r}
 
 ```
 
