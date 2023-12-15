@@ -1,0 +1,66 @@
+---
+title: "genome_chr_correspondence"
+author: "Juan M Vazquez (docmanny)"
+date: "2022-11-26"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(pafr)
+```
+
+```{r}
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
+```
+
+
+```{r}
+table.myoAui <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoAui1.csv")%>% arrange(tnum, qnum)
+table.myoCai <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoCai1.csv")%>% arrange(tnum, qnum)
+table.myoOcc <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoOcc1.csv")%>% arrange(tnum, qnum)
+table.myoLuc <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoLuc1.csv")%>% arrange(tnum, qnum)
+table.myoYum <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoYum1.cleaned.csv")%>% arrange(tnum, qnum)
+table.myoVol <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoVol1.csv")%>% arrange(tnum, qnum)
+table.myoVel <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoVel1.csv")%>% arrange(tnum, qnum)
+table.myoEvo <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoEvo1.csv")%>% arrange(tnum, qnum)
+table.myoThy <- read_csv("../../analyses/pangenome/output/flip_table/mMyoOcc1_mMyoThy1.csv")%>% arrange(tnum, qnum)
+
+table.batgenomes <- Reduce(
+  f = function(x,y) {full_join(x=x,y=y, by=c("tname", "tnum"))}, 
+  x = list(table.myoAui%>% group_by(tname, tnum) %>% summarize(myoAui.scaff = paste(qname, collapse=","), myoAui.nscaff=n_distinct(qname)),
+           table.myoCai%>% group_by(tname, tnum) %>% summarize(myoCai.scaff = paste(qname, collapse=","), myoCai.nscaff=n_distinct(qname)),
+           table.myoOcc%>% group_by(tname, tnum) %>% summarize(myoOcc.scaff = paste(qname, collapse=","), myoOcc.nscaff=n_distinct(qname)),
+           table.myoLuc%>% group_by(tname, tnum) %>% summarize(myoLuc.scaff = paste(qname, collapse=","), myoLuc.nscaff=n_distinct(qname)),
+           table.myoYum%>% group_by(tname, tnum) %>% summarize(myoYum.scaff = paste(qname, collapse=","), myoYum.nscaff=n_distinct(qname)),
+           table.myoVol%>% group_by(tname, tnum) %>% summarize(myoVol.scaff = paste(qname, collapse=","), myoVol.nscaff=n_distinct(qname)),
+           table.myoVel%>% group_by(tname, tnum) %>% summarize(myoVel.scaff = paste(qname, collapse=","), myoVel.nscaff=n_distinct(qname)),
+           table.myoEvo%>% group_by(tname, tnum) %>% summarize(myoEvo.scaff = paste(qname, collapse=","), myoEvo.nscaff=n_distinct(qname)),
+           table.myoThy%>% group_by(tname, tnum) %>% summarize(myoThy.scaff = paste(qname, collapse=","), myoThy.nscaff=n_distinct(qname)))
+) %>% 
+  arrange(tnum) %>% 
+  select(tname, tnum, everything())
+
+table.batgenomes
+```
+

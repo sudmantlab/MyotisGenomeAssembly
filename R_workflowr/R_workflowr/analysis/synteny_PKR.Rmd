@@ -1,0 +1,114 @@
+---
+title: "synteny_PKR"
+author: "docmanny"
+date: "2023-07-31"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(ggtree)
+library(gggenes)
+library(gggenomes)
+```
+
+```{r}
+mMyoVel1.fai <- read_fai("../data/genomes/mMyoVel1.fa.fai") %>%
+  mutate(
+    seq_desc = "genome=mMyoVel1",
+    bin_id = 'mMyoVel1'
+  )
+mMyoLuc1.fai <- read_fai("../data/genomes/mMyoLuc1.fa.fai") %>%
+  mutate(
+    seq_desc = "genome=mMyoLuc1",
+    bin_id = 'mMyoLuc1'
+  ) #%>% 
+  # rename(genome=seq_desc)
+
+toy.seqs <- bind_rows(
+  mMyoVel1.fai %>% filter(seq_id == 'SUPER__13') %>% mutate(seq_id = str_c(bin_id, "\t", seq_id)),
+  mMyoLuc1.fai %>% filter(seq_id == 'SUPER__13') %>% 
+    mutate(seq_id = str_c(bin_id, "\t", seq_id))
+)
+```
+
+```{r ggenomes toy}
+p1.toy <- gggenomes(seqs=toy.seqs,) + 
+  geom_seq() + geom_bin_label()
+p1.toy
+```
+
+```{r}
+mMyoVel1.pkr <- read_bed("../data/target_BED/mMyoVel1_PKR_Core.bed") %>% 
+  mutate(bin_id = 'mMyoVel1') %>% 
+  mutate(seq_id = str_c(bin_id, "\t", seq_id))
+mMyoLuc1.pkr <- read_bed("../data/target_BED/mMyoLuc1_PKR_Core.bed")%>% 
+  mutate(bin_id = 'mMyoLuc1') %>% 
+  mutate(seq_id = str_c(bin_id, "\t", seq_id))
+
+pkr.genes <- bind_rows(
+  mMyoVel1.pkr,
+  mMyoLuc1.pkr
+)
+
+
+mMyoLuc1.gff <- read_gff3(
+  file = '../data/GFFs/gff_aladavid/mMyoLuc1/mMyoLuc1_finalAnnotation.gff3'
+  ) %>%
+  mutate(bin_id='mMyoLuc1')
+
+mMyoVel1.gff <- read_gff3(
+  file = '../data/GFFs/gff_aladavid/mMyoVel1/mMyoVel1_finalAnnotation.gff3'
+  ) %>%
+  mutate(bin_id='mMyoVel1')
+
+
+pkr.genes.gff <- bind_rows(
+  mMyoLuc1.gff %>% filter(seq_id == "SUPER__13") %>% mutate(seq_id = str_c("mMyoLuc1", "\t", seq_id)),
+  mMyoVel1.gff %>% filter(seq_id == "SUPER__13") %>% mutate(seq_id = str_c("mMyoVel1", "\t", seq_id))
+  )
+
+```
+
+```{r}
+p2.toy <- gggenomes(
+  genes = pkr.genes,
+  seqs=toy.seqs
+) + 
+  geom_seq() + 
+  geom_bin_label() + 
+  geom_gene()
+p2.toy
+
+locus = tibble(
+  seq_id = c('mMyoVel1\tSUPER__13','mMyoLuc1\tSUPER__13'), 
+  start=c(17590000, 17750000), 
+  end=c(18043248, 18244000),
+  bin_id = c('mMyoVel1', 'mMyoLuc1')
+)
+
+p2.toy %>% focus(.loci=locus[1,1:3])
+
+p2.toy.2 <- 
+  gggenomes(
+    genes = pkr.genes, #pkr.genes.gff %>% filter(type=='gene') %>% filter(start>17500000, end <18244000),
+    seqs=toy.seqs %>% left_join(locus)
+  ) + 
+  geom_seq() + 
+  geom_bin_label() +
+  geom_gene() #+
+  # geom_gene_tag(aes(label=ID))
+p2.toy.2
+```
+
+```{r}
+
+
+
+```
+

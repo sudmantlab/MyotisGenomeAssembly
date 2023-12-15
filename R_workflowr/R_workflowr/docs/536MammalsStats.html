@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="docmanny" />
+
+<meta name="date" content="2023-10-19" />
+
+<title>536MammalsStats</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Myotis Genome Analyses</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">536MammalsStats</h1>
+<h4 class="author">docmanny</h4>
+<h4 class="date">2023-10-19</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-10-23
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230501code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230501)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230501code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230501)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Repository version:</strong> no
+version control </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongnoversioncontrol"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Tracking code development and connecting the code version to the
+results is critical for reproducibility. To start using Git, open the
+Terminal and type <code>git init</code> in your project directory.</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+This project is not being versioned with Git. To obtain the full
+reproducibility benefits of using workflowr, please see
+<code>?wflow_start</code>.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.3     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(ggpubr)
+library(ggsci)
+library(ggrepel)
+library(kableExtra)</code></pre>
+<pre><code>
+Attaching package: &#39;kableExtra&#39;
+
+The following object is masked from &#39;package:dplyr&#39;:
+
+    group_rows</code></pre>
+<pre class="r"><code># library(UpSetR)
+library(ComplexHeatmap)</code></pre>
+<pre><code>Loading required package: grid
+========================================
+ComplexHeatmap version 2.14.0
+Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+Github page: https://github.com/jokergoo/ComplexHeatmap
+Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
+
+If you use it in published research, please cite either one:
+- Gu, Z. Complex Heatmap Visualization. iMeta 2022.
+- Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+    genomic data. Bioinformatics 2016.
+
+
+The new InteractiveComplexHeatmap package can directly export static 
+complex heatmaps into an interactive Shiny app with zero effort. Have a try!
+
+This message can be suppressed by:
+  suppressPackageStartupMessages(library(ComplexHeatmap))
+========================================</code></pre>
+<pre class="r"><code>df.lq &lt;- read_tsv(&#39;../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli.tsv&#39;)</code></pre>
+<pre><code>Rows: 5463 Columns: 7
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;\t&quot;
+chr (2): label, Order
+dbl (4): size, lifespan, predLife, LQ
+lgl (1): has.ali
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>ali.species.lists &lt;- jsonlite::read_json(&#39;../data/allgenes_reformat.json&#39;) %&gt;% 
+  lapply(function(x){x %&gt;% .[which(.!=&quot;&quot;)]})</code></pre>
+<pre class="r"><code>df.lq %&gt;% 
+  filter(!is.na(LQ)) %&gt;% 
+  group_by(Order) %&gt;% 
+  summarize(
+    pc.sampled = sum(has.ali)/length(has.ali), 
+    n.LQ = n(), 
+    n.withAli = sum(has.ali)
+  ) %&gt;% 
+  mutate(
+    pc.sampled = factor(
+      scales::label_percent(accuracy=1)(pc.sampled),
+      levels=scales::label_percent(accuracy=1)(sort(pc.sampled)) %&gt;% unique
+    )
+  ) %&gt;% 
+  arrange(desc(pc.sampled), desc(n.LQ)) %&gt;% 
+  ggtexttable()</code></pre>
+<p><img src="figure/536MammalsStats.Rmd/Table%20of%20sampling%20depth%20given%20a%20known%20LQ%20in%20each%20clade-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ali.species.mat &lt;- UpSetR::fromList(ali.species.lists)
+ali.species.n &lt;- sapply(ali.species.lists, length)
+
+df.ali.species.n &lt;- ali.species.n %&gt;% 
+  tibble(gene = names(.), count = .) %&gt;% 
+  arrange(desc(count)) %&gt;% 
+  mutate(gene = factor(gene, levels=gene))
+
+df.ali.species.n %&gt;% 
+  summary</code></pre>
+<pre><code>              gene           count    
+ ENSG00000003987:    1   Min.   :  0  
+ ENSG00000004700:    1   1st Qu.:452  
+ ENSG00000004864:    1   Median :510  
+ ENSG00000008988:    1   Mean   :441  
+ ENSG00000010030:    1   3rd Qu.:527  
+ ENSG00000010244:    1   Max.   :536  
+ (Other)        :19389                </code></pre>
+<pre class="r"><code>median.count &lt;- median(df.ali.species.n$count)
+median.gene &lt;- df.ali.species.n %&gt;% 
+  filter(count == 510) %&gt;% 
+  tail(n=1) %&gt;% 
+  pull(gene)
+
+genes.top3Q &lt;- df.ali.species.n %&gt;% 
+  filter(count &gt;= 452) 
+
+n.genes.top3Q &lt;- genes.top3Q %&gt;% 
+  nrow
+
+gene.top3Q &lt;- genes.top3Q %&gt;% 
+  tail(n=1) %&gt;% 
+  pull(gene)
+
+df.ali.species.n %&gt;% 
+  ggplot(
+    aes(
+      x=gene,
+      y=count
+    )
+  ) + 
+  geom_bar(stat = &#39;identity&#39;) +
+  geom_hline(yintercept = median.count, lty=&#39;dashed&#39;, color=&#39;red&#39;) + 
+  geom_segment(aes(x=median.gene, xend=median.gene, y=median.count, yend=0), color=&#39;red&#39;) + 
+  geom_label(aes(label=str_c(&#39;Median:\n&#39;, median.count,&quot;/536 Species&quot;), x=median.gene, y=median.count+20)) + 
+  geom_hline(yintercept = 452, lty=&#39;dashed&#39;, color=&#39;blue&#39;) + 
+  geom_segment(aes(x=gene.top3Q, xend=gene.top3Q, y=452, yend=0), color=&#39;blue&#39;) + 
+  geom_label(aes(label=str_c(&#39;Q3:452/536\n&#39;, &#39;#Genes: &#39;, n.genes.top3Q, &#39;/&#39;, length(gene)), x=gene.top3Q, y=452-20)) + 
+  theme_pubr() + 
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )</code></pre>
+<p><img src="figure/536MammalsStats.Rmd/species%20hist-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>laurasiatheria.orders &lt;- c(
+  &quot;Chiroptera&quot;,
+  &quot;Perissodactyla&quot;,
+  &quot;Cetacea&quot;,
+  &quot;Artiodactyla&quot;,
+  &quot;Carnivora&quot;,
+  &quot;Pholidota&quot;,
+  &quot;Erinaceomorpha&quot;
+)
+
+outgroup.orders &lt;- c(
+  &quot;Rodentia&quot;,
+  &quot;Primates&quot;,
+  &quot;Sirenia&quot;,
+  &quot;Proboscidea&quot;,
+  &quot;Hyracoidea&quot;
+)
+
+df.lq.laurasiatheria &lt;- df.lq %&gt;% 
+  filter(Order %in% laurasiatheria.orders)
+
+df.lq.outgroup &lt;- df.lq %&gt;% 
+  filter(Order %in% outgroup.orders)
+
+species.out.ali.lq &lt;- c(
+  # Rodents
+  &#39;Mus_musculus&#39;,
+  &#39;Mus_minutoides&#39;,
+  &#39;Rattus_rattus&#39;,
+  &#39;Rattus_norvegicus&#39;,
+  &#39;Peromyscus_leucopus&#39;,
+  &#39;Peromyscus_californicus&#39;,
+  &#39;Fukomys_damarensis&#39;,
+  &#39;Capromys_pilorides&#39;,
+  &#39;Heterocephalus_glaber&#39;,
+  &#39;Cavia_aperea&#39;,
+  &#39;Cavia_tschudii&#39;,
+  &#39;Cavia_porcellus&#39;,
+  # Paenungulates
+  &#39;Heterohyrax_brucei&#39;,
+  &#39;Procavia_capensis&#39;,
+  &#39;Dugon_dugon&#39;,
+  &#39;Trichechus_manatus&#39;,
+  &#39;Loxodonta_africana&#39;,
+  &#39;Elephas_maximus&#39;,
+  # Primates
+  &#39;Pan_troglodytes&#39;,
+  &#39;Pan_paniscus&#39;,
+  &#39;Homo_sapiens&#39;,
+  &#39;Gorilla_gorilla&#39;
+)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.3.1 (2023-06-16)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.3 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: America/Los_Angeles
+tzcode source: system (glibc)
+
+attached base packages:
+[1] grid      stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] ComplexHeatmap_2.14.0 kableExtra_1.3.4      ggrepel_0.9.4        
+ [4] ggsci_3.0.0           ggpubr_0.6.0          lubridate_1.9.2      
+ [7] forcats_1.0.0         stringr_1.5.0         dplyr_1.1.3          
+[10] purrr_1.0.2           readr_2.1.4           tidyr_1.3.0          
+[13] tibble_3.2.1          ggplot2_3.4.3         tidyverse_2.0.0      
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0    viridisLite_0.4.2   farver_2.1.1       
+ [4] fastmap_1.1.1       promises_1.2.1      digest_0.6.33      
+ [7] timechange_0.2.0    lifecycle_1.0.3     cluster_2.1.4      
+[10] magrittr_2.0.3      compiler_4.3.1      rlang_1.1.1        
+[13] sass_0.4.7          tools_4.3.1         utf8_1.2.3         
+[16] yaml_2.3.7          knitr_1.44          ggsignif_0.6.4     
+[19] labeling_0.4.3      bit_4.0.5           plyr_1.8.8         
+[22] xml2_1.3.5          RColorBrewer_1.1-3  abind_1.4-5        
+[25] workflowr_1.7.1     withr_2.5.0         BiocGenerics_0.46.0
+[28] stats4_4.3.1        fansi_1.0.5         git2r_0.32.0       
+[31] colorspace_2.1-0    scales_1.2.1        iterators_1.0.14   
+[34] cli_3.6.1           UpSetR_1.4.0        rmarkdown_2.25     
+[37] crayon_1.5.2        generics_0.1.3      rstudioapi_0.15.0  
+[40] httr_1.4.7          tzdb_0.4.0          rjson_0.2.21       
+[43] cachem_1.0.8        rvest_1.0.3         parallel_4.3.1     
+[46] matrixStats_1.0.0   vctrs_0.6.3         webshot_0.5.5      
+[49] jsonlite_1.8.7      carData_3.0-5       car_3.1-2          
+[52] IRanges_2.34.1      hms_1.1.3           GetoptLong_1.0.5   
+[55] S4Vectors_0.38.2    bit64_4.0.5         rstatix_0.7.2      
+[58] clue_0.3-65         systemfonts_1.0.4   foreach_1.5.2      
+[61] jquerylib_0.1.4     glue_1.6.2          codetools_0.2-19   
+[64] cowplot_1.1.1       shape_1.4.6         stringi_1.7.12     
+[67] gtable_0.3.4        later_1.3.1         munsell_0.5.0      
+[70] pillar_1.9.0        htmltools_0.5.6     circlize_0.4.15    
+[73] R6_2.5.1            doParallel_1.0.17   rprojroot_2.0.3    
+[76] vroom_1.6.3         evaluate_0.21       png_0.1-8          
+[79] backports_1.4.1     broom_1.0.5         httpuv_1.6.11      
+[82] bslib_0.5.1         Rcpp_1.0.11         gridExtra_2.3      
+[85] svglite_2.1.1       xfun_0.40           fs_1.6.3           
+[88] pkgconfig_2.0.3     GlobalOptions_0.1.2</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

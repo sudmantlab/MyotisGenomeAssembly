@@ -1,0 +1,36 @@
+---
+title: "TEs"
+author: "docmanny"
+date: "2023-05-02"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+genomes = c(
+  "Myotis auriculus" = "myoAui1",
+  "Myotis californicus" = "myoCai1",
+  "Myotis volans" = "myoVol1",
+  "Myotis velifer" = "myoVel1",
+  "Myotis yumanensis" = "myoYum1",
+  "Myotis evotis" = "myoEvo1",
+  "Myotis thysanodes" = "myoThy1",
+  "Myotis lucifugus" = "myoLuc1",
+  "Myotis occultus" = "myoOcc1",
+  "Myotis myotis" = "myoMyo1"
+)
+# Load Genes
+
+# Load TEs
+
+
+```
+

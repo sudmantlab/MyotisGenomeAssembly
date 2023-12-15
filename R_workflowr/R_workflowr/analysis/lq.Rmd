@@ -1,0 +1,1044 @@
+---
+title: "LQ"
+author: "docmanny"
+date: "2023-10-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(ggdist)
+library(broom)
+library(ggsci)
+library(ggrepel)
+library(kableExtra)
+```
+
+```{r}
+# our_genomes = c(
+#   "Myotis_auriculus",
+#   "Myotis_californicus",
+#   "Myotis_occultus",
+#   "Myotis_lucifugus",
+#   "Myotis_yumanensis",
+#   "Myotis_volans",
+#   "Myotis_velifer",
+#   "Myotis_evotis",
+#   "Myotis_septentrionalis",
+#   "Myotis_thysanodes"
+# )
+# 
+# species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+#   set_names(., c(our_genomes, "Other"))
+# 
+# species_color["Myotis_evotis"] = "#AEC7E8FF"
+# species_color["Other"] = "#7F7F7FFF"
+
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
+
+```
+
+
+```{r}
+df <- read_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.tsv')
+
+train.lq <- df %>% 
+  filter(Order != 'Chiroptera') %>% 
+  select(label,lifespan, size) %>% 
+  filter(!is.na(size), !is.na(lifespan)) %>% 
+  column_to_rownames('label')
+
+lm.lq <- lm(
+  lifespan ~ size, 
+  data = train.lq %>% 
+    mutate_all(log)
+)
+
+df.lq <- augment(
+  lm.lq, newdata = df%>% mutate(size=log(size), lifespan = log(lifespan))
+) %>% 
+  mutate(predLife = .fitted) %>% 
+  select(label, size, lifespan, predLife, Order) %>% 
+  mutate(
+    size=exp(size), 
+    lifespan = exp(lifespan), 
+    predLife = exp(predLife), 
+    LQ = lifespan/predLife
+  )
+```
+
+```{r}
+df.lq %>%
+  summarize(
+    N.species = n_distinct(label),
+    N.size = sum(!is.na(size)),
+    N.lifespan = sum(!is.na(lifespan)),
+    N.size.life = sum(!is.na(size) & !is.na(lifespan))
+  )
+```
+
+```{r species in 536 alignment with lifespan}
+allspecies <- read_lines('../data/536species.list')
+common.species.lq <- intersect(allspecies, df.lq %>% filter(!is.na(LQ)) %>% pull(label))
+
+length(common.species.lq)
+
+common.species.size <- intersect(allspecies, df.lq %>% filter(!is.na(size)) %>% pull(label))
+
+length(common.species.size)
+
+```
+
+```{r species subset: Laurasiatheria}
+
+laurasiatheria.orders <- c(
+  "Chiroptera",
+  "Perissodactyla",
+  "Cetacea",
+  "Artiodactyla",
+  "Carnivora",
+  "Pholidota",
+  "Erinaceomorpha"
+)
+
+outgroup.orders <- c(
+  "Rodentia",
+  "Primates",
+  "Sirenia",
+  "Proboscidea",
+  "Hyracoidea"
+)
+
+
+df.lq <- df.lq %>% 
+  mutate(has.ali = label %in% allspecies)
+
+df.lq.laurasiatheria <- df.lq %>% 
+  filter(Order %in% laurasiatheria.orders)
+
+
+df.lq.outgroup <- df.lq %>% 
+  filter(Order %in% outgroup.orders)
+
+table.species.laur.ali.lq <- df.lq.laurasiatheria %>% 
+  filter(has.ali) %>% 
+  filter(!is.na(LQ)) %>% 
+  group_by(Order) %>% 
+  summarize(n=n())
+
+species.laur.ali.lq <- df.lq.laurasiatheria %>% 
+  filter(has.ali) %>% 
+  filter(!is.na(LQ)) %>% 
+  pull(label)
+
+## Pulling out some of these cause they're more of interest than others:
+# species.out.ali.lq <- df.lq.outgroup %>% 
+#   filter(has.ali) %>% 
+#   filter(!is.na(LQ)) %>% 
+#   pull(label)
+# 
+species.out.ali.lq <- c(
+  # Rodents
+  'Mus_musculus',
+  'Mus_minutoides',
+  'Rattus_rattus',
+  'Rattus_norvegicus',
+  'Peromyscus_leucopus',
+  # 'Peromyscus_californicus',
+  'Fukomys_damarensis',
+  'Capromys_pilorides',
+  'Heterocephalus_glaber',
+  'Cavia_aperea',
+  'Cavia_tschudii',
+  'Cavia_porcellus',
+  # Paenungulates
+  'Heterohyrax_brucei',
+  'Procavia_capensis',
+  'Dugon_dugon',
+  'Trichechus_manatus',
+  'Loxodonta_africana',
+  'Elephas_maximus',
+  # Primates
+  'Pan_troglodytes',
+  'Pan_paniscus',
+  'Homo_sapiens',
+  'Gorilla_gorilla'
+)
+
+write_tsv(df.lq, '../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli.tsv')
+
+c(species.laur.ali.lq,
+  species.out.ali.lq)
+
+df.lq <- df.lq %>% 
+  mutate(lnSize = log(size))
+```
+
+
+```{r LQ black}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      fill=if_else(Order=="Chiroptera", 'yellow', 'black')
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+    geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  scale_fill_identity() + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+```
+
+```{r LQ white}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      fill=if_else(Order=="Chiroptera", 'yellow', 'white')
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+    geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  scale_fill_identity() + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+```
+
+```{r LQ species color}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      fill=if_else(
+        Order=="Chiroptera", 
+        if_else(
+          label %in% our_genomes, 
+          species_color[label], 
+          'black'
+        ), 
+        'white'
+      )
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera", !label %in% our_genomes), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 24,
+    size=4
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 25,
+    size=2
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 25,
+    size=2
+  ) + 
+  scale_fill_identity() + 
+  scale_color_manual(values = species_color, guide=guide_none()) + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+```
+
+```{r LQ species color on black}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      fill=if_else(
+        Order=="Chiroptera", 
+        if_else(
+          label %in% our_genomes, 
+          species_color[label], 
+          'yellow'
+        ), 
+        'black'
+      )
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera", !label %in% our_genomes), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 24,
+    size=4
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 25,
+    size=2
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 25,
+    size=2
+  ) + 
+  scale_fill_identity() + 
+  scale_color_manual(values = species_color, guide=guide_none()) + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+```
+
+```{r LQ species color on black with text}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      fill=if_else(
+        Order=="Chiroptera", 
+        if_else(
+          label %in% our_genomes, 
+          species_color[label], 
+          'yellow'
+        ), 
+        'black'
+      )
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera", !label %in% our_genomes), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 23,
+    size=3
+  ) + 
+  # geom_point(
+  #   data=df.lq %>% filter(label %in% our_genomes), 
+  #   # aes(color=label),
+  #   color='black',
+  #   pch = 25,
+  #   size=2
+  # ) + 
+  scale_fill_identity() + 
+  scale_color_manual(values = species_color, guide=guide_none())+
+  geom_text_repel(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    aes(color=label, label=label),
+    nudge_x = 5, nudge_y = 3,xlim = c(5,10),
+    bg.color = "white"
+  ) + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+  
+```
+
+```{r LQ species color on black with ordered text}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=size/1000, 
+      y=LQ,
+      fill=if_else(
+        Order=="Chiroptera", 
+        if_else(
+          label %in% our_genomes, 
+          species_color[label], 
+          'yellow'
+        ), 
+        'black'
+      )
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera", !label %in% our_genomes), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 23,
+    size=3
+  ) + 
+  scale_fill_identity() + 
+  scale_color_manual(values = species_color, guide=guide_none())+
+  geom_text_repel(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    aes(
+      color=label, 
+      label=label %>% str_replace_all("_", " ")
+    ), 
+    nudge_y = 3,
+    force = 1,
+    hjust=0,
+    fontface='italic',
+    nudge_x=7-(df.lq %>% filter(label %in% our_genomes) %>% .$size %>% log()), 
+    direction = 'y',
+    bg.color = "white"
+  ) + 
+  scale_x_log10(
+    # breaks = c(0,5,10,15,18.82615),
+    # labels = c(0,5,10,15,18.82615) %>% exp
+  ) + 
+  labs(
+    x="Body size [log(kg)]",
+    y="Longevity\nQuotient"
+  )+
+  theme_pubr() +
+  labs_pubr()
+```
+
+```{r LQ species color on black with ordered text with alignment status}
+df.lq %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ,
+      alpha = has.ali,
+      fill=if_else(
+        Order=="Chiroptera", 
+        if_else(
+          label %in% our_genomes, 
+          species_color[label], 
+          'yellow'
+        ), 
+        'black'
+      )
+    )
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order != "Chiroptera"), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(Order == "Chiroptera", !label %in% our_genomes), 
+    pch = 21, color='black'
+  ) + 
+  geom_point(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    # aes(color=label),
+    color='black',
+    pch = 23,
+    size=3
+  ) + 
+  scale_fill_identity() + 
+  scale_color_manual(values = species_color, guide=guide_none())+
+  geom_text_repel(
+    data=df.lq %>% filter(label %in% our_genomes), 
+    aes(
+      color=label, 
+      label=label %>% str_replace_all("_", " ")
+    ), 
+    nudge_y = 3,
+    force = 1,
+    hjust=0,
+    fontface='italic',
+    nudge_x=7-(df.lq %>% filter(label %in% our_genomes) %>% .$size %>% log()), 
+    direction = 'y',
+    bg.color = "white",
+    show.legend = F
+  ) + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  scale_alpha_manual("Has alignment?",values=c(0.25,1), labels=c('No', 'Yes'))+
+  theme_pubr() + 
+  guides(
+    fill = guide_legend(
+      override.aes = list(shape = 22, size=5)
+    ),
+    alpha = guide_legend(
+      override.aes = list(shape=22, size=5, fill='grey')
+    )
+  )+
+  labs_pubr()
+```
+
+```{r Laurasiatheria LQ species color on black with ordered text with alignment status}
+df.lq.laurasiatheria %>% 
+  ggplot(
+    aes(
+      x=log(size), 
+      y=LQ, 
+      alpha = has.ali
+    )
+  ) + 
+  geom_point(
+    data=df.lq.laurasiatheria %>% filter(!label %in% our_genomes), 
+    aes(fill=Order),
+    pch = 21, color='black'
+  ) +
+  geom_point(
+    data=df.lq.laurasiatheria %>% filter(label %in% our_genomes), 
+    aes(color=label),
+    # color='black',
+    pch = 18,
+    size=3
+  ) + 
+  geom_text_repel(
+    data=df.lq.laurasiatheria %>% filter(label %in% our_genomes), 
+    aes(
+      color=label, 
+      label=label %>% str_replace_all("_", " ")
+    ), 
+    nudge_y = 3,
+    force = 1,
+    hjust=0,
+    fontface='italic',
+    nudge_x=7-(df.lq.laurasiatheria %>% filter(label %in% our_genomes) %>% .$size %>% log()), 
+    direction = 'y',
+    bg.color = "white",
+    show.legend = FALSE
+  ) + 
+  labs(
+    x="Body size [log(g)]",
+    y="Longevity\nQuotient"
+  )+
+  scale_alpha_manual("Has alignment?",values=c(0.25,1), labels=c('No', 'Yes'))+
+  scale_fill_brewer("Order", palette="Dark2") +
+  scale_color_manual(values = species_color, guide=guide_none())+
+  theme_pubr() + 
+  guides(
+    fill = guide_legend(
+      override.aes = list(shape = 22, size=5)
+    ),
+    alpha = guide_legend(
+      override.aes = list(shape=22, size=5, fill='grey')
+    )
+  )+
+  labs_pubr() + 
+  theme(
+    legend.position = c(0.8,0.6)
+  )
+```
+
+```{r}
+df.min <- df.lq %>% 
+  select(Order, LQ) %>% 
+  filter(!is.na(LQ))
+
+df.range <- df.min %>% 
+  group_by(Order) %>% 
+  summarize(min = min(LQ),
+            max = max(LQ),
+            median = median(LQ),
+            n = n())
+
+df.min <- df.min %>% 
+  mutate(
+    Order = factor(
+      Order,
+      levels=df.range %>% 
+        arrange(desc(median)) %>% 
+        pull(Order)
+    )
+  )
+
+df.min %>% 
+  ggplot(
+    aes(
+      x=LQ,
+      y=Order,
+      color=LQ
+    )
+  ) + 
+  geom_segment(
+    data=df.range,
+    aes(
+      y=Order,
+      yend=Order,
+      x=min,
+      xend=max,
+      color=median
+    )
+  ) + 
+  geom_point(
+    aes(color=LQ),
+    shape="|"
+  ) + 
+  theme_pubr()
+```
+
+```{r Raincloud plot for LQ}
+# p.lq.raindrop <- 
+  df.min %>%
+  # filter(Order == 'Chiroptera') %>%
+  ggplot(
+    aes(
+      x=LQ,
+      y=Order,
+    )
+  ) +
+  stat_slab(
+    aes(
+      fill=Order
+      ), 
+    normalize='groups',
+    # adjust = 0.5,
+    # density= 'unbounded',
+    # justification = -0.2,
+    scale=0.5,
+    # .width = 0,
+    point_colour = NA
+  ) +
+  geom_boxplot(
+    width = 0.25,
+    outlier.color = NA,
+    alpha = 0.5
+  ) +
+  geom_point(
+    aes(
+      y=as.numeric(Order) -0.25,
+      color=LQ
+    ),
+    shape="|"
+  ) + 
+  geom_text(
+    data=df.range,
+    aes(
+      x=min(min),
+      label=n
+    ),
+    hjust = 1
+  ) + 
+  scale_color_viridis_c(option = "C") + 
+  # Themes and Labels
+  theme_pubr() + 
+  guides(
+    fill=guide_none()
+  ) + 
+  theme(
+    legend.position = c(0.75,0.75),
+    legend.direction = 'vertical',
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  ) + 
+  labs_pubr()
+```
+
+```{r Raincloud plot for LQ using halfeye}
+p.lq.raindrop <-
+  df.min %>%
+  filter(
+    Order %in% (df.range %>% filter(n>10) %>% pull(Order))
+  ) %>%
+  ggplot(
+    aes(
+      x=LQ,
+      y=Order,
+    )
+  ) +
+  geom_vline(xintercept = 1, lty='dashed') + 
+  geom_point(
+    aes(
+      y=Order,
+      color=LQ,
+    ),
+    shape="|",
+    size=3,
+    position=position_nudge(y=-0.25)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=Order
+      ), 
+    normalize='groups',
+    scale=0.5,
+    point_size=2,
+    shape=21,
+    stroke=1
+  ) +
+  geom_text(
+    data=df.range %>%
+  filter(n>10),
+    aes(
+      x=min(min),
+      label=n
+    ),nudge_x = -0.1,
+    hjust = 1
+  ) + 
+  scale_color_viridis_c(option = "C") + 
+  # Themes and Labels
+  theme_pubr() + 
+  scale_x_continuous(breaks=c(0.026,1,3,6,9,11.2), labels=c(0.026,1,3,6,9,11.2)) +
+  labs(
+    x="Longevity Quotient"
+  ) + 
+  labs_pubr() + 
+  guides(
+    fill=guide_none()
+  ) + 
+  theme(
+    legend.position = c(0.75,0.75),
+    legend.direction = 'vertical',
+    # axis.ticks.y = element_blank(),
+    # axis.title.y = element_blank(),
+    # axis.text.y = element_blank()
+  )
+
+p.lq.raindrop
+```
+
+```{r Raincloud plot for LQ using halfeye filtered for RERConverge}
+species.rc <- c(species.laur.ali.lq,
+  species.out.ali.lq)
+
+df.lq.rc <-  df.lq %>%
+  filter(label %in% species.rc)
+
+df.range.rc <- df.lq.rc %>% 
+  group_by(Order) %>% 
+  summarize(min = min(LQ),
+            max = max(LQ),
+            median = median(LQ),
+            n = n())
+
+df.min.rc <- df.lq.rc %>% 
+  select(Order, LQ) %>% 
+  mutate(
+    Order = factor(
+      Order,
+      levels=df.range %>% 
+        arrange(desc(median)) %>%
+        pull(Order)
+    )
+  )
+
+p.lq.raindrop.rc <- df.min.rc %>%
+  ggplot(
+    aes(
+      x=LQ,
+      y=Order,
+    )
+  ) +
+  geom_vline(xintercept = 1, lty='dashed') + 
+  geom_point(
+    aes(
+      y=Order,
+      color=LQ,
+    ),
+    shape="|",
+    size=3,
+    position=position_nudge(y=-0.25)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=Order
+      ), 
+    normalize='groups',
+    scale=0.5,
+    point_size=2,
+    shape=21,
+    stroke=1
+  ) +
+  geom_text(
+    data=df.range.rc,
+    aes(
+      x=min(min),
+      label=n
+    ),nudge_x = -0.1,
+    hjust = 1
+  ) + 
+  scale_color_viridis_c(option = "C") + 
+  # Themes and Labels
+  theme_pubr() + 
+  scale_x_continuous(breaks=c(0.026,1,3,6,9,11.2), labels=c(0.026,1,3,6,9,11.2)) +
+  labs(
+    x="Longevity Quotient"
+  ) + 
+  labs_pubr() + 
+  guides(
+    fill=guide_none()
+  ) + 
+  theme(
+    legend.position = c(0.75,0.75),
+    legend.direction = 'vertical',
+    # axis.ticks.y = element_blank(),
+    # axis.title.y = element_blank(),
+    # axis.text.y = element_blank()
+  )
+p.lq.raindrop.rc
+```
+
+
+```{r Raindrop with vs without Ali, eval=F}
+df.range.aliStatus <- df.lq %>% 
+  filter(
+    !has.ali,
+    !is.na(LQ)
+  ) %>% 
+  group_by(Order, has.ali) %>% 
+  summarize(min = min(LQ),
+            max = max(LQ),
+            median = median(LQ),
+            n = n())
+
+df.min.aliStatus <- df.lq %>% 
+  filter(
+    !has.ali,
+    !is.na(LQ)
+  ) %>% 
+  select(Order, LQ, has.ali) %>% 
+  mutate(
+    Order = factor(
+      Order,
+      levels=df.range %>% 
+        arrange(desc(median)) %>%
+        pull(Order)
+    )
+  )
+
+p.lq.raindrop.aliStatus <- df.min.aliStatus %>%
+  mutate(aliStatus=c(-1,1)[as.numeric(has.ali)+1])
+  ggplot(
+    aes(
+      x=LQ,
+      y=Order,
+    )
+  ) +
+  geom_vline(xintercept = 1, lty='dashed') + 
+  # geom_point(
+  #   aes(
+  #     y=Order,
+  #     color=LQ,
+  #   ),
+  #   shape="|",
+  #   size=3,
+  #   position=position_nudge(y=-0.25)
+  # ) + 
+  stat_halfeye(
+    aes(
+      fill=Order
+      ), 
+    normalize='groups',
+    scale=0.5,
+    point_size=2,
+    shape=21,
+    stroke=1
+  ) +
+  geom_text(
+    data=df.range.rc,
+    aes(
+      x=min(min),
+      label=n
+    ),nudge_x = -0.1,
+    hjust = 1
+  ) + 
+  scale_color_viridis_c(option = "C") + 
+  # Themes and Labels
+  theme_pubr() + 
+  scale_x_continuous(breaks=c(0.026,1,3,6,9,11.2), labels=c(0.026,1,3,6,9,11.2)) +
+  labs(
+    x="Longevity Quotient"
+  ) + 
+  labs_pubr() + 
+  guides(
+    fill=guide_none()
+  ) + 
+  theme(
+    legend.position = c(0.75,0.75),
+    legend.direction = 'vertical',
+    # axis.ticks.y = element_blank(),
+    # axis.title.y = element_blank(),
+    # axis.text.y = element_blank()
+  )
+p.lq.raindrop.rc
+```
+
+
+```{r}
+write_lines(species.rc, '../output/RERC_Species.list')
+
+
+```
+
+## Bins
+
+```{r}
+df.lq.bats.ntiles <- df.lq %>% 
+  filter(Order == 'Chiroptera') %>% 
+  filter(!is.na(LQ)) %>% 
+  mutate(
+    decile = ntile(LQ, 10),
+    septile = ntile(LQ, 7),
+    quintile = ntile(LQ, 5),
+    quartile = ntile(LQ, 4),
+    tercile = ntile(LQ, 3),
+    duocile = ntile(LQ, 2)
+  )
+
+df.lq.bats.ntiles %>% 
+  filter(
+    decile == 10,
+    has.ali
+  ) %>% pull(label)
+df.lq.bats.ntiles %>% write_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli_hasNTiles.tsv')
+```
+
+```{r LQ Bats Ranking}
+
+col_absrel <- c(
+  "Desmodus_rotundus" = '#3D348B',
+  "Miniopterus_schreibersii" = '#A01A7D',
+  "Myotis_brandtii" = '#E6AF2E',
+  "Myotis_evotis" = species_color[['Myotis_evotis']],
+  "Myotis_lucifugus" = species_color[['Myotis_lucifugus']],
+  "Myotis_myotis" = '#816E94',
+  "Myotis_occultus" = species_color[['Myotis_occultus']],
+  "Myotis_volans" = species_color[['Myotis_volans']],
+  "Rhinolophus_ferrumequinum" = '#273E47'
+  )
+
+df.lq.bats.ntiles %>% 
+  # mutate(y=0.02 %>% multiply_by(rep(c(1,-1), times=5))) %>%
+  ggplot(
+    aes(
+      x=LQ,
+      y=0,
+      color=LQ,
+      fill=LQ
+    )
+  ) +
+  geom_hline(yintercept=0) +
+  geom_point(
+    shape = '|',
+    size=4,
+    alpha=0.5
+  ) +
+    geom_point(
+      data=. %>% filter(has.ali),
+    shape = '|',
+    size=8,
+  ) +
+  geom_point(
+    data = . %>% 
+      filter(
+        has.ali,
+        quartile==4
+      ),
+    shape=1,
+    size=4
+  ) + 
+  scale_color_viridis_c(option='D') + 
+  ggnewscale::new_scale_color() + 
+  geom_text_repel(
+    data = . %>% 
+      filter(
+        has.ali,
+        quintile==5
+      ),
+    aes(
+      label=label %>% str_replace_all("_", " "),
+      color=label
+    ),force = 10, max.overlaps = 1100, direction = 'y',
+    hjust=1,min.segment.length = 0,
+    fontface='italic',
+    bg.color='white'
+  ) + 
+  scale_color_manual('Species', values = col_absrel) + 
+  # theme_void() +
+  labs(x="LQ") + 
+  theme_minimal() + 
+  labs_pubr() + 
+  theme(
+    legend.position = 'none',
+    axis.line.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.title.y=element_blank(),
+    panel.grid = element_blank()
+  )
+
+```
+
