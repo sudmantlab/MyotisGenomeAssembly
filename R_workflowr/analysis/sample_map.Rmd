@@ -103,42 +103,42 @@ sheet_cols <- c(
 
 # datasheet <- read_sheet("https://docs.google.com/spreadsheets/d/1DJctPKAd9TQOLNnmGXP8t0TPAEe4-CICus9QZ7IYsCU/edit#gid=915133740", col_types = sheet_cols %>% paste0(collapse=""))
 # datasheet %>% write_tsv("../data/collection_datasheet_2022-11-15.tsv")
-datasheet <- read_tsv("../../data/collection_datasheet_2022-11-15.tsv", col_types = sheet_cols %>% paste0(collapse=""))
+datasheet <- read_tsv("../data/collection_datasheet_2022-11-15.tsv", col_types = sheet_cols %>% paste0(collapse=""))
 ```
 ```{r Species Shapefiles, results=F, warning=F}
-shape.myoAui <- dir(path="../../data/USGS_SpeciesRanges/Myotis_auriculus/", pattern = ".shp$", full.names=T) %>% 
+shape.myoAui <- dir(path="../data/USGS_SpeciesRanges/Myotis_auriculus/", pattern = ".shp$", full.names=T) %>% 
   st_read() %>% 
   mutate(species = "Myotis_auriculus") %>% 
   st_make_valid()
-shape.myoCai <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_californicus/", pattern = ".shp$", full.names=T) %>%
+shape.myoCai <- dir(path = "../data/USGS_SpeciesRanges/Myotis_californicus/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_californicus") %>% 
   st_make_valid()
-shape.myoOcc <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_occultus/", pattern = ".shp$", full.names=T) %>%
+shape.myoOcc <- dir(path = "../data/USGS_SpeciesRanges/Myotis_occultus/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_occultus") %>% 
   st_make_valid()
-shape.myoLuc <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_lucifugus/", pattern = ".shp$", full.names=T) %>%
+shape.myoLuc <- dir(path = "../data/USGS_SpeciesRanges/Myotis_lucifugus/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_lucifugus") %>% 
   st_make_valid()
-shape.myoYum <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_yumanensis/", pattern = ".shp$", full.names=T) %>%
+shape.myoYum <- dir(path = "../data/USGS_SpeciesRanges/Myotis_yumanensis/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_yumanensis") %>% 
   st_make_valid()
-shape.myoVol <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_volans/", pattern = ".shp$", full.names=T) %>%
+shape.myoVol <- dir(path = "../data/USGS_SpeciesRanges/Myotis_volans/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_volans") %>% 
   st_make_valid()
-shape.myoVel <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_velifer/", pattern = ".shp$", full.names=T) %>%
+shape.myoVel <- dir(path = "../data/USGS_SpeciesRanges/Myotis_velifer/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_velifer") %>% 
   st_make_valid()
-shape.myoEvo <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_evotis/", pattern = ".shp$", full.names=T) %>%
+shape.myoEvo <- dir(path = "../data/USGS_SpeciesRanges/Myotis_evotis/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_evotis") %>% 
   st_make_valid()
-shape.myoThy <- dir(path = "../../data/USGS_SpeciesRanges/Myotis_thysanodes/", pattern = ".shp$", full.names=T) %>%
+shape.myoThy <- dir(path = "../data/USGS_SpeciesRanges/Myotis_thysanodes/", pattern = ".shp$", full.names=T) %>%
   st_read() %>% 
   mutate(species = "Myotis_thysanodes") %>% 
   st_make_valid()
@@ -377,7 +377,7 @@ p.map.myoLuc.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis lucifugus") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_lucifugus"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoYum.calaz <- p.map.base.calaz + 
@@ -386,7 +386,7 @@ p.map.myoYum.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis yumanensis") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_yumanensis"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoCai.calaz <- p.map.base.calaz + 
@@ -395,7 +395,7 @@ p.map.myoCai.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis californicus") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_californicus"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoVol.calaz <- p.map.base.calaz + 
@@ -404,7 +404,7 @@ p.map.myoVol.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis volans") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_volans"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoEvo.calaz <- p.map.base.calaz + 
@@ -413,7 +413,7 @@ p.map.myoEvo.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis evotis") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_evotis"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoThy.calaz <- p.map.base.calaz + 
@@ -422,7 +422,7 @@ p.map.myoThy.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis thysanodes") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_thysanodes"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoOcc.calaz <- p.map.base.calaz + 
@@ -431,7 +431,7 @@ p.map.myoOcc.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis occultus") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_occultus"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoVel.calaz <- p.map.base.calaz + 
@@ -440,7 +440,7 @@ p.map.myoVel.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis velifer") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_velifer"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoAui.calaz <- p.map.base.calaz + 
@@ -449,7 +449,7 @@ p.map.myoAui.calaz <- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face="bold", size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
+  theme(title = element_text(face="bold", size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, "cm")) + 
   ggtitle("Myotis auriculus") +
   geom_spatial_point(data= datasheet.known %>% filter(species == "Myotis_auriculus"), aes(group=species, y=Lattitude, x=Longitude), size=2)
 

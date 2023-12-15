@@ -31,10 +31,15 @@ library(patchwork)
 ```
 
 ```{r F1A}
-p.tr.auNG.circ.altcolor
+p.trNew.auNG.circ.altcolor.withLine
 ```
 ```{r}
-p.tr.auNG.circ.altcolor %>% ggsave(plot = ., "../output/phylo_auNG_circ_col.pdf")
+p.trNew.auNG.circ.altcolor.withLine %>% 
+  ggsave(plot = ., "../output/subfigs/phylo_auNG_circ_col.pdf")
+p.trNew.auNG.circ.altcolor.withLine %>% 
+  ggsave(plot = ., "../output/subfigs/phylo_auNG_circ_col.svg")
+p.trNew.auNG.circ.altcolor.withLine %>% 
+  ggsave(plot = ., "../output/subfigs/phylo_auNG_circ_col.png")
 ```
 
 ## Figure 1b: Collection Sites
@@ -47,8 +52,33 @@ p.map.collections.caaznv
 ```
 
 ```{r}
-p.map.collections.caaznv %>% ggsave(plot = ., "../output/Collection_map_CAAZNV.pdf")
+p.map.collections.caaznv %>% 
+  ggsave(plot = ., "../output/subfigs/Collection_map_CAAZNV.pdf")
+p.map.collections.caaznv %>% 
+  ggsave(plot = ., "../output/subfigs/Collection_map_CAAZNV.svg")
+p.map.collections.caaznv %>% 
+  ggsave(plot = ., "../output/subfigs/Collection_map_CAAZNV.png")
 ```
+
+
+## Figure 1C: BUSCOs
+
+```{r, include=F, echo=F, results='hide', child="annotations.Rmd" }
+```
+
+```{r F1C}
+p.busco
+```
+
+```{r}
+p.busco %>% 
+  ggsave(plot = ., "../output/subfigs/BUSCOs.pdf")
+p.busco %>% 
+  ggsave(plot = ., "../output/subfigs/BUSCOs.svg")
+p.busco %>% 
+  ggsave(plot = ., "../output/subfigs/BUSCOs.png")
+```
+
 
 
 # Figure 1:
@@ -60,15 +90,15 @@ p.map.collections.caaznv %>% ggsave(plot = ., "../output/Collection_map_CAAZNV.p
 f1v1.layout <- "
 AAAAAA
 AAAAAA
-BB####
-BB####
+BBCC##
+BBCC##
 "
 
 f1a <- p.tr.auNG.circ.altcolor + 
   theme(
     text=element_text(
       family='helvetica', 
-      size=10
+      size=5
     )
   )
 
@@ -77,11 +107,11 @@ f1b <- p.map.collections.caaznv +
   theme(
     text=element_text(
       family='helvetica', 
-      size=10
+      size=5
     )
   )
 
-# f1c <- 
+f1c <- p.busco
 
 f1v1 <- f1a + f1b + plot_layout(design = f1v1.layout)
 

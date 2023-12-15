@@ -19,12 +19,16 @@ library(ggtree)
 library(ggtreeExtra)
 library(ggtext)
 library(ggsci)
+# library(gridExtra)
+library(ragg)
 # library(gghighlight)
 # library(plotly)
 ```
 
+## Assembly Stats
+
 ```{r assembly_stats}
-assembly_stats <- read_tsv("../../data/assembly_stats/all_assembly_stats.contigs.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
+assembly_stats <- read_tsv("../data/assembly_stats/all_assembly_stats.contigs.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
   mutate(contig = str_detect(genomeName, "contig")) %>% 
   filter(str_detect(genomeName, "M_|mmyo|\\.chr", negate=T)) %>%
   filter(str_detect(genomeName, "mMyo.+1(?!_unmasked)", negate=T)) %>%
@@ -47,7 +51,7 @@ our_genomes = c(
 ```
 
 ```{r metadata}
-meta <- read_tsv("../../data/chiropteraGenomes-20230427.tsv") %>% 
+meta <- read_tsv("../data/chiropteraGenomes-20230427.tsv") %>% 
   mutate(`Organism Name` = `Organism Name` %>% str_replace_all(" ", "_"))
 
 meta.origin <- meta %>% 
@@ -80,6 +84,7 @@ assembly_stats.meta[str_detect(assembly_stats.meta$name, "T2T"),"Origin"] <- "T2
 
 
 ```
+
 ### Notes about the tree
 
 In order to get TimeTree to play nicely with the phylogeny, a few changes were needed:
@@ -96,12 +101,13 @@ If you do all these changes, then undo the changes in post, you get this tree.
 Note that it was very annoying to splice the two trees together by eye so avoid needing to redo this.
 
 ```{r phylogeny}
-tr <- treeio::read.newick("../../data/tree/TimeTree.org/genomeSpecies.timetree.nwk")
+tr <- treeio::read.newick("../data/trees/TimeTree.org/genomeSpecies.timetree.nwk")
 
 # setdiff(tr$tip.label, assembly_stats.meta$species)
 # setdiff(assembly_stats.meta$species, tr$tip.label)
 ```
 
+## NGx curves
 
 ```{r NGx}
 plot.NGx <- assembly_stats.meta %>% 
@@ -149,7 +155,7 @@ plot.NGx.altCol.log <- assembly_stats.meta %>%
 plot.NGx.altCol.log
 ```
 
-```{r NGx alt log}
+```{r NGx alt linear}
 
 plot.NGx.altCol <- assembly_stats.meta %>% 
   mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
@@ -170,7 +176,7 @@ plot.NGx.altCol
 plot.NGx.altCol %>% ggsave(plot=., filename = "../output/NGx_curves.pdf", width = 6, height = 3.71, dpi=900, units = "in")
 ```
 
-```{r, onlyT2T}
+```{r onlyT2T}
 assembly_stats.plotme <- assembly_stats.meta %>% 
   mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
   filter(stat == "NGx",
@@ -195,6 +201,7 @@ plot.NGx.altCol.t2tzoo %>% ggsave(plot=., filename = "../output/NGx_curves_onlyT
 
 ```
 
+## auNG
 
 ```{r AuNG}
 plot.auNG <- assembly_stats.meta %>% 
@@ -214,6 +221,8 @@ plot.auNG <- assembly_stats.meta %>%
   theme(legend.position = "bottom")
 plot.auNG
 ```
+
+## Tree plus auNG
 
 ```{r setup phylo plus auNG}
 auNG <- assembly_stats.meta %>% 
@@ -406,6 +415,7 @@ p.tr.auNG.circ.altcolor <-
 p.tr.auNG.circ.altcolor
 
 ```
+
 ```{r with T2T line}
 
 t2t.base = p.tr.auNG.circ.altcolor$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
@@ -422,6 +432,129 @@ p.tr.auNG.circ.altcolor.withLine <- p.tr.auNG.circ.altcolor +
       y = t2t.start, 
       yend = t2t.end
     )
+  )
+```
+
+## Updated Phylo
+
+```{r}
+tr.536 <- read.tree('../data/trees/536Mammals-rooted-nodeNames.nwk')
+
+tr.536$tip.label <- tr.536$tip.label %>% 
+            str_replace('Canis_lupus_familiaris', 'Canis_familiaris') #%>% 
+            # 
+
+auNG.fancy.color$label <- auNG.fancy.color$label %>% 
+  str_replace('Murina_aurata_feae', 'Murina_aurata') %>% 
+  str_replace('Pteronotus_parnellii_mesoamericanus', 'Pteronotus_parnellii')
+  
+t.tr.536 <- tr.536 %>% as_tibble
+
+node.chiroptera = t.tr.536%>% filter(label=='Chiroptera') %>% pull(node)
+
+tipnodes.chiroptera = tidytree::offspring(
+  tr.536, 
+  .node=node.chiroptera, 
+  type = 'tips'
+)
+
+tipnodes.chiroptera <- t.tr.536 %>% 
+    filter(node %in% tipnodes.chiroptera) %>% 
+    pull(label)
+
+
+tips = c(
+  # t.tr.536 %>% 
+  #   filter(node %in% tipnodes.chiroptera) %>% 
+  #   pull(label),
+  tipnodes.chiroptera,
+  "Homo_sapiens",
+  "Mus_musculus",
+  "Canis_familiaris",
+  "Bos_taurus"
+)
+
+tr.genomes <- tr.536 %>% 
+  keep.tip(
+    tips
+  )
+
+```
+
+
+```{r newPhylo}
+
+p.trNew.auNG.circ.altcolor <-
+  tr.genomes %>%
+  ggtree(layout = "fan", open.angle=180, branch.length = 'none') +
+  # xlim_tree(c(NA,10))+ 
+  # geom_fruit_list(
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_col,
+      mapping=aes(
+        y= label,
+        x = log(auNG),
+        color=color_me,
+        fill=color_me
+      ),
+      orientation = 'y',
+      width = .6
+    ) + 
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_richtext, 
+      mapping = aes(
+        y=label,
+        label=label_fancy,
+        color=color_me,
+        angle=sapply(angle,angle_rotate),
+        hjust=sapply(angle,h_readjust)
+      ),
+      fill = NA, 
+      label.color = NA,
+      fontface='italic',
+      size=8/.pt,
+      # offset=0.2,
+      label.padding = grid::unit(rep(0,4), "pt"),
+    ) + 
+  # ) +
+  scale_color_manual("Origin", values = species_color, guide="none") +
+  scale_fill_manual("Origin", values = species_color, guide="none") +
+  theme(plot.margin = unit(c(4,0,0,0),"cm"))
+
+t2t.base = p.trNew.auNG.circ.altcolor$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
+t2t.bartop = p.trNew.auNG.circ.altcolor$layers[[3]]$data %>% filter(label == 'Homo_sapiens') %>% pull(new_xtmp) +0.6#+   p.trNew.auNG.circ.altcolor$layers[[3]]$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
+t2t.start = min(p.trNew.auNG.circ.altcolor$data$y)
+t2t.end = max(p.trNew.auNG.circ.altcolor$data$y)
+
+p.trNew.auNG.circ.altcolor.withLine <- p.trNew.auNG.circ.altcolor + 
+  geom_segment(
+    aes(
+      x = t2t.base + t2t.bartop,
+      xend = t2t.base + t2t.bartop,
+      y = t2t.start, 
+      yend = t2t.end
+    ),
+    linewidth=0.1, 
+    # lty='dashed'
+  )
+
+p.trNew.auNG.circ.altcolor.withLine
+```
+
+```{r}
+
+# g <- ggplotGrob(p.trNew.auNG.circ.altcolor.withLine)
+
+p.trNew.auNG.circ.altcolor.withLine %>% 
+  ggsave(
+    filename = '../output/subfigs/phylo_auNG_circ_col_withLine.pdf',
+    plot= ., 
+    width = 7.5, 
+    height = 4, 
+    units = 'in', 
+    dpi = 300
   )
 ```
 

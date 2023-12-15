@@ -23,6 +23,7 @@ library(broom.mixed)
 library(ggnewscale)
 library(RcppRoll)
 library(ggpubr)
+library(ggsci)
 ```
 
 ## Phylogeny 
@@ -67,7 +68,7 @@ species_color["Other"] = "#7F7F7FFF"
 
 
 ```{r Upham 2019 4098 mammals}
-upham.ml <- read.tree("../../data/tree/UphamEtAl2019_Dryad_doi_10.5061/Data_S3_globalRAxML_files/RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick")
+upham.ml <- read.tree("../data/trees/UphamEtAl2019_Dryad_doi_10.5061/RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick")
 
 upham.ml$tip.label <- upham.ml$tip.label %>% str_remove("_[A-Z]+_[A-Z]+$")
 
@@ -77,7 +78,7 @@ upham.ml.ourbats <- upham.ml %>%
 upham.ml.ourbats$tip.label <- upham.ml.ourbats$tip.label %>% 
   str_remove("_VESPERTILIONIDAE_CHIROPTERA")
 
-upham.tr <- read.nexus("../../data/tree/UphamEtAl2019_Dryad_doi_10.5061/Data_S7_Mammalia_credibleTreeSets_tipDR/DNAonly_MCCs/MamPhy_fullPosterior_BDvr_DNAonly_4098sp_topoFree_NDexp_MCC_v2_target.tre")
+upham.tr <- read.nexus("../data/trees/UphamEtAl2019_Dryad_doi_10.5061/MamPhy_fullPosterior_BDvr_DNAonly_4098sp_topoFree_NDexp_MCC_v2_target.tre")
 
 upham.tr$tip.label <- upham.tr$tip.label %>% str_remove("_[A-Z]+_[A-Z]+$")
 
@@ -114,7 +115,7 @@ cophylo(
 ```{r Lack et al 2010}
 ## According to Amador, their analysis recapitulates the topology in this tree for Myotis
 
-lack.tr <- read.nexus('../../data/tree/Lack2010.nexorg')[[2]] # 2nd tree is timetree
+lack.tr <- read.nexus('../data/trees/Lack2010.nexorg')[[2]] # 2nd tree is timetree
 
 ## Somehow they didn't have lucifugus????
 
@@ -187,13 +188,20 @@ cophylo(
 ```
 
 
-```{r Upham vs Our Phylo - ggtree}
-
+```{r Upham vs Our Phylo - ggtree (prep)}
 uphamtree <- upham.ml.ourbats %>% 
   rotate(14) %>%  # Luc-Thy-Evo -> Thy-Luc-Evo
   rotate(15) %>%  # Thy-Luc-Evo -> Thy-Evo-Luc
   rotate(16) #%>%  # Cai-Aui-Vol -> Vol-Cai-Aui
 
+ourtree <- tr.species %>% 
+  drop.tip("Myotis_occultus") %>%
+  rotateConstr(upham.ml.ourbats$tip.label) %>% 
+  rotate(15)  # Evo-Thy -> Thy-Evo
+```
+
+
+```{r Upham vs Our Phylo - ggtree, eval=F}
 p1 <- uphamtree %>% 
   # groupOTU(breakup) %>% 
   ggtree(
@@ -207,12 +215,6 @@ p1 <- uphamtree %>%
   # geom_nodelab(aes(label=node)) + 
   xlim_tree(c(NA,10))# + geom_highlight(node=14, fill='lightgreen', col='lightgreen')
 
-
-
-ourtree <- tr.species %>% 
-  drop.tip("Myotis_occultus") %>%
-  rotateConstr(upham.ml.ourbats$tip.label) %>% 
-  rotate(15)  # Evo-Thy -> Thy-Evo 
 
 p2 <- ourtree %>% 
   # groupOTU(breakup) %>% 
@@ -255,8 +257,8 @@ pp #+ geom_line(aes(x, y, group=label), data=dd, color='grey')
 
 ```{r Upham vs Our Phylo - cophyloplot}
 cophylo(
-  upham.ml.ourbats,
-  ourtree, 
+  as.phylo(upham.ml.ourbats),
+  as.phylo(tr.species), 
   assoc = cbind(ourtree$tip.label,ourtree$tip.label)
 ) %>% 
   plot(ylim=c(-0.3,1))
@@ -267,7 +269,7 @@ cophylo(
 ## Phylogeny by chromosome
 
 ```{r tree dataframe, eval=F}
-df.chr.tr <- read_tsv('../../analyses/phylo/output/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
+df.chr.tr <- read_tsv('../data/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
 
 # df.chr.tr.withPhylo<- df.chr.tr %>% mutate(tree = df.chr.tr$phylo %>% {ifelse(is.na(.), NA, read.tree(file=NULL, text=.))})
 l.chr.tr <- df.chr.tr %>% select(Chr, phylo) %>% split(.,.$phylo) %>% set_names(., sapply(., . %>% pull(Chr))) %>% lapply(., . %>% pull(phylo) %>% read.tree(file=NULL, text=.) %>% ape::root.phylo(., 'Myotis_myotis', resolve.root=T))
@@ -293,7 +295,7 @@ p.chr.trees
 ## PGLS stuff
 
 ```{r Data: AnAge}
-anage <- read_tsv('../../data/lifehistory/anage_data.txt') %>% 
+anage <- read_tsv('../data/lifehistory/anage_data.txt') %>% 
   mutate(label = str_c(Genus, "_", Species)) %>% 
   rename(size = `Adult weight (g)`,
          lifespan = `Maximum longevity (yrs)`) %>% 
@@ -301,7 +303,7 @@ anage <- read_tsv('../../data/lifehistory/anage_data.txt') %>%
 ```
 
 ```{r Data: panTheria}
-panTheria <- read_tsv("../../data/lifehistory/PanTHERIA_1-0_WR05_Aug2008.txt") %>% 
+panTheria <- read_tsv("../data/lifehistory/PanTHERIA_1-0_WR05_Aug2008.txt") %>% 
   mutate(label = MSW05_Binomial %>% str_replace_all(" ", "_"),
          lifespan = `17-1_MaxLongevity_m` %>% divide_by(12)) %>% 
   rename(size = `5-1_AdultBodyMass_g`)
@@ -385,22 +387,24 @@ agedata <- agedata %>%
 agedata$lifespan[agedata$lifespan<0] <- NA
 agedata$size[agedata$size<0] <- NA
 
-agedata %>% write_tsv("../../data/lifehistory/manny_mammal_agedata_harmonized.tsv")
+agedata %>% write_tsv("../data/lifehistory/manny_mammal_agedata_harmonized.uncurated.tsv")
 
 tt.upham <- taxa.upham.best %>% 
   select(-score) %>% 
   mutate(label = matched_name %>% str_replace(" ", "_"))
 
-tt.upham %>% write_tsv('../../data/tree/UphamEtAl2019_harmonizednames.tsv')
+tt.upham %>% write_tsv('../data/tree/UphamEtAl2019_harmonizednames.tsv')
+
+rename_vec <- tt.upham$label
+names(rename_vec) <- tt.upham$submitted_name
+upham.tr$tip.label <- rename_vec[upham.tr$tip.label]
+upham.tr %>% write.tree('../data/trees/UphamEtAl2019_harmonizednames.nwk')
+
 ```
 
 
-```{r Data harmonization: load data that was harmonized}
-agedata <- read_tsv("../../data/lifehistory/manny_mammal_agedata_harmonized.tsv")
-
-
-# Fill in a gap for Occultus
-agedata$lifespan[agedata$label=="Myotis_occultus"] <- 31 #Harris (1990)
+```{r Data harmonization: load data that was harmonized AND CURATED}
+agedata <- read_tsv("../data/lifehistory/manny_mammal_agedata_harmonized.tsv")
 
 # Not dealing with nosize species
 
@@ -417,7 +421,7 @@ agedata.hassizelifespan <- agedata.hassize %>% filter(!label %in% nolifespan)
 
 
 ```{r Data: DBatVir}
-vir <- readxl::read_xls("../../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
+vir <- readxl::read_xls("../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
   mutate(
     label = `From bat` %>% 
       str_replace("^Myotis$", "Myotis_spc.") %>% 
@@ -573,7 +577,7 @@ p.tr.lq.dat <- tr.lq.dat %>%
   xlim_tree(c(NA,10)) + 
   theme(legend.position = c(0.1,0.8))
   
-  
+p.tr.lq.dat
   
 ```
 
@@ -612,6 +616,8 @@ p.wa.tr.ourbats.lq <- wa.tr.ourbats.lq %>%
   scale_fill_viridis_c(option = "A", guide = guide_none())+
   xlim_tree(c(NA,10)) + 
   theme(legend.position = c(0.1,0.8))
+
+p.wa.tr.ourbats.lq
 ```
 
 
@@ -702,143 +708,6 @@ pp  +
 
 ```
 
-
-```{r Data harmonization with Upham}
-tt.upham <-  read_tsv('../../data/tree/UphamEtAl2019_harmonizednames.tsv')
-
-upham.tr.cleanlabs <- upham.tr
-upham.tr.cleanlabs$tip.label <- recode(upham.tr.cleanlabs$tip.label, !!!setNames(tt.upham$submitted_name,tt.upham$label))
-
-upham.nosize <- setdiff(upham.tr.cleanlabs$tip.label, agedata.hassize$label)
-
-upham.nolife <-  setdiff(upham.tr.cleanlabs$tip.label, agedata.hassizelifespan$label)
-
-upham.tr.trimmed <- upham.tr.cleanlabs %>% 
-  drop.tip(upham.nosize)
-
-upham.tr.trimmed.withlife <- upham.tr.trimmed %>% 
-    drop.tip(upham.nolife)
-```
-
-```{r}
-dat.size.lifespan.upham.withLife <- agedata.hassizelifespan %>% ungroup %>% 
-  filter(!label %in% setdiff(agedata.hassizelifespan$label, upham.tr.trimmed.withlife$tip.label)) %>% 
-  mutate(lnSize = log(size)) %>% 
-  select(label, lnSize, Lifespan=lifespan) %>% 
-  as.data.frame()
-
-rownames(dat.size.lifespan.upham.withLife) <- dat.size.lifespan.upham.withLife$label
-
-dat.slawl.min <- dat.size.lifespan.upham.withLife %>% select(label, Lifespan, lnSize)
-rownames(dat.slawl.min) <- dat.slawl.min$label
-
-size.lifespan.upham.lm <- gls(
-  Lifespan ~ lnSize,
-  data=dat.slawl.min,
-  correlation = corBrownian(1, upham.tr.trimmed.withlife)
-)
-
-### Predict new lifespans
-
-d.lifespan.upham.long <- agedata.hassize %>% ungroup %>% 
-  mutate(lnSize = log(size)) %>% 
-  dplyr::select(label, lnSize)
-
-d.lifespan.upham.long.predict <-  bind_cols(
-  d.lifespan.upham.long,
-  Lifespan=predict(
-    object = size.lifespan.upham.lm, 
-    newdata = d.lifespan.upham.long
-  ) #%>% exp
-) # %>% 
-  #mutate(name = str_replace(name, "lnSize", "Lifespan"))
-
-d.lifespan.upham <- 
-  # bind_rows(
-  #   d.lifespan.upham.long, 
-  #   d.lifespan.atlantogenata.long.predict
-  # ) %>% 
-  # pivot_wider(id_cols = node, names_from=name, values_from = lnSize)
-  left_join(
-    d.lifespan.upham.long.predict %>% rename(Lifespan.predict = Lifespan), 
-    agedata.hassizelifespan %>% mutate(lnSize = log(size)) %>% ungroup %>% select(label, lnSize, Lifespan=lifespan, Order), 
-    by = c("label", "lnSize")
-  )
-```
-
-
-```{r}
-d.lifespan.upham %>% 
-  filter(!is.na(Order)) %>% 
-  group_by(Order) %>% 
-  filter(n_distinct(label) > 50) %>% 
-  ungroup %>% 
-  ggplot(
-    aes(
-      x=Lifespan,
-      y=Lifespan.predict,
-      color=Order
-    )
-  )+ 
-  geom_point() + 
-  labs(x="Lifespan (yrs)",
-       y="Predicted Lifespan (yrs)") + 
-  geom_smooth(method = 'lm') + 
-  scale_color_d3(palette = 'category20') + 
-  facet_wrap(~Order, scales="free") + 
-  theme_pubclean() + 
-  theme(legend.position = "none")
-```
-
-
-
-Need to have predictions at internal nodes for this
-
-```{r RICR, eval=F}
-tree.size.lifespan.upham.full.table <- upham.ml.trimmed %>% 
-  as_tibble %>% 
-  left_join(d.lifespan.upham, by='node') %>% 
-### Cancer Susceptibility
-  mutate(
-    K1 = (Lifespan)^6 * exp(lnSize),
-    lnK1 = 6*log(Lifespan) + lnSize
-  )
-
-cancerSucceptibility.Atlantogenata.table <- tree.size.lifespan.Atlantogenata.full.table %>% 
-  mutate(
-    Ancestor = label %>% 
-      sapply(
-        .,
-        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
-          if(is.na(n)){return(NA)}
-          #print(n)
-          #print(length(n))
-          p.node <- d %>% filter(label==n) %>% pull(parent) %>% unique
-          d %>% filter(node == p.node) %>% pull(label) %>% unique %>% return
-        }
-      ) %>% str_replace_all("\\.", " ") %>% 
-      str_replace("Root", "Atlantogenata"),
-    K2 = parent %>% 
-      sapply(
-        .,
-        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
-          d %>% filter(node==n) %>% pull(K1) %>% unique
-        }
-      ),
-    lnK2 = parent %>% 
-      sapply(
-        .,
-        function(n, d=tree.size.lifespan.Atlantogenata.full.table){
-          d %>% filter(node==n) %>% pull(lnK1) %>% unique
-        }
-      ),
-    CancerSucceptabilityChange = K2/K1,
-    log2CancerSucceptabilityChange = log2(K2)-log2(K1),
-    label = label %>% str_replace_all("\\.", " ")
-  )
-
-```
-
 ## MAST
 
 ```{r}
@@ -847,11 +716,11 @@ cancerSucceptibility.Atlantogenata.table <- tree.size.lifespan.Atlantogenata.ful
 tip_order = c("Myotis_auriculus", "Myotis_californicus", "Myotis_evotis", "Myotis_thysanodes", "Myotis_lucifugus", "Myotis_occultus", "Myotis_velifer", "Myotis_yumanensis", "Myotis_myotis", "Myotis_volans")
 
 
-gtr.freq = read_table("../../analyses/phylo/output/iqtree/2023_04_28_genes/gene_trees/allTrees.uniq.top25.noPoly.nwk", col_names = c("g.freq", "tree"))
+gtr.freq = read_table("../data/trees/iqtree/2023_04_28_genes/gene_trees/allTrees.uniq.top25.noPoly.nwk", col_names = c("g.freq", "tree"))
 
 gtr.freq
 
-MAST.weights.chr1 <- read_table("../../analyses/phylo/output/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.treefilePlusWeights", col_names=c("weight", "tree.bl")) %>% 
+MAST.weights.chr1 <- read_table("../data/trees/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.treefilePlusWeights", col_names=c("weight", "tree.bl")) %>% 
   mutate(tree = tree.bl %>% str_remove_all(":[0-9.]+"))
 
 MAST.full <- left_join(MAST.weights.chr1, gtr.freq) %>% 
@@ -1035,10 +904,10 @@ Thinking about the MAST results: ILS/introgression results in a tree where two s
 
 ```{r MAST site likelihoods}
 library(data.table)
-sitelh <- fread("../../analyses/phylo/output/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.sitelh", skip = "#") %>% 
+sitelh <- fread("../data/trees/iqtree/2023_04_28_genes/MAST_TMIX-GTR_FO_I_G-T_byChr/SUPER__1/SUPER__1_noPoly.sitelh", skip = "#") %>% 
   melt(id.vars="Site")
 
-partitions <- read_table("../../analyses/phylo/data/genes/2023_04_28_genes/alignments_noATG_concat_byChr/SUPER__1/SUPER__1.partition", col_names=F) %>% 
+partitions <- read_table("../data/genes/2023_04_28_genes/alignments_noATG_concat_byChr/SUPER__1/SUPER__1.partition", col_names=F) %>% 
   select(gene=X2, range=X4) %>% 
   separate(range, c("start", "end"), sep="-") %>% 
   mutate(start=as.numeric(start), end=as.numeric(end)) %>% 

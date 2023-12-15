@@ -16,11 +16,11 @@ library(tidytree)
 library(ggtree)
 library(ape)
 library(naturalsort)
-library(taxiz)
+library(taxize)
 ```
 
 ```{r tree dataframe}
-df.chr.tr <- read_tsv('../../analyses/phylo/output/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
+df.chr.tr <- read_tsv('../data/trees/iqtree/20230411_genes_noempty_complete_concat_byChr/alltrees.scaffold.phylo.list', col_names=c("Chr", "phylo"))
 
 tip_order = c(
   "Myotis_lucifugus",
@@ -45,10 +45,11 @@ class(l.chr.tr) <- "multiPhylo"
 
 ```{r species tree }
 tr.species <- root.phylo(read.tree(text="(Myotis_auriculus:0.0049530287,(Myotis_californicus:0.0059138183,(((Myotis_lucifugus:0.0030514562,Myotis_occultus:0.0032471934)100/100:0.0020768353,(Myotis_velifer:0.0029764851,Myotis_yumanensis:0.0029904558)100/100:0.0038364895)100/100:0.0009882682,(Myotis_myotis:0.0131977455,Myotis_volans:0.0055379826)100/100:0.0012340035)100/100:0.0023012371)100/100:0.0009098871,(Myotis_evotis:0.0017915030,Myotis_thysanodes:0.0018269795)100/100:0.0020219079);"), outgroup = "Myotis_myotis", resolve.root = T)
+master.tree <- tr.species
 ```
 
 ```{r }
-upham.ml <- read.tree("../../data/tree/UphamEtAl2019_Dryad_doi_10.5061/Data_S3_globalRAxML_files/RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick")
+upham.ml <- read.tree("../data/trees/UphamEtAl2019_Dryad_doi_10.5061/RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick")
 
 upham.ml.ourbats <- upham.ml %>% 
   keep.tip(tip_order[str_detect(tip_order, "occultus", negate = T)] %>% str_c(., "_VESPERTILIONIDAE_CHIROPTERA"))
@@ -81,10 +82,6 @@ dd <- bind_rows(d1, d2) %>%
 
 pp + geom_line(aes(x, y, group=label), data=dd, color='grey') 
 
-
-
-
-
 ```
 
 
@@ -104,7 +101,7 @@ p.chr.trees
 
 
 ```{r Data: AnAge}
-anage <- read_tsv('../../data/lifehistory/anage_data.txt') %>% 
+anage <- read_tsv('../data/lifehistory/anage_data.txt') %>% 
   mutate(label = str_c(Genus, "_", Species)) %>% 
   rename(size = `Adult weight (g)`,
          lifespan = `Maximum longevity (yrs)`) %>% 
@@ -112,7 +109,7 @@ anage <- read_tsv('../../data/lifehistory/anage_data.txt') %>%
 ```
 
 ```{r Data: panTheria}
-panTheria <- read_tsv("../../data/lifehistory/PanTHERIA_1-0_WR05_Aug2008.txt") %>% 
+panTheria <- read_tsv("../data/lifehistory/PanTHERIA_1-0_WR05_Aug2008.txt") %>% 
   mutate(label = MSW05_Binomial %>% str_replace_all(" ", "_"),
          lifespan = `17-1_MaxLongevity_m` %>% divide_by(12)) %>% 
   rename(size = `5-1_AdultBodyMass_g`)
@@ -126,7 +123,7 @@ setdiff(panTheria$label, anage$label)
 
 
 ```{r Data: DBatVir}
-vir <- readxl::read_xls("../../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
+vir <- readxl::read_xls("../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
   mutate(
     label = `From bat` %>% 
       str_replace("^Myotis$", "Myotis_spc.") %>% 

@@ -31,7 +31,7 @@ col.busco <- c(
   
 )
   
-busco <- read_tsv("../../data/BUSCOs.tsv") %>% 
+busco <- read_tsv("../data/BUSCOs.tsv") %>% 
   pivot_longer(-Genome) %>% 
   mutate(name = name %>% factor(levels=rev(c('Complete', 'Single', 'Duplicated', 'Fragmented', 'Missing', 'N'))))
 
