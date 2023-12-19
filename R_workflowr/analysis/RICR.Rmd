@@ -54,6 +54,18 @@ lm_eqn = function(m) {
 
 
 ```{r data}
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
 tt.upham <- read_tsv('../data/trees/UphamEtAl2019_harmonizednames.tsv') %>% 
   select(newlab = label, label=submitted_name)
 tr.upham <- read.tree('../data/trees/UphamEtAl2019_harmonizednames.nwk')
@@ -342,6 +354,8 @@ tr.sizelife.lq <- augment(
 tr.sizelife.lq@phylo$tip.label=tr.sizelife.lq@extraInfo %>% filter(!str_detect(label.y, '\\d')) %>% pull(label.y)
 ```
 
+## Range Plots
+
 ```{r scales}
 size.scale <- tr.sizedata %>% as_tibble %>% pull(lnSize.median) %>% unique %>% as.numeric() %>% sort
 size.scale.min <- size.scale[1]
@@ -395,7 +409,11 @@ LQ.scale.expanded.min <- lifespan.scale.expanded[1]
 LQ.scale.expanded.max <- lifespan.scale.expanded[length(lifespan.scale.expanded)]
 ```
 
-```{r range plot size - bats, include=F}
+### Body Size
+
+#### Bats
+
+```{r range plot size - bats}
 p.bodysize.bats <- tr.sizedata  %>% 
   tidytree::tree_subset(MRCA(tr.sizedata, 'Myotis_lucifugus', 'Pteropus_vampyrus'), levels_back = 0) %>%
   as_tibble %>% 
@@ -454,7 +472,73 @@ p.bodysize.bats <- tr.sizedata  %>%
   )
 ```
 
-```{r rangePlot Lifespan - Bats, include=F}
+#### Myotis
+
+```{r range plot size - myotis}
+p.bodysize.myotis <- tr.sizedata  %>% 
+  tidytree::tree_subset(MRCA(tr.sizedata, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(lnSize.median) %>% 
+  mutate(
+    size.median = exp(lnSize.median),
+    size.low = exp(lnSize.low),
+    size.high = exp(lnSize.high)
+  ) %>% 
+  mutate(label = factor(label, levels=label)) %>% 
+  ggplot(
+    aes(
+      y=label,
+      # x=bs.median, 
+      # xmin=bs.low,
+      # xmax=bs.high
+      x=size.median, 
+      xmin=size.low,
+      xmax=size.high
+      )
+  ) +
+  geom_pointrange(size=0.5) +
+  geom_point(aes(color=lnSize.median), size=1) +
+  geom_point(aes(x=size.low, color=lnSize.low), size=1.5, stroke=2, pch="[") +
+  geom_point(aes(x=size.high, color=lnSize.high), size=1.5, stroke=2, pch="]") +
+  scale_color_distiller(limits=c(size.scale.expanded.min, size.scale.expanded.max), 
+                        palette = "Blues", 
+                        direction = 1,
+                        guide = guide_colorbar(
+                          title="Body size (log)",
+                          title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+                          title.position = "top",
+                          title.hjust = 0.5
+                          )
+                        ) +
+  labs(
+    x="Body size (log)",
+    y="Node"
+  ) + 
+  theme_pubclean()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+p.bodysize.myotis
+```
+
+### Lifespan
+
+#### Bats
+
+```{r rangePlot Lifespan - Bats}
 p.lifespan.bats <- tr.lifedata %>%
   tidytree::tree_subset(MRCA(tr.lifedata, 'Myotis_lucifugus', 'Pteropus_vampyrus'), levels_back = 0) %>%
   as_tibble %>% 
@@ -512,6 +596,71 @@ p.lifespan.bats <- tr.lifedata %>%
   )
 ```
 
+#### Myotis
+
+```{r rangePlot Lifespan - Myotis}
+p.lifespan.myotis <- tr.lifedata %>%
+  tidytree::tree_subset(MRCA(tr.lifedata, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(lnLife.median) %>% 
+  mutate(
+    life.median = exp(lnLife.median),
+    life.low = exp(lnLife.low),
+    life.high = exp(lnLife.high)
+  ) %>% 
+  mutate(label = factor(label, levels=label)) %>% 
+  ggplot(
+    aes(
+      y=label,
+      # x=lifespan.median, 
+      # xmin=lifespan.low,
+      # xmax=lifespan.high
+      x=life.median, 
+      xmin=life.low,
+      xmax=life.high
+      )
+  ) +
+  geom_pointrange(size=0.5) +
+  geom_point(aes(color=lnLife.median), size=1) +
+  geom_point(aes(x=life.low, color=lnLife.low), size=1.5, stroke=2, pch="[") +
+  geom_point(aes(x=life.high, color=lnLife.high), size=1.5, stroke=2, pch="]") +
+  scale_color_distiller(
+    palette = "Reds", direction = 1,
+    guide = guide_colorbar(
+      title="Lifespan (yrs)",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) + 
+  labs(
+    x="Lifespan (log)",
+    y="Node"
+  ) + 
+  theme_pubclean()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+p.lifespan.myotis
+```
+
+### LQ
+
+#### Bats
+
 ```{r rangePlot LQ - Bats, include=F}
 p.LQ.bats <- tr.sizelife.lq %>%
   tidytree::tree_subset(MRCA(tr.sizelife.lq, 'Myotis_lucifugus', 'Pteropus_vampyrus'), levels_back = 0) %>%
@@ -530,15 +679,15 @@ p.LQ.bats <- tr.sizelife.lq %>%
   geom_point(aes(color=LQ.median), size=1) +
   geom_point(aes(x=LQ.low, color=LQ.low), size=1.5, stroke=2, pch="[") +
   geom_point(aes(x=LQ.high, color=LQ.high), size=1.5, stroke=2, pch="]") +
-  scale_color_distiller(
-    palette = "Reds", direction = 1,
+  scale_color_viridis_c(
+    option = 'D',
     guide = guide_colorbar(
       title="LQ",
       title.theme =  element_text(size = 6, face = "bold", colour = "black"),
       title.position = "top",
       title.hjust = 0.5
     )
-  ) + 
+  ) +
   labs(
     x="LQ",
     y="Node"
@@ -561,6 +710,60 @@ p.LQ.bats <- tr.sizelife.lq %>%
     legend.position = "bottom"
   )
 p.LQ.bats
+```
+
+#### Myotis
+
+```{r rangePlot LQ - Myotis, include=F}
+p.LQ.myotis <- tr.sizelife.lq %>%
+  tidytree::tree_subset(MRCA(tr.sizelife.lq, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(LQ.median) %>% 
+  mutate(label = factor(label, levels=label)) %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=LQ.median, 
+      xmin=LQ.low,
+      xmax=LQ.high
+      )
+  ) +
+  geom_pointrange(size=0.5) +
+  geom_point(aes(color=LQ.median), size=1) +
+  geom_point(aes(x=LQ.low, color=LQ.low), size=1.5, stroke=2, pch="]") +
+  geom_point(aes(x=LQ.high, color=LQ.high), size=1.5, stroke=2, pch="[") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="LQ",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  labs(
+    x="LQ",
+    y="Node"
+  ) + 
+  theme_pubclean()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.LQ.myotis
 ```
 
 ```{r Time tree - all mammals}
@@ -1191,6 +1394,58 @@ p.dbltree.all <-
 
 p.dbltree.all
 ```
+
+
+### All together figure - Myotis
+
+```{r}
+p.tr.myotis <- tr.upham %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>% 
+  tidytree::tree_subset(MRCA(tr.upham %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>% 
+  ggtree() + 
+  geom_tiplab() + 
+  geom_nodelab(aes(label=label)) + 
+  xlim(c(NA, 50))
+
+library(patchwork)
+
+fig.myotis.sizelifelq <- (
+  (
+    p.tr.myotis
+  ) | 
+  (
+    (p.bodysize.myotis + theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)) / 
+    (p.lifespan.myotis + theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)) / 
+    (p.LQ.myotis + theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0))
+  ) 
+) +
+    # guide_area()  + 
+  plot_layout(width=c(2,1))+
+  plot_annotation(tag_levels = 'A') & 
+  theme_pubclean &
+  theme(legend.box='vertical',
+        legend.direction = 'vertical',
+        legend.key.height = unit(0.3, 'in'),
+        legend.key.width = unit(0.25, 'in'),
+        legend.key.size = unit(0.25, 'in'),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.tag = element_text(size = 8, face = 'bold'))
+
+fig.myotis.sizelifelq
+
+ggsave(
+  '../output/draft_figs/Myotis_size_life_LQ_upham.pdf', 
+  plot=fig.myotis.sizelifelq,
+  width = 5,
+  height = 6,
+  units = 'in',
+  dpi=300
+)
+
+```
+
 
 ## Cancer Succeptibility & RICR
 
