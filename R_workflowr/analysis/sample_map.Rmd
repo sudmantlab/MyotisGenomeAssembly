@@ -233,7 +233,7 @@ p.mapMyo.split
 #%>% plotly::ggplotly()
 ```
 
-```{r myotis pictures}
+```{r myotis pictures, eval=F}
 pic.myoLuc <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/108746-19-e1593640880404.jpg") %>% image_ggplot()
 pic.myoYum <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/106605-56-812x600.jpg") %>% image_ggplot()
 pic.myoCai <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/106608-56-812x600.jpg") %>% image_ggplot()
@@ -243,6 +243,18 @@ pic.myoThy <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/1064
 pic.myoOcc <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/Arizona-myotis-Rick-and-Nora-Bowers-Alamy-Stock-Photo--812x600.jpeg") %>% image_ggplot()
 pic.myoVel <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/106463-19-e1642201625671-812x600.jpg") %>% image_ggplot()
 pic.myoAui <- image_read("https://www.batcon.org/wp-content/uploads/2020/02/106475-19-e1593638188243-812x600.jpg") %>% image_ggplot()
+```
+
+```{r myotis pictures from file}
+pic.myoLuc <- image_read(path = '../data/img/batCon-myoLuc.jpg') %>% image_ggplot()
+pic.myoYum <- image_read("../data/img/batCon-myoYum.jpg") %>% image_ggplot()
+pic.myoCai <- image_read("../data/img/batCon-myoCai.jpg") %>% image_ggplot()
+pic.myoVol <- image_read("../data/img/batCon-myoVol.jpg") %>% image_ggplot()
+pic.myoEvo <- image_read("../data/img/batCon-myoEvo-Michael-DurhamMinden-PIctures.jpeg") %>% image_ggplot()
+pic.myoThy <- image_read("../data/img/batCon-myoThy.jpg") %>% image_ggplot()
+pic.myoOcc <- image_read("../data/img/batCon-myoOcc-Rick-and-Nora-Bowers-Alamy.jpeg") %>% image_ggplot()
+pic.myoVel <- image_read("../data/img/batCon-myoVel.jpg") %>% image_ggplot()
+pic.myoAui <- image_read("../data/img/batCon-myoAui.jpg") %>% image_ggplot()
 ```
 
 ```{r myotis ranges split with photo}

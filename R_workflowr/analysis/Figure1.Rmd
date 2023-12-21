@@ -12,6 +12,33 @@ editor_options:
 library(tidyverse)
 library(ggpubr)
 library(patchwork)
+library(grid)
+library(cowplot)
+library(sf)
+library(maps)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggspatial)
+
+## From: https://stackoverflow.com/questions/77188670/ggplot2-fix-absolute-size-of-ggplot-on-onscreen-device-rstudio-plots-pane
+draw <- function(plot, x_in = 2, y_in = 2) {
+  
+  grid::grid.newpage()
+  
+  grid::rectGrob(gp = grid::gpar(fill = "gray")) |>
+  grid::grid.draw()
+  
+  grid::viewport(width  = ggplot2::unit(x_in, "in"), 
+                 height = ggplot2::unit(y_in, "in")) |>
+    grid::pushViewport()
+  
+  ggplot2::ggplot_build(plot) |>
+    ggplot2::ggplot_gtable() |>
+    grid::grid.draw()
+}
+
+print.ggplot <- draw
+
 ```
 
 
@@ -31,7 +58,98 @@ library(patchwork)
 ```
 
 ```{r F1A}
-p.trNew.auNG.circ.altcolor.withLine
+
+lq <- read_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli.tsv') %>% 
+  select(label, LQ, lifespan) %>% 
+  filter(label %in% tr.genomes$tip.label)
+
+# setdiff(tr.genomes$tip.label,lq$label)
+tr.genomes.lq <- tr.genomes %>% 
+  tidytree::full_join(lq)
+
+p.trNew.auNG.circ.altcolor <-
+  tr.genomes.lq %>% 
+  ggtree(
+    aes(color=LQ),
+    layout = "fan", 
+    open.angle=180, 
+    branch.length = 'none'
+  ) +
+  scale_color_viridis_c(
+    'Longevity Quotient', option='D',na.value = 'black',
+    guide=guide_colorbar(title.position='top', title.hjust = 0.5,
+    title.theme = element_text(face='bold', hjust = 0.5, size=5))
+  ) +
+  ggnewscale::new_scale_color() + 
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_col,
+      mapping=aes(
+        y= label,
+        x = log(auNG),
+        color=color_me,
+        fill=color_me
+      ),
+      # color=NA,
+      orientation = 'y',
+      width = .6
+    ) + 
+    geom_fruit(
+      data = auNG.fancy.color,
+      geom = geom_richtext, 
+      mapping = aes(
+        y=label,
+        label=label_fancy,
+        color=color_me,
+        angle=sapply(angle,angle_rotate),
+        hjust=sapply(angle,h_readjust)
+      ),
+      fill = NA, 
+      label.color = NA,
+      fontface='italic',
+      size=5/.pt,
+      # offset=0.2,
+      label.padding = unit(rep(0,4), "pt"),
+    ) + 
+  # ) +
+  scale_color_manual("Origin", values = species_color, guide="none") +
+  scale_fill_manual("Origin", values = species_color, guide="none") #+
+  # theme(plot.margin = unit(c(0.3,0.5,0,0.5),"in"))
+
+t2t.base = p.trNew.auNG.circ.altcolor$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
+t2t.bartop = p.trNew.auNG.circ.altcolor$layers[[3]]$data %>% filter(label == 'Homo_sapiens') %>% pull(new_xtmp) +0.6#+   p.trNew.auNG.circ.altcolor$layers[[3]]$data %>% filter(label == 'Homo_sapiens') %>% pull(x)
+t2t.start = min(p.trNew.auNG.circ.altcolor$data$y)
+t2t.end = max(p.trNew.auNG.circ.altcolor$data$y)
+
+f1a <- p.trNew.auNG.circ.altcolor + 
+  geom_segment(
+    aes(
+      x = t2t.base + t2t.bartop,
+      xend = t2t.base + t2t.bartop,
+      y = t2t.start, 
+      yend = t2t.end
+    ),
+    linewidth=0.1, 
+    # lty='dashed'
+  ) + 
+  theme_void() + 
+  theme(
+    text=element_text(
+      family='Helvetica', 
+      size=5
+    ),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.position = c(0.5,0.45),
+    legend.key.width = unit(0.2, 'in'),
+    legend.key.height = unit(0.1, 'in'),
+    legend.direction = 'horizontal',
+    legend.box.margin = margin(0,0,0,0, unit='in'),
+    # legend.title = element_text(face='bold', hjust = 0.5, size=1)
+  )
+
+draw(f1a, x_in = 7, y_in = 4)
+
 ```
 ```{r}
 p.trNew.auNG.circ.altcolor.withLine %>% 
@@ -48,7 +166,129 @@ p.trNew.auNG.circ.altcolor.withLine %>%
 ```
 
 ```{r F1B}
-p.map.collections.caaznv
+
+datasheet.known.noYum <- 
+  datasheet.known %>% 
+  filter(species != "Myotis yumanensis")
+
+f1b <- ggplot() + 
+  geom_sf(
+    data= caaznv, 
+    color = "#ABB0B8", 
+    fill = "#6F7378", 
+    size = 0.1
+  ) +
+  geom_spatial_point(
+    data= datasheet.known.noYum %>% filter(!species %in% c('Myotis auriculus', 'Myotis volans')), 
+    aes(
+      x=Longitude, 
+      y=Lattitude, 
+      group=species, 
+      color=species
+  ), 
+  size=2.5
+  ) + 
+  geom_spatial_point(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis auriculus'), 
+    aes(
+      x=Longitude, 
+      y=Lattitude, 
+      group=species, 
+      color=species
+  ), 
+  size=2.5, 
+  shape="\u25D7"
+  ) + 
+  geom_spatial_point(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis volans'), 
+    aes(
+      x=Longitude, 
+      y=Lattitude, 
+      group=species, 
+      color=species
+  ), 
+  size=2.5, 
+  shape='\u25D6',
+  position=position_nudge(x=-0.4, y=0.02)
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis lucifugus'), 
+    aes(label=species, group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=8.5,
+    nudge_y=1
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis californicus'), 
+    aes(label=species, group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=8,
+    nudge_y=2
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis occultus'), 
+    aes(label=species %>% str_pad(width = str_length('Myotis auriculus')-1,side = 'both'), 
+        group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=-8.75,
+    nudge_y=1.17
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis velifer'), 
+    aes(label=species %>% str_pad(width = str_length('Myotis auriculus')+1,side = 'both'), 
+        group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=-9.4,
+    nudge_y=2.4
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis volans'), 
+    aes(label=species %>% str_pad(width = str_length('Myotis auriculus'),side = 'both'), 
+        group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, size=2, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=-11.4,
+    nudge_y=1.3
+  ) + 
+  geom_spatial_label(
+    data= datasheet.known.noYum %>% filter(species == 'Myotis auriculus'), 
+    aes(label=species %>% str_pad(width = str_length('Myotis auriculus')), 
+        group=species, y=Lattitude, x=Longitude, fill=species,
+    ),
+    show.legend=F, size=2, color='black', size=2, family='Helvetica', fontface='bold.italic',
+    nudge_x=-11.5,
+    nudge_y=-0.25
+  ) + 
+  scale_color_manual(
+    values = species_color %>% 
+      set_names(
+        ., 
+        names(.) %>% 
+          str_replace_all("_", " ")
+      )
+  ) +
+  scale_fill_manual(
+    values = species_color %>% 
+      set_names(., names(.) %>% str_replace_all("_", " "))
+  ) +
+  theme_pubr() + 
+  labs_pubr() + 
+  coord_sf(clip = 'off') + 
+  theme(
+    legend.position = "none",
+    text=element_text(
+      family='Helvetica', 
+      size=5
+    ),
+    plot.background = element_blank(),
+    plot.margin = margin(0,0.0,0,0.0,unit='in'),
+  )
+
+draw(f1b, x_in = 2, y_in = 2)
 ```
 
 ```{r}
@@ -67,7 +307,75 @@ p.map.collections.caaznv %>%
 ```
 
 ```{r F1C}
-p.busco
+f1c <- busco %>% 
+  filter(!name %in% c("N", "Complete")) %>% 
+  ggplot(
+    aes(
+      x = Genome,
+      fill = name,
+      y = value
+    )
+  ) + 
+  geom_bar(position="stack", stat = "identity") + 
+  geom_text(
+    data = busco %>% filter(name == "Complete"), 
+    mapping = aes(label=value %>% str_c(., "%"), y=0),
+    hjust=0,
+    family='Helvetica',
+    fontface='bold',
+    size=2
+  ) + 
+  geom_errorbar(
+    data = busco %>% filter(name == "Complete"), 
+    mapping = aes(
+      x = Genome, 
+      color=name,
+      y=value,
+      ymin=value,
+      ymax=value
+    ),
+    stat= 'identity',
+    fill=NA,
+    inherit.aes = F,
+    show.legend = F
+  ) + 
+  scale_fill_manual(
+    "Category", values = col.busco,
+    guide=guide_legend(
+      direction = 'vertical',
+      title.position='top', 
+      title.vjust = 0.5,
+      title.theme = element_text(
+        face='bold', 
+        hjust = 0.5, 
+        size=5
+      ),
+      # nrow = 2,
+      # ncol=3,
+      label.position = 'left'
+    )
+    ) + 
+  scale_y_continuous("Percentage", labels = scales::percent_format(scale = 1, accuracy=1)) + 
+  coord_flip() + 
+  theme_pubr() +
+  labs_pubr() + 
+  theme(
+    text=element_text(
+      family='Helvetica', 
+      size=5
+    ),
+    plot.margin = margin(0,0.0,0,0.0,unit='in'),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.position = 'left',
+    # legend.position = c(0,-0.5),
+    legend.key.width = unit(0.1, 'in'),
+    legend.key.height = unit(0.1, 'in'),
+    legend.margin = margin(0,0,0,0, unit='in'),
+    legend.justification = 'right'
+  )
+
+f1c
 ```
 
 ```{r}
@@ -85,36 +393,139 @@ p.busco %>%
 
 ## Version 1
 
-```{r Figure 1 V1}
-
+```{r Figure 1 via patchwork}
 f1v1.layout <- "
 AAAAAA
 AAAAAA
-BBCC##
-BBCC##
+BBCCDD
+BBCCDD
 "
 
-f1a <- p.tr.auNG.circ.altcolor + 
-  theme(
-    text=element_text(
-      family='helvetica', 
-      size=5
-    )
-  )
-
-f1b <- p.map.collections.caaznv + 
-  coord_sf(clip = 'off') + 
-  theme(
-    text=element_text(
-      family='helvetica', 
-      size=5
-    )
-  )
-
-f1c <- p.busco
-
-f1v1 <- f1a + f1b + plot_layout(design = f1v1.layout)
+f1v1 <- f1a + f1b + plot_spacer() + f1c + plot_layout(design = f1v1.layout) + plot_annotation(tag_levels = 'A')
 
 f1v1
+```
+
+## Version 2: using grid graphics
+
+```{r Figure 1 via Grid}
+
+vp.f1 <- viewport(
+  x=unit(0,'in'),
+  y=unit(0,'in'),
+  just = c("left", "bottom"),
+  name = "Fig1",
+  width = unit(5, 'in'),
+  height = unit(4, 'in'),
+)
+
+f1.blank <- rectGrob(
+  x=unit(0,'in'),
+  y=unit(0,'in'),
+  width = unit(5, 'in'),
+  height = unit(4, 'in'),
+  just = c("left", "bottom"),
+  gp = gpar(color='white', fill='white')
+)
+
+inset.f1a <- viewport(
+  name="f1a",
+  x = unit(0, 'in'), 
+  y = unit(0, 'in'), 
+  just = c("left", "bottom"),
+  width = unit(5, 'in'), 
+  height = unit(4, 'in')
+)
+
+
+inset.f1b <- viewport(
+  name="f1b",
+  x = unit(0, 'in'), 
+  y = unit(-0.15, 'in'), 
+  just = c("left", "bottom"),
+  width = unit(2.1, 'in'), 
+  height = unit(2.1, 'in')
+)
+
+inset.f1c <- viewport(
+  name="f1c",
+  x = unit(2.14, 'in'), 
+  y = unit(0, 'in'), 
+  just = c("left", "bottom"),
+  width = unit(2.85, 'in'), 
+  height = unit(1.8, 'in')
+)
+
+
+lab.A <- grid.text(
+  name = 'labA',
+    label= 'A',
+    x = unit(0, 'in'), 
+    y = unit(4, 'in'), 
+    just = c("left", "top"),
+    gp = gpar(
+      fontsize = 10,
+      fontfamily = 'Helvetica',
+      fontface = 'bold'
+    )
+  )
+
+lab.B <- grid.text(
+  name = 'labB',
+    label= 'B',
+    x = unit(0, 'in'), 
+    y = unit(1.95, 'in'), 
+    just = c("left", "top"),
+    gp = gpar(
+      fontsize = 10,
+      fontfamily = 'Helvetica',
+      fontface = 'bold'
+    )
+  )
+
+lab.C <- grid.text(
+  name = 'labC',
+    label= 'C',
+    x = unit(3.1, 'in'), 
+    y = unit(1.95, 'in'), 
+    just = c("left", "top"),
+    gp = gpar(
+      fontsize = 10,
+      fontfamily = 'Helvetica',
+      fontface = 'bold'
+    )
+  )
+
+cairo_pdf('../output/draft_figs/Draft_Figure1.pdf',width = 5, height = 4, onefile = T)
+# f1 <- grid.grabExpr({
+grid.newpage()
+
+vp_all <- vpTree(inset.f1a, vpList(inset.f1b, inset.f1c))
+pushViewport(vp_all)
+seekViewport('f1a')
+grid.draw(f1.blank)
+grid.draw(ggplotGrob(f1a+theme(plot.margin = margin(0.4,0.1,0.5,0,unit='in'))))
+
+grid.draw(lab.A)
+
+grid.draw(lab.B)
+
+grid.draw(lab.C)
+
+seekViewport('f1b')
+
+grid.draw(ggplotGrob(f1b))
+
+seekViewport('f1c')
+
+grid.draw(ggplotGrob(f1c))
+
+upViewport()
+
+# })
+
+# grid.newpage()
+# grid.draw(f1)
+dev.off()
 ```
 

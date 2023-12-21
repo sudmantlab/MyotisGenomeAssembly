@@ -391,7 +391,7 @@ enrichments <- lapply(
   names(sets)[1],
   function(n, s=sets, a=all_genes, e='pathway_Reactome', f=0.1, p = 'aBSREL'){
     run_ORA(
-      geneSet = s[[n]],
+      # geneSet = s[[n]],
   refGeneSet = a, 
   outputDirectory = paste0('../output/webGestalt/', n), 
   enrichmentDB = e, 

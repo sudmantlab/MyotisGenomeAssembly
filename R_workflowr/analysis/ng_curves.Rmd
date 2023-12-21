@@ -12,14 +12,16 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
 knitr::opts_chunk$set(crop = TRUE)
 library(tidyverse)
+library(ape)
 library(magrittr)
 library(ggpubr)
 library(patchwork)
 library(ggtree)
+library(tidytree)
 library(ggtreeExtra)
 library(ggtext)
 library(ggsci)
-# library(gridExtra)
+library(gridExtra)
 library(ragg)
 # library(gghighlight)
 # library(plotly)
@@ -27,16 +29,7 @@ library(ragg)
 
 ## Assembly Stats
 
-```{r assembly_stats}
-assembly_stats <- read_tsv("../data/assembly_stats/all_assembly_stats.contigs.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
-  mutate(contig = str_detect(genomeName, "contig")) %>% 
-  filter(str_detect(genomeName, "M_|mmyo|\\.chr", negate=T)) %>%
-  filter(str_detect(genomeName, "mMyo.+1(?!_unmasked)", negate=T)) %>%
-  separate(genomeName, c("name", "scaffold"), sep="\\.") %>% 
-  arrange(name, contig) %>% 
-  select(-scaffold) %>% 
-  mutate(name=name %>% str_remove("_unmasked"))
-
+```{r}
 our_genomes = c(
   "Myotis_auriculus",
   "Myotis_californicus",
@@ -49,6 +42,22 @@ our_genomes = c(
   "Myotis_thysanodes"
 )
 ```
+
+```{r assembly_stats, eval=F}
+assembly_stats <- read_tsv("../data/assembly_stats/all_assembly_stats.contigs.tsv", col_names = c("genomeName", "stat", "v1", "v2")) %>% 
+  mutate(contig = str_detect(genomeName, "contig")) %>% 
+  filter(str_detect(genomeName, "M_|mmyo|\\.chr", negate=T)) %>%
+  filter(str_detect(genomeName, "mMyo.+1(?!_unmasked)", negate=T)) %>%
+  separate(genomeName, c("name", "scaffold"), sep="\\.") %>% 
+  arrange(name, contig) %>% 
+  select(-scaffold) %>% 
+  mutate(name=name %>% str_remove("_unmasked"))
+```
+
+```{r assembly_stats from file}
+assembly_stats <- read_tsv('../data/assembly_stats/all_assembly_stats.cleaned.tsv')
+```
+
 
 ```{r metadata}
 meta <- read_tsv("../data/chiropteraGenomes-20230427.tsv") %>% 
@@ -64,8 +73,7 @@ meta.origin <- meta %>%
 
 assembly_stats.meta <- assembly_stats %>% 
   left_join(meta.origin, by="name") %>% 
-  replace_na(list(Origin="Other")) %>% 
-  mutate(
+  replace_na(list(Origin="Other"))%>% mutate(
     species = name %>% 
       str_replace("mMyoAui.*", "Myotis_auriculus") %>% 
       str_replace("mMyoCai.*", "Myotis_californicus") %>% 
@@ -156,7 +164,6 @@ plot.NGx.altCol.log
 ```
 
 ```{r NGx alt linear}
-
 plot.NGx.altCol <- assembly_stats.meta %>% 
   mutate(Origin = Origin %>% factor(levels=names(col.source))) %>% 
   filter(stat == "NGx",
@@ -172,7 +179,10 @@ plot.NGx.altCol <- assembly_stats.meta %>%
   labs_pubr() + 
   theme(legend.position = "bottom")
 plot.NGx.altCol
+```
 
+
+```{r eval=F}
 plot.NGx.altCol %>% ggsave(plot=., filename = "../output/NGx_curves.pdf", width = 6, height = 3.71, dpi=900, units = "in")
 ```
 
@@ -196,7 +206,10 @@ plot.NGx.altCol.t2tzoo <- assembly_stats.plotme %>%
   labs_pubr() + 
   theme(legend.position = "bottom")
 plot.NGx.altCol.t2tzoo
+```
 
+
+```{r eval=F}
 plot.NGx.altCol.t2tzoo %>% ggsave(plot=., filename = "../output/NGx_curves_onlyT2TZoonomia.pdf", width = 6, height = 3.71, dpi=900, units = "in")
 
 ```
@@ -231,7 +244,12 @@ auNG <- assembly_stats.meta %>%
          ) %>% 
   select(species, Origin, v2, v1) %>% 
   rename(label=species, auNG=v2, genomeSize=v1) %>% 
-  filter(!(str_detect(label, "lucifugus") & Origin=="Other"))
+  filter(!(str_detect(label, "lucifugus") & Origin=="Other")) %>% 
+  # a bug lead to an accidental dup when there was both a contig and a scaffold
+  group_by(label, Origin) %>% 
+  filter(auNG==max(auNG)) %>% 
+  ungroup
+  
 
 color_scale_origin = RColorBrewer::brewer.pal(n=auNG %>% pull(Origin) %>% unique %>% length, name="Dark2") %>% set_names(., auNG %>% pull(Origin) %>% unique)
 
@@ -298,15 +316,17 @@ p.tr.auNG <- tr %>%
 p.tr.auNG
 ```
 
-```{r phylo auNG circular}
-
+```{r auNG.fancy}
 auNG.fancy <- auNG %>% 
   mutate(
     label_fancy = sapply(label, . %>% if_else(. %in% our_genomes, str_c("**",.,"**"), .)) %>% 
       str_remove("_mesoamericanus") %>% 
       str_replace_all("_", " ")
   )
+```
 
+
+```{r phylo auNG circular}
 angle_rotate <- function(angle){
     # subset1 <- "(angle < 90 | angle > 270)"
     # subset2 <- "(angle >= 90 & angle <=270)"
@@ -364,8 +384,7 @@ p.tr.auNG.circ
 
 ```
 
-```{r phylo auNG circular map color}
-
+```{r prep stuff}
 species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
   set_names(., c(our_genomes, "Other"))
 
@@ -374,7 +393,10 @@ species_color["Other"] = "#7F7F7FFF"
 
 auNG.fancy.color <- auNG.fancy %>% 
   mutate(color_me = sapply(label, . %>% ifelse(. %in% our_genomes, ., "Other")))
+```
 
+
+```{r phylo auNG circular map color}
 p.tr.auNG.circ.altcolor <-
   tr %>%
   ggtree(layout = "fan", open.angle=180) +
@@ -437,7 +459,7 @@ p.tr.auNG.circ.altcolor.withLine <- p.tr.auNG.circ.altcolor +
 
 ## Updated Phylo
 
-```{r}
+```{r new phylo}
 tr.536 <- read.tree('../data/trees/536Mammals-rooted-nodeNames.nwk')
 
 tr.536$tip.label <- tr.536$tip.label %>% 

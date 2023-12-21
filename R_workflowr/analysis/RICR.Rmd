@@ -29,6 +29,8 @@ library(ggrepel)
 library(kableExtra)
 library(rphylopic)
 library(ggnewscale)
+library(patchwork)
+library(aplot)
 ```
 
 ```{r}
@@ -112,7 +114,7 @@ p.prediction <- df.lq %>%
   scale_color_d3(palette = 'category20') +
   facet_wrap(~Order, scales="free") +
   geom_smooth(method = 'lm') +
-  theme_pubclean() +
+  theme_pubr() +
   labs_pubr() +
   theme(legend.position = "none")
 p.prediction
@@ -453,7 +455,7 @@ p.bodysize.bats <- tr.sizedata  %>%
     x="Body size (log)",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -474,7 +476,7 @@ p.bodysize.bats <- tr.sizedata  %>%
 
 #### Myotis
 
-```{r range plot size - myotis}
+```{r range plot size - Myotis}
 p.bodysize.myotis <- tr.sizedata  %>% 
   tidytree::tree_subset(MRCA(tr.sizedata, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
   as_tibble %>% 
@@ -491,15 +493,15 @@ p.bodysize.myotis <- tr.sizedata  %>%
       # x=bs.median, 
       # xmin=bs.low,
       # xmax=bs.high
-      x=size.median, 
-      xmin=size.low,
-      xmax=size.high
+      x=lnSize.median, 
+      xmin=lnSize.low,
+      xmax=lnSize.high
       )
   ) +
-  geom_pointrange(size=0.5) +
-  geom_point(aes(color=lnSize.median), size=1) +
-  geom_point(aes(x=size.low, color=lnSize.low), size=1.5, stroke=2, pch="[") +
-  geom_point(aes(x=size.high, color=lnSize.high), size=1.5, stroke=2, pch="]") +
+  geom_pointrange(size=0.5, stroke=0.1) +
+  geom_point(aes(color=lnSize.median), size=0.5) +
+  # geom_point(aes(x=lnSize.low, color=lnSize.low), size=1.5, stroke=2, pch="[") +
+  # geom_point(aes(x=lnSize.high, color=lnSize.high), size=1.5, stroke=2, pch="]") +
   scale_color_distiller(limits=c(size.scale.expanded.min, size.scale.expanded.max), 
                         palette = "Blues", 
                         direction = 1,
@@ -514,7 +516,7 @@ p.bodysize.myotis <- tr.sizedata  %>%
     x="Body size (log)",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -560,10 +562,10 @@ p.lifespan.bats <- tr.lifedata %>%
       xmax=life.high
       )
   ) +
-  geom_pointrange(size=0.5) +
-  geom_point(aes(color=lnLife.median), size=1) +
-  geom_point(aes(x=life.low, color=lnLife.low), size=1.5, stroke=2, pch="[") +
-  geom_point(aes(x=life.high, color=lnLife.high), size=1.5, stroke=2, pch="]") +
+  geom_pointrange(size=0.5, stroke=0.5) +
+  geom_point(aes(color=lnLife.median), size=0.5) +
+  # geom_point(aes(x=life.low, color=lnLife.low), size=1.5, stroke=2, pch="[") +
+  # geom_point(aes(x=life.high, color=lnLife.high), size=1.5, stroke=2, pch="]") +
   scale_color_distiller(
     palette = "Reds", direction = 1,
     guide = guide_colorbar(
@@ -577,7 +579,7 @@ p.lifespan.bats <- tr.lifedata %>%
     x="Lifespan (log)",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -594,6 +596,7 @@ p.lifespan.bats <- tr.lifedata %>%
                                face = "plain", colour = "black"),
     legend.position = "bottom"
   )
+p.lifespan.bats
 ```
 
 #### Myotis
@@ -620,10 +623,10 @@ p.lifespan.myotis <- tr.lifedata %>%
       xmax=life.high
       )
   ) +
-  geom_pointrange(size=0.5) +
-  geom_point(aes(color=lnLife.median), size=1) +
-  geom_point(aes(x=life.low, color=lnLife.low), size=1.5, stroke=2, pch="[") +
-  geom_point(aes(x=life.high, color=lnLife.high), size=1.5, stroke=2, pch="]") +
+  geom_pointrange(size=0.5, stroke=0.5) +
+  geom_point(aes(color=life.median), size=0.5) +
+  # geom_point(aes(x=life.low, color=life.low), size=1.5, stroke=2, pch="[") +
+  # geom_point(aes(x=life.high, color=life.high), size=1.5, stroke=2, pch="]") +
   scale_color_distiller(
     palette = "Reds", direction = 1,
     guide = guide_colorbar(
@@ -637,7 +640,7 @@ p.lifespan.myotis <- tr.lifedata %>%
     x="Lifespan (log)",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -692,7 +695,7 @@ p.LQ.bats <- tr.sizelife.lq %>%
     x="LQ",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -745,7 +748,7 @@ p.LQ.myotis <- tr.sizelife.lq %>%
     x="LQ",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   theme(
     text = element_text(face = "plain", 
@@ -1403,12 +1406,17 @@ p.tr.myotis <- tr.upham %>%
   keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>% 
   tidytree::tree_subset(MRCA(tr.upham %>%
   keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>% 
-  ggtree() + 
-  geom_tiplab() + 
-  geom_nodelab(aes(label=label)) + 
+  ggtree(
+    size=1
+  ) + 
+  geom_tiplab(
+    size=3
+  ) + 
+  geom_nodelab(
+    aes(label=label)
+  ) + 
   xlim(c(NA, 50))
 
-library(patchwork)
 
 fig.myotis.sizelifelq <- (
   (
@@ -1423,7 +1431,7 @@ fig.myotis.sizelifelq <- (
     # guide_area()  + 
   plot_layout(width=c(2,1))+
   plot_annotation(tag_levels = 'A') & 
-  theme_pubclean &
+  # theme_pubr() &
   theme(legend.box='vertical',
         legend.direction = 'vertical',
         legend.key.height = unit(0.3, 'in'),
@@ -1614,3 +1622,695 @@ p.RICR.bats
 It seems like overall, there's not much change in cancer risk at nodes within the tree - all the changes happen at the tips. Within the root of _Myotis_, the RICR changes are small (<1). In both megabats and microbats, changes in RICR within the tree are relatively small but dynamic - this is probably due to the density of species in such a short period of time compared to what I'm used to in elephants and other large-bodied mammals. 
 
 At the common ancestor of Grey myotis and the other bats, there's a series of small increases in RICR (3.8, 0.99, 4.24, 0.65) from the common ancestor until you get to _grisescens_ -  then there's a big drop (-12.7) in RICR. Brandt's bat is the longest-lived bat and the daughter of a short-lived node, so it makes sense that there's a big drop there (-0.22 to -6.8). All of our _Myotis_ show drops in RICR, especially for _lucifugus_ (-4.1). Note that for _Myotis myotis_, while it has a low drop in RICR (-1.0), its most recent ancestor had a larger drop (-3.2). The second greatest drop in RICR in in Megabats, in _Pteropus gigantus_ (-7.3).  
+
+### RICR-based version of bat fig
+
+```{r RangePlot RICR - Myotis}
+p.RICR.myotis <- tr.cancerSucceptibility %>%
+  tidytree::tree_subset(MRCA(tr.cancerSucceptibility, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(log2CancerSucceptabilityChange) %>% 
+  mutate(label = factor(label, levels=label)) %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) + 
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  # geom_point(aes(x=LQ.low, color=LQ.low), size=1.5, stroke=2, pch="]") +
+  # geom_point(aes(x=LQ.high, color=LQ.high), size=1.5, stroke=2, pch="[") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  labs(
+    x="RICR",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis
+```
+
+```{r RangePlot RICR v2 - Myotis}
+tbl.RICR.myotis2 <- tr.cancerSucceptibility %>%
+  tidytree::tree_subset(MRCA(tr.cancerSucceptibility, 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(lnK1) %>% 
+  mutate(label = str_replace_all(label, "_", " ")) %>% 
+  mutate(label = factor(label, levels=label))
+
+high.K <- tbl.RICR.myotis2$label[str_detect(tbl.RICR.myotis2$label, "Myotis myotis")]
+mid.K <- tbl.RICR.myotis2$label[str_detect(
+  tbl.RICR.myotis2$label, 
+  # "Myotis_septentrionalis"
+  "1668"
+)]
+low.K = tbl.RICR.myotis2$label[str_detect(tbl.RICR.myotis2$label, "Myotis auriculus")]
+
+p.RICR.myotis2 <- tbl.RICR.myotis2 %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=lnK1
+      )
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=lnK2, xend=lnK1,
+        color=log2CancerSucceptabilityChange),
+    arrow = arrow(length = unit(0.1, 'cm'),type='closed')
+  ) + 
+  geom_point(aes(x=lnK2), size=2, shape="|") +
+  geom_segment(
+    aes(
+      y=high.K,
+      yend = mid.K,
+      x=-Inf,
+      xend=-Inf
+    ),
+    color='blue',
+    size=2
+  )+
+  geom_segment(
+    aes(
+      y=mid.K,
+      yend = low.K,
+      x=-Inf,
+      xend=-Inf
+    ),
+    color='red',
+    size=2
+  )+
+  # geom_point(aes(x=LQ.low, color=LQ.low), size=1.5, stroke=2, pch="]") +
+  # geom_point(aes(x=LQ.high, color=LQ.high), size=1.5, stroke=2, pch="[") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  labs(
+    x="Cancer Risk",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  guides(
+    shape = guide_legend()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis2
+```
+
+```{r RangePlot RICR v3 - Myotis}
+p.RICR.myotis3.plot <- tbl.RICR.myotis2 %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=lnK1
+      )
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=lnK2, xend=lnK1,
+        color=log2CancerSucceptabilityChange),
+    arrow = arrow(length = unit(0.2, 'cm'),type='closed')
+  ) + 
+  geom_point(aes(x=lnK2), size=2, shape="|") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_x_continuous(limits=c(9.5,30)) +
+  labs(
+    x="Cancer Risk",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() +
+  theme(
+    text = element_text(face = "plain",
+                        colour = "black", lineheight = 0.9,
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(),
+                        debug = FALSE),
+    axis.text = element_text(size = 6,
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8,
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8,
+                              colour = "black", lineheight = 1, face = "bold"),
+    axis.text.y = element_blank(), 
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    legend.text = element_text(size = 6,
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.tiles <- tbl.RICR.myotis2 %>% 
+  ggplot(
+    aes(
+      x=0,
+      y=label,
+      fill=lnK1
+    )
+  ) + 
+    geom_tile(
+    width=0.25,
+    height=0.5,
+    color='black'
+  ) +
+    scale_fill_viridis_c(
+    option = 'B',
+    guide = guide_colorbar(
+      title="Cancer Risk (log)",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) + 
+  theme_void() +
+  theme(
+    legend.position = 'bottom'
+  )
+
+p.RICR.myotis.text <- tbl.RICR.myotis2 %>% 
+  ggplot(
+    aes(
+      x=0,
+      y=label,
+      label=label
+    )
+  ) + 
+    geom_text(
+      hjust=1, 
+      size=2.5,
+      fontface='bold.italic'
+    ) +  
+  xlim(c(-0.025,0)) + 
+  theme_void() +
+  theme(
+    legend.position = 'bottom'
+  )
+
+p.RICR.myotis3 <- (p.RICR.myotis.text + 
+  p.RICR.myotis.tiles + 
+  p.RICR.myotis3) + 
+  # guide_area() + 
+  plot_layout(guides='collect',widths = c(0.3,0.01,1)) & 
+  theme(
+    legend.position = 'bottom',
+    legend.text = element_text(size = 6,
+                               face = "plain", colour = "black"),
+  )
+   
+p.RICR.myotis3
+
+ggsave(
+  '../output/subfigs/myotis_RICR_v3.pdf',
+  p.RICR.myotis3,
+  height = 5,
+  width = 8,
+  units = 'in',
+  dpi=300
+)
+ggsave(
+  '../output/subfigs/myotis_RICR_v3.png',
+  p.RICR.myotis3,
+  height = 5,
+  width = 8,
+  units = 'in',
+  dpi=300
+)
+
+```
+
+```{r myotis-only size-life-RICR fig}
+
+p.tr.myotis <- tr.cancerSucceptibility %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>% 
+  tidytree::tree_subset(MRCA(tr.upham %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>% 
+  ggtree(
+    size=1
+  ) + 
+  geom_tiplab(
+    size=3
+  ) + 
+  geom_nodelab(
+    aes(label=label),
+    geom = 'shadowtext',
+    color='white',
+    fill='black',
+    hjust=1.5,
+    vjust=-0.2,
+    size=2.5,
+  ) + 
+  xlim(c(NA, 50))
+
+
+fig.myotis.sizelifericr <- (
+  (
+    p.tr.myotis
+  ) | 
+  (
+    (p.bodysize.myotis + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     ) / 
+    (p.lifespan.myotis + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     ) / 
+    (p.RICR.myotis2 + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     )
+  ) 
+) +
+    # guide_area()  + 
+  plot_layout(width=c(1,2))+
+  plot_annotation(tag_levels = 'A') & 
+  theme(legend.box='vertical',
+        legend.direction = 'vertical',
+        legend.key.height = unit(0.3, 'in'),
+        legend.key.width = unit(0.25, 'in'),
+        legend.key.size = unit(0.25, 'in'),
+        # axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.tag = element_text(size = 8, face = 'bold'))
+
+fig.myotis.sizelifericr
+
+ggsave(
+  '../output/draft_figs/Myotis_size_life_RICR_upham.pdf', 
+  plot=fig.myotis.sizelifericr,
+  width = 8,
+  height = 6,
+  units = 'in',
+  dpi=300
+)
+```
+
+```{r Bat averages}
+# tr.RICR.chiroptera %>% ggtree(layout='circular') + geom_tiplab2()
+
+node.myotis = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Myotis_emarginatus')
+node.vespertilionidae = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Lasiurus_cinereus')
+node.molossidae = MRCA(tr.RICR.chiroptera, 'Molossus_molossus', 'Chaerephon_pumilus')
+node.phyllostomidae = MRCA(tr.RICR.chiroptera, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
+node.yinpterochiroptera = MRCA(tr.RICR.chiroptera, 'Macroderma_gigas', 'Pteropus_giganteus')
+node.yangochiroptera = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Mystacina_tuberculata') 
+
+tr.RICR.myotis <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.myotis, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Myotis',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+tr.RICR.vespertilionidae <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.vespertilionidae, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Vespertilionidae',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+tr.RICR.molossidae <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.molossidae, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Molossidae',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+tr.RICR.phyllostomidae <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.phyllostomidae, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Phyllostomidae',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+tr.RICR.yinpterochiroptera <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.yinpterochiroptera, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Yinpterochiroptera',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+tr.RICR.yangochiroptera <- tr.RICR.chiroptera %>%
+  tidytree::tree_subset(node.yangochiroptera, levels_back = 0) %>%
+  as_tibble %>% 
+  summarize(
+    label='Yangochiroptera',
+    lnSize.median = mean(lnSize.median),
+    lnLife.median = mean(lnLife.median),
+    lnSize.low = mean(lnSize.low),
+    lnLife.low = mean(lnLife.low),
+    lnSize.high = mean(lnSize.high),
+    lnLife.high = mean(lnLife.high),
+    lnK1 = mean(lnK1),
+    lnK2 = mean(lnK2),
+    log2CancerSucceptabilityChange = mean(log2CancerSucceptabilityChange)
+  )
+
+tr.RICR.summary <- 
+  bind_rows(
+    tr.RICR.myotis,
+    tr.RICR.vespertilionidae,
+    tr.RICR.molossidae,
+    tr.RICR.phyllostomidae,
+    tr.RICR.yinpterochiroptera,
+    tr.RICR.yangochiroptera,
+  )
+
+
+phyloOrder <- p.tr.myotis$data %>% 
+  select(label, y) %>% 
+  arrange(desc(y)) %>% 
+  pull(label) %>% 
+  c(tr.RICR.summary$label) %>% 
+  str_replace_all("_", " ") %>% 
+  rev
+
+tbl.RICR.myotis.withSummary <- 
+  tbl.RICR.myotis2 %>% 
+  select(label, lnSize.median, lnLife.median, lnSize.low, lnLife.low, lnSize.high, lnLife.high, lnK1, lnK2, log2CancerSucceptabilityChange) %>% 
+  bind_rows(tr.RICR.summary) %>% 
+  mutate(label=factor(label, levels=phyloOrder)) %>% 
+  arrange(label)
+
+```
+
+```{r RICR with Summarized Data - Myotis}
+p.RICR.myotis.sum <- tbl.RICR.myotis.withSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=lnK1
+      )
+  ) +
+  geom_rect(
+    aes(
+      ymin=factor("Myotis", levels=phyloOrder),
+      ymax=factor("Yangochiroptera", levels=phyloOrder),
+      xmin=-Inf, 
+      xmax=Inf
+    ), 
+    color='beige',
+    fill='beige'
+  ) + 
+  geom_segment(
+    aes(y=label, yend=label,
+        x=lnK2, xend=lnK1,
+        color=log2CancerSucceptabilityChange),
+    arrow = arrow(length = unit(0.1, 'cm'),type='closed')
+  ) + 
+  geom_point(aes(x=lnK2), size=2, shape="|") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  labs(
+    x="Cancer Risk",
+    y="Node"
+  ) + 
+  theme_pubclean()+
+  labs_pubr() + 
+  guides(
+    shape = guide_legend()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sum
+```
+
+```{r Body Size with Summarized Data - Myotis}
+p.bodysize.myotis.sum <- tbl.RICR.myotis.withSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=lnSize.median, 
+      xmin=lnSize.low,
+      xmax=lnSize.high
+      )
+  ) +
+  geom_rect(
+    aes(
+      ymin=factor("Myotis", levels=phyloOrder),
+      ymax=factor("Yangochiroptera", levels=phyloOrder),
+      xmin=-Inf, 
+      xmax=Inf
+    ), 
+    color='beige',
+    fill='beige'
+  ) + 
+  geom_pointrange(size=0.5, stroke=0.1) +
+  geom_point(aes(color=lnSize.median), size=0.5) +
+  scale_color_distiller(limits=c(size.scale.expanded.min, size.scale.expanded.max), 
+                        palette = "Blues", 
+                        direction = 1,
+                        guide = guide_colorbar(
+                          title="Body size (log)",
+                          title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+                          title.position = "top",
+                          title.hjust = 0.5
+                          )
+                        ) +
+  labs(
+    x="Body size (log)",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+p.bodysize.myotis.sum
+```
+
+```{r lifespan with summarized data - Myotis}
+p.lifespan.myotis.sum <- tbl.RICR.myotis.withSummary %>% 
+  mutate(
+    life.median = exp(lnLife.median),
+    life.low = exp(lnLife.low),
+    life.high = exp(lnLife.high)
+  ) %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=life.median, 
+      xmin=life.low,
+      xmax=life.high
+      )
+  ) +
+  geom_rect(
+    aes(
+      ymin=factor("Myotis", levels=phyloOrder),
+      ymax=factor("Yangochiroptera", levels=phyloOrder),
+      xmin=-Inf, 
+      xmax=Inf
+    ), 
+    color='beige',
+    fill='beige'
+  ) + 
+  geom_pointrange(size=0.5, stroke=0.5) +
+  geom_point(aes(color=life.median), size=0.5) +
+  scale_color_distiller(
+    palette = "Reds", direction = 1,
+    guide = guide_colorbar(
+      title="Lifespan (yrs)",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) + 
+  labs(
+    x="Lifespan (log)",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+p.lifespan.myotis.sum
+```
+
+```{r Myotis+Summary Size-Life-RICR fig}
+
+fig.myotis.sizelifericr.sum <- (
+  (
+    p.tr.myotis
+  ) | 
+  (
+    (p.bodysize.myotis.sum + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     ) / 
+    (p.lifespan.myotis.sum + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     ) / 
+    (p.RICR.myotis.sum + 
+       # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
+       theme(legend.position = 'none')
+     )
+  ) 
+) +
+    # guide_area()  + 
+  plot_layout(width=c(1,2))+
+  plot_annotation(tag_levels = 'A') & 
+  theme(legend.box='vertical',
+        legend.direction = 'vertical',
+        legend.key.height = unit(0.3, 'in'),
+        legend.key.width = unit(0.25, 'in'),
+        legend.key.size = unit(0.25, 'in'),
+        # axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.tag = element_text(size = 8, face = 'bold'))
+
+fig.myotis.sizelifericr.sum
+
+ggsave(
+  '../output/draft_figs/Myotis_size_life_RICR_upham_withSummary.pdf', 
+  plot=fig.myotis.sizelifericr.sum,
+  width = 7,
+  height = 8.5,
+  units = 'in',
+  dpi=300
+)
+```
