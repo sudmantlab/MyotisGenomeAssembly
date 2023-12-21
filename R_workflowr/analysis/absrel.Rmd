@@ -76,7 +76,7 @@ df.val %>%
 ```
 
 
-```{r Volcano plot}
+```{r Volcano plot 2}
 df.val %>% 
   ggplot(
     aes(
