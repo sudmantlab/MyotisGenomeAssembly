@@ -189,7 +189,7 @@ cols_set <- c(
 ```{r full Upset}
 UpSet(
   m1,
-  set_order = set_order,
+  set_order = order_set,
   comb_order = order_cols,
   comb_col = cols_comb[comb_name(m1)],
 )
@@ -205,7 +205,7 @@ order_cols_sub = c(
 
 u1 <- UpSet(
   subset_m,
-  set_order = set_order,
+  set_order = order_set,
   comb_col = cols_comb[comb_name(subset_m)],
   left_annotation = rowAnnotation(
     set_name = anno_text(
