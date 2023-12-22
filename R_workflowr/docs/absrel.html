@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="docmanny" />
+
+<meta name="date" content="2023-11-08" />
+
+<title>absrel</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Myotis Genome Analyses</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">absrel</h1>
+<h4 class="author">docmanny</h4>
+<h4 class="date">2023-11-08</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-12-21
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
+<span class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230501code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230501)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230501code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230501)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree16e2cd735eb6682a4003fd708052f09b3b1c0f93targetblank16e2cd7a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/16e2cd735eb6682a4003fd708052f09b3b1c0f93" target="_blank">16e2cd7</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree16e2cd735eb6682a4003fd708052f09b3b1c0f93targetblank16e2cd7a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/16e2cd735eb6682a4003fd708052f09b3b1c0f93" target="_blank">16e2cd7</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    R_workflowr/.Rproj.user/
+    Ignored:    R_workflowr/analysis/figure/
+    Ignored:    R_workflowr/data/
+    Ignored:    R_workflowr/output/pubFiles/
+    Ignored:    R_workflowr/output/webGestalt/
+    Ignored:    R_workflowr/renv/library/
+    Ignored:    R_workflowr/renv/staging/
+    Ignored:    R_workflowr/test.phy
+
+Unstaged changes:
+    Modified:   R_workflowr/output/subfigs/phylo_auNG_circ_col_withLine.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>R_workflowr/analysis/absrel.Rmd</code>)
+and HTML (<code>R_workflowr/docs/absrel.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/16e2cd735eb6682a4003fd708052f09b3b1c0f93/R_workflowr/analysis/absrel.Rmd" target="_blank">16e2cd7</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-21
+</td>
+<td>
+bugfix: refactor error
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/ec8e248b6f72a716e0a55e59ea8ea33ee6590d24/R_workflowr/analysis/absrel.Rmd" target="_blank">ec8e248</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-21
+</td>
+<td>
+bugfix: duplicate chunk name
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/8f66d05c66fd494567461d74f4110a0876566489/R_workflowr/analysis/absrel.Rmd" target="_blank">8f66d05</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-21
+</td>
+<td>
+clean version of Fig 1, now with LQ
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/77bd637f40e2cced911c2e548ddda6f92674f59b/R_workflowr/analysis/absrel.Rmd" target="_blank">77bd637</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-19
+</td>
+<td>
+added more figs
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/analysis/absrel.Rmd" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+<td>
+draft sub figs for F1&amp;2
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.3     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(ggpubr)
+library(ComplexHeatmap)</code></pre>
+<pre><code>Loading required package: grid
+========================================
+ComplexHeatmap version 2.14.0
+Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+Github page: https://github.com/jokergoo/ComplexHeatmap
+Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
+
+If you use it in published research, please cite either one:
+- Gu, Z. Complex Heatmap Visualization. iMeta 2022.
+- Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+    genomic data. Bioinformatics 2016.
+
+
+The new InteractiveComplexHeatmap package can directly export static 
+complex heatmaps into an interactive Shiny app with zero effort. Have a try!
+
+This message can be suppressed by:
+  suppressPackageStartupMessages(library(ComplexHeatmap))
+========================================</code></pre>
+<pre class="r"><code>library(WebGestaltR)</code></pre>
+<pre><code>******************************************
+
+*                                        *
+
+*          Welcome to WebGestaltR !      *
+
+*                                        *
+
+******************************************</code></pre>
+<pre class="r"><code>library(ggnewscale)
+library(ggrepel)
+library(grid)
+library(cowplot)</code></pre>
+<pre><code>
+Attaching package: &#39;cowplot&#39;
+
+The following object is masked from &#39;package:ggpubr&#39;:
+
+    get_legend
+
+The following object is masked from &#39;package:lubridate&#39;:
+
+    stamp</code></pre>
+<pre class="r"><code>df &lt;- read_tsv(&#39;../data/absrel_highlight/BatsOnly_LQ_quartile4-branchAttributes.csv&#39;)</code></pre>
+<pre><code>Rows: 862510 Columns: 13
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;\t&quot;
+chr  (3): species, gene, original name
+dbl (10): Baseline MG94xREV, Baseline MG94xREV omega ratio, Corrected P-valu...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>tt &lt;- read_csv(&#39;../data/Myotis_alignments_sequence_map_files_20230622 - Myotis_alignments_sequence_map_files_20230622.csv&#39;)</code></pre>
+<pre><code>Rows: 23080 Columns: 16
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (13): human_ID, human_gene_name, myotis_ali_fn, velifer_ID, auriculus_ID...
+dbl  (1): nb_myotis_sp
+lgl  (2): velifer_human_onetoone, velifer_human_strongblast
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>df.lq.bats.ntiles &lt;- read_tsv(&#39;../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli_hasNTiles.tsv&#39;)</code></pre>
+<pre><code>Rows: 106 Columns: 13
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;\t&quot;
+chr  (2): label, Order
+dbl (10): size, lifespan, predLife, LQ, decile, septile, quintile, quartile,...
+lgl  (1): has.ali
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>df.tt &lt;- df  %&gt;% 
+  left_join(
+    tt,
+    by=c(&#39;gene&#39; = &#39;myotis_ali_fn&#39;)
+  ) %&gt;% 
+  mutate(p.val = `Corrected P-value`)
+  
+all_genes &lt;- df.tt %&gt;% 
+  pull(human_gene_name) %&gt;% 
+  unique</code></pre>
+<pre class="r"><code>our_genomes = c(
+  &quot;Myotis_auriculus&quot;,
+  &quot;Myotis_californicus&quot;,
+  &quot;Myotis_occultus&quot;,
+  &quot;Myotis_lucifugus&quot;,
+  &quot;Myotis_yumanensis&quot;,
+  &quot;Myotis_volans&quot;,
+  &quot;Myotis_velifer&quot;,
+  &quot;Myotis_evotis&quot;,
+  &quot;Myotis_thysanodes&quot;
+)
+
+species_color = ggsci::pal_d3(palette = &quot;category20&quot;)(length(our_genomes)+1) %&gt;% 
+  set_names(., c(our_genomes, &quot;Other&quot;))
+
+species_color[&quot;Myotis_evotis&quot;] = &quot;#17BECF&quot;
+species_color[&quot;Other&quot;] = &quot;#7F7F7F&quot;</code></pre>
+<pre class="r"><code>df.val &lt;- df %&gt;% 
+  select(species, gene, LRT, p.val = `Corrected P-value`) %&gt;% 
+  filter(!is.na(p.val))</code></pre>
+<pre class="r"><code>df.val %&gt;% 
+  group_by(species) %&gt;% 
+  summarize(
+    n = n(),
+    n.sig = sum(p.val&lt;=0.05)
+  )</code></pre>
+<pre><code># A tibble: 9 × 3
+  species                       n n.sig
+  &lt;chr&gt;                     &lt;int&gt; &lt;int&gt;
+1 Desmodus_rotundus         15596   231
+2 Miniopterus_schreibersii  14280   120
+3 Myotis_brandtii           14033   408
+4 Myotis_evotis             16307   168
+5 Myotis_lucifugus          16430   207
+6 Myotis_myotis             14560   317
+7 Myotis_occultus           16316   203
+8 Myotis_volans             16321   210
+9 Rhinolophus_ferrumequinum 15752   325</code></pre>
+<pre class="r"><code>df.val %&gt;% 
+  ggplot(
+    aes(
+      x=LRT, 
+      y=p.val,
+      color=species
+    )
+  ) +
+  geom_point() + 
+  facet_wrap(vars(species), scales=&#39;free&#39;) + 
+  theme_pubr() + 
+  theme(legend.position = &#39;none&#39;) + 
+  labs_pubr()</code></pre>
+<p><img src="figure/absrel.Rmd/Volcano%20plot%202-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggpubr::gghistogram(df.val %&gt;% mutate(p.val=p.val), x=&quot;p.val&quot;,bins=100) +
+  facet_wrap(vars(species)) + 
+  scale_y_log10()</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
+<p><img src="figure/absrel.Rmd/Volcano%20plot%202-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  # theme_pubr() + 
+  # labs_pubr()</code></pre>
+<pre class="r"><code>df.val.geneID &lt;- df.tt %&gt;% 
+  filter(p.val&lt;=0.05)
+
+list.geneid &lt;- df.val.geneID %&gt;% 
+  select(species, human_gene_name) %&gt;% 
+  group_split(species)
+list.geneid &lt;- 
+  magrittr::set_names(list.geneid, list.geneid %&gt;% sapply(. %&gt;% pull(species) %&gt;% unique)) %&gt;%
+  lapply(pull, human_gene_name)</code></pre>
+<pre class="r"><code>mat.absrel &lt;- list_to_matrix(list.geneid)
+
+m1 &lt;-  make_comb_mat(mat.absrel)
+
+set_name(m1)</code></pre>
+<pre><code>[1] &quot;Desmodus_rotundus&quot;         &quot;Miniopterus_schreibersii&quot; 
+[3] &quot;Myotis_brandtii&quot;           &quot;Myotis_evotis&quot;            
+[5] &quot;Myotis_lucifugus&quot;          &quot;Myotis_myotis&quot;            
+[7] &quot;Myotis_occultus&quot;           &quot;Myotis_volans&quot;            
+[9] &quot;Rhinolophus_ferrumequinum&quot;</code></pre>
+<pre class="r"><code>cols_comb_core &lt;- c(
+  &quot;000010000&quot; = species_color[[&#39;Myotis_lucifugus&#39;]],  # myoLuc
+  &quot;000000100&quot; = species_color[[&#39;Myotis_occultus&#39;]],  # myoOcc
+  &quot;000100000&quot; = species_color[[&#39;Myotis_evotis&#39;]],  # myoEvo
+  &quot;000000010&quot; = species_color[[&#39;Myotis_volans&#39;]],  # myoVol
+  &quot;001000000&quot; = &#39;#E6AF2E&#39;,  # myoBra
+  &quot;000001000&quot; = &#39;#816E94&#39;,  # myoMyo
+  &quot;100000000&quot; = &#39;#3D348B&#39;,  # desRot
+  &quot;010000000&quot; = &#39;#A01A7D&#39;,  # minSch
+  &quot;000000001&quot; = &#39;#273E47&#39;,  # rhiFer
+  &quot;001111110&quot; = &#39;red&#39;,  # panMyo
+  &quot;110000001&quot; = &#39;white&#39;,  # notMyo
+  &quot;001110110&quot; = &#39;green&#39;,  # neaMyo
+  &quot;000110110&quot; = &#39;blue&#39;,  # wesMyo
+  &quot;000010100&quot; = &#39;goldenrod&#39;  # LucOcc
+)
+
+unhighlighted &lt;- setdiff(
+  # comb_name(m1)[order(comb_size(m1),decreasing = T)],
+  comb_name(m1),
+  names(cols_comb_core)
+)
+
+cols_comb &lt;- c(
+  cols_comb_core,
+  set_names(
+    rep(&#39;#000000&#39;, times=length(unhighlighted)),
+    unhighlighted
+  )
+)
+
+order_set &lt;- c(
+    &#39;Myotis_lucifugus&#39;,
+    &#39;Myotis_occultus&#39;,
+    &#39;Myotis_evotis&#39;,
+    &#39;Myotis_brandtii&#39;,
+    &#39;Myotis_volans&#39;,
+    &#39;Myotis_myotis&#39;,
+    &#39;Desmodus_rotundus&#39;,
+    &#39;Miniopterus_schreibersii&#39;,
+    &#39;Rhinolophus_ferrumequinum&#39;
+  )
+
+
+order_cols_core &lt;- match(names(cols_comb_core), names(comb_size(m1))) %&gt;% 
+  set_names(., names(cols_comb_core)) %&gt;% 
+  .[!is.na(.)]
+
+order_cols = c(
+ order_cols_core %&gt;% unname,
+ setdiff(order(comb_size(m1),decreasing = T), order_cols_core)
+)
+
+cols_set &lt;- c(
+  &quot;Desmodus_rotundus&quot; = &#39;#3D348B&#39;,
+  &quot;Miniopterus_schreibersii&quot; = &#39;#A01A7D&#39;,
+  &quot;Myotis_brandtii&quot; = &#39;#E6AF2E&#39;,
+  &quot;Myotis_evotis&quot; = species_color[[&#39;Myotis_evotis&#39;]],
+  &quot;Myotis_lucifugus&quot; = species_color[[&#39;Myotis_lucifugus&#39;]],
+  &quot;Myotis_myotis&quot; = &#39;#816E94&#39;,
+  &quot;Myotis_occultus&quot; = species_color[[&#39;Myotis_occultus&#39;]],
+  &quot;Myotis_volans&quot; = species_color[[&#39;Myotis_volans&#39;]],
+  &quot;Rhinolophus_ferrumequinum&quot; = &#39;#273E47&#39;
+  )</code></pre>
+<pre class="r"><code>UpSet(
+  m1,
+  set_order = order_set,
+  comb_order = order_cols,
+  comb_col = cols_comb[comb_name(m1)],
+)</code></pre>
+<p><img src="figure/absrel.Rmd/full%20Upset-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>subset_m &lt;- m1[comb_name(m1) %in% names(cols_comb_core)]
+order_cols_sub = c(
+ match(names(cols_comb_core), names(comb_size(subset_m))) %&gt;% 
+  .[!is.na(.)],
+ setdiff(order(comb_size(subset_m),decreasing = T), order_cols_core)
+)
+
+u1 &lt;- UpSet(
+  subset_m,
+  set_order = order_set,
+  comb_col = cols_comb[comb_name(subset_m)],
+  left_annotation = rowAnnotation(
+    set_name = anno_text(
+      set_name(subset_m), 
+      location = 0.5, 
+      just = &quot;center&quot;,
+      width = max_text_width(set_name(subset_m)) + unit(4, &quot;mm&quot;)
+    ),
+    &quot;Postively-Selected Genes&quot; = anno_barplot(
+      -set_size(subset_m), 
+      baseline = 0,
+      axis_param = list(
+        at = c(0, -100, -200, -300, -400),
+        labels = c(0, 100, 200, 300, 400),
+        labels_rot = 0
+        ),
+      border = FALSE, 
+      gp = gpar(fill = &quot;black&quot;), 
+      width = unit(4, &quot;cm&quot;)
+    )
+  ),
+  right_annotation = NULL,
+  show_row_names=F
+)
+
+ht=draw(u1)</code></pre>
+<p><img src="figure/absrel.Rmd/subset%20upset-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(ggtree)</code></pre>
+<pre><code>ggtree v3.6.2 For help: https://yulab-smu.top/treedata-book/
+
+If you use the ggtree package suite in published research, please cite
+the appropriate paper(s):
+
+Guangchuang Yu, David Smith, Huachen Zhu, Yi Guan, Tommy Tsan-Yuk Lam.
+ggtree: an R package for visualization and annotation of phylogenetic
+trees with their covariates and other associated data. Methods in
+Ecology and Evolution. 2017, 8(1):28-36. doi:10.1111/2041-210X.12628
+
+Shuangbin Xu, Lin Li, Xiao Luo, Meijun Chen, Wenli Tang, Li Zhan, Zehan
+Dai, Tommy T. Lam, Yi Guan, Guangchuang Yu. Ggtree: A serialized data
+object for visualization of a phylogenetic tree and annotation data.
+iMeta 2022, 1(4):e56. doi:10.1002/imt2.56
+
+LG Wang, TTY Lam, S Xu, Z Dai, L Zhou, T Feng, P Guo, CW Dunn, BR
+Jones, T Bradley, H Zhu, Y Guan, Y Jiang, G Yu. treeio: an R package
+for phylogenetic tree input and output with richly annotated and
+associated data. Molecular Biology and Evolution. 2020, 37(2):599-603.
+doi: 10.1093/molbev/msz240</code></pre>
+<pre><code>
+Attaching package: &#39;ggtree&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:ggpubr&#39;:
+
+    rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:tidyr&#39;:
+
+    expand</code></pre>
+<pre class="r"><code>library(treeio)</code></pre>
+<pre><code>treeio v1.25.4 For help: https://yulab-smu.top/treedata-book/
+
+If you use the ggtree package suite in published research, please cite
+the appropriate paper(s):
+
+LG Wang, TTY Lam, S Xu, Z Dai, L Zhou, T Feng, P Guo, CW Dunn, BR
+Jones, T Bradley, H Zhu, Y Guan, Y Jiang, G Yu. treeio: an R package
+for phylogenetic tree input and output with richly annotated and
+associated data. Molecular Biology and Evolution. 2020, 37(2):599-603.
+doi: 10.1093/molbev/msz240
+
+Shuangbin Xu, Lin Li, Xiao Luo, Meijun Chen, Wenli Tang, Li Zhan, Zehan
+Dai, Tommy T. Lam, Yi Guan, Guangchuang Yu. Ggtree: A serialized data
+object for visualization of a phylogenetic tree and annotation data.
+iMeta 2022, 1(4):e56. doi:10.1002/imt2.56
+
+G Yu. Data Integration, Manipulation and Visualization of Phylogenetic
+Trees (1st ed.). Chapman and Hall/CRC. 2022. ISBN: 9781032233574</code></pre>
+<pre class="r"><code>library(tidytree)</code></pre>
+<pre><code>If you use the ggtree package suite in published research, please cite
+the appropriate paper(s):
+
+Shuangbin Xu, Lin Li, Xiao Luo, Meijun Chen, Wenli Tang, Li Zhan, Zehan
+Dai, Tommy T. Lam, Yi Guan, Guangchuang Yu. Ggtree: A serialized data
+object for visualization of a phylogenetic tree and annotation data.
+iMeta 2022, 1(4):e56. doi:10.1002/imt2.56
+
+LG Wang, TTY Lam, S Xu, Z Dai, L Zhou, T Feng, P Guo, CW Dunn, BR
+Jones, T Bradley, H Zhu, Y Guan, Y Jiang, G Yu. treeio: an R package
+for phylogenetic tree input and output with richly annotated and
+associated data. Molecular Biology and Evolution. 2020, 37(2):599-603.
+doi: 10.1093/molbev/msz240</code></pre>
+<pre><code>
+Attaching package: &#39;tidytree&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:treeio&#39;:
+
+    getNodeNum</code></pre>
+<pre><code>The following object is masked from &#39;package:stats&#39;:
+
+    filter</code></pre>
+<pre class="r"><code>library(MCMCtreeR)</code></pre>
+<pre><code>Loading required package: ape</code></pre>
+<pre><code>
+Attaching package: &#39;ape&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:tidytree&#39;:
+
+    drop.tip, keep.tip</code></pre>
+<pre><code>The following object is masked from &#39;package:treeio&#39;:
+
+    drop.tip</code></pre>
+<pre><code>The following object is masked from &#39;package:ggtree&#39;:
+
+    rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:ggpubr&#39;:
+
+    rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    where</code></pre>
+<pre><code>Loading required package: sn</code></pre>
+<pre><code>Loading required package: stats4</code></pre>
+<pre><code>
+Attaching package: &#39;sn&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:lubridate&#39;:
+
+    dst</code></pre>
+<pre><code>The following object is masked from &#39;package:stats&#39;:
+
+    sd</code></pre>
+<pre><code>Loading required package: coda</code></pre>
+<pre class="r"><code>library(dendextend)</code></pre>
+<pre><code>
+---------------------
+Welcome to dendextend version 1.17.1
+Type citation(&#39;dendextend&#39;) for how to cite the package.
+
+Type browseVignettes(package = &#39;dendextend&#39;) for the package vignette.
+The github page is: https://github.com/talgalili/dendextend/
+
+Suggestions and bug-reports can be submitted at: https://github.com/talgalili/dendextend/issues
+You may ask questions at stackoverflow, use the r and dendextend tags: 
+     https://stackoverflow.com/questions/tagged/dendextend
+
+    To suppress this message use:  suppressPackageStartupMessages(library(dendextend))
+---------------------</code></pre>
+<pre><code>
+Attaching package: &#39;dendextend&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:ape&#39;:
+
+    ladderize, rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:ggtree&#39;:
+
+    rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:ggpubr&#39;:
+
+    rotate</code></pre>
+<pre><code>The following object is masked from &#39;package:stats&#39;:
+
+    cutree</code></pre>
+<pre class="r"><code>timetree &lt;- readMCMCtree(&#39;../data/timetree/Run2_real_combined_allGenesAllSpecies/FigTree.tre&#39;)$apePhy %&gt;% 
+  keep.tip(order_set)
+
+
+timetree &lt;- timetree %&gt;% ape::rotate(16) %&gt;%  ape::rotate(17)
+
+tt.hclust &lt;- as.hclust(timetree)
+
+phylo_row_dend = as.dendrogram(tt.hclust)</code></pre>
+<pre class="r"><code>p.lq &lt;- df.lq.bats.ntiles %&gt;% 
+  # mutate(y=0.02 %&gt;% multiply_by(rep(c(1,-1), times=5))) %&gt;%
+  ggplot(
+    aes(
+      x=LQ,
+      y=0,
+      color=LQ,
+      fill=LQ
+    )
+  ) +
+  geom_hline(yintercept=0) +
+  geom_point(
+    shape = &#39;|&#39;,
+    size=4,
+    alpha=0.5
+  ) +
+    geom_point(
+      data=. %&gt;% filter(has.ali),
+    shape = &#39;|&#39;,
+    size=8,
+  ) +
+  geom_point(
+    data = . %&gt;% 
+      filter(
+        has.ali,
+        quartile==4
+      ),
+    shape=1,
+    size=4
+  ) + 
+  scale_color_viridis_c(option=&#39;D&#39;) + 
+  ggnewscale::new_scale_color() + 
+  geom_text_repel(
+    data = . %&gt;% 
+      filter(
+        has.ali,
+        quintile==5
+      ),
+    aes(
+      label=label %&gt;% str_replace_all(&quot;_&quot;, &quot; &quot;),
+      color=label
+    ),force = 10, max.overlaps = 1100, direction = &#39;y&#39;,
+    hjust=0.5,min.segment.length = 0,
+    fontface=&#39;italic&#39;,
+    bg.color=&#39;white&#39;
+  ) + 
+  scale_color_manual(&#39;Species&#39;, values = cols_set) + 
+  # theme_void() +
+  labs(x=&quot;LQ&quot;) + 
+  theme_minimal() + 
+  labs_pubr() + 
+  theme(
+    legend.position = &#39;none&#39;,
+    axis.line.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.title.y=element_blank(),
+    panel.grid = element_blank()
+  )
+p.lq</code></pre>
+<p><img src="figure/absrel.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p.ht &lt;- grid.grabExpr(
+  draw(u1),
+  width=unit(6, &#39;in&#39;),
+  height=unit(4, &#39;in&#39;)
+)
+p.tr &lt;- revts(ggtree(timetree) + theme_tree2()) +
+  scale_x_continuous(labels=abs)</code></pre>
+</div>
+<div id="webgestaltr" class="section level2">
+<h2>WebGestaltR</h2>
+<div id="prep" class="section level3">
+<h3>Prep</h3>
+<pre class="r"><code>sets = list(
+  desRot = extract_comb(m1, &#39;100000000&#39;),
+  minSch = extract_comb(m1, &#39;010000000&#39;),
+  myoBra = extract_comb(m1, &#39;001000000&#39;),
+  myoEvo = extract_comb(m1, &#39;000100000&#39;),
+  myoLuc = extract_comb(m1, &#39;000010000&#39;),
+  myoMyo = extract_comb(m1, &#39;000001000&#39;),
+  myoOcc = extract_comb(m1, &#39;000000100&#39;),
+  myoVol = extract_comb(m1, &#39;000000010&#39;),
+  rhiFer = extract_comb(m1, &#39;000000001&#39;),
+  panMyo = extract_comb(m1, &#39;001111110&#39;),
+  notMyo = extract_comb(m1, &#39;110000001&#39;),
+  neaMyo = extract_comb(m1, &#39;001110110&#39;),
+  wesMyo = extract_comb(m1, &#39;000110110&#39;),
+  LucOcc = extract_comb(m1, &#39;000010100&#39;)
+)</code></pre>
+<pre class="r"><code>dir.create(&#39;../output/webGestalt/&#39;, recursive=T, showWarnings = F)
+
+for (set in names(sets)) {
+  opath &lt;- paste0(&#39;../output/webGestalt/&#39;, set)
+  dir.create(opath, recursive=T, showWarnings = F)
+  sets[[set]] %&gt;% write_lines(paste0(opath, &#39;/aBSREL-&#39;, set, &#39;.txt&#39;))
+  all_genes %&gt;% write_lines(paste0(opath, &#39;aBSREL-allGenes.txt&#39;))
+}</code></pre>
+<pre class="r"><code>run_ORA &lt;- function(geneSet, refGeneSet, outputDirectory, enrichmentDB, fdrThr, projName){
+  WebGestaltR(
+    enrichMethod = &quot;ORA&quot;,
+    enrichDatabase = enrichmentDB,
+    organism = &quot;hsapiens&quot;,
+    interestGene = geneSet,
+    interestGeneType = &quot;genesymbol&quot;,
+    referenceGene = refGeneSet,
+    referenceGeneType = &quot;genesymbol&quot;,
+    maxNum=1000,
+    sigMethod=&quot;top&quot;,
+    topThr=100,
+    fdrThr=as.numeric(fdrThr),
+    reportNum=100,
+    isOutput = T,
+    outputDirectory = outputDirectory,
+    hostName=&quot;http://www.webgestalt.org/&quot;,
+    projectName=projName
+  )
+}
+
+enrichments &lt;- lapply(
+  names(sets)[1],
+  function(n, s=sets, a=all_genes, e=&#39;pathway_Reactome&#39;, f=0.1, p = &#39;aBSREL&#39;){
+    run_ORA(
+      # geneSet = s[[n]],
+  refGeneSet = a, 
+  outputDirectory = paste0(&#39;../output/webGestalt/&#39;, n), 
+  enrichmentDB = e, 
+  fdrThr = f, 
+  projName = p
+  )
+  }
+)</code></pre>
+</div>
+</div>
+<div id="all-myotis-nodes" class="section level2">
+<h2>All Myotis Nodes</h2>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.3.1 (2023-06-16)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.3 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: America/La_Paz
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats4    grid      stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] dendextend_1.17.1     MCMCtreeR_1.1         coda_0.19-4          
+ [4] sn_2.1.1              ape_5.7-1             tidytree_0.4.5       
+ [7] treeio_1.25.4         ggtree_3.6.2          cowplot_1.1.1        
+[10] ggrepel_0.9.4         ggnewscale_0.4.9      WebGestaltR_0.4.6    
+[13] ComplexHeatmap_2.14.0 ggpubr_0.6.0          lubridate_1.9.2      
+[16] forcats_1.0.0         stringr_1.5.0         dplyr_1.1.3          
+[19] purrr_1.0.2           readr_2.1.4           tidyr_1.3.0          
+[22] tibble_3.2.1          ggplot2_3.4.3         tidyverse_2.0.0      
+
+loaded via a namespace (and not attached):
+  [1] mnormt_2.1.1        gridExtra_2.3       rlang_1.1.1        
+  [4] magrittr_2.0.3      clue_0.3-65         GetoptLong_1.0.5   
+  [7] git2r_0.32.0        matrixStats_1.0.0   compiler_4.3.1     
+ [10] png_0.1-8           systemfonts_1.0.4   vctrs_0.6.3        
+ [13] pkgconfig_2.0.3     shape_1.4.6         crayon_1.5.2       
+ [16] fastmap_1.1.1       magick_2.8.1        backports_1.4.1    
+ [19] labeling_0.4.3      utf8_1.2.3          promises_1.2.1     
+ [22] rmarkdown_2.25      tzdb_0.4.0          bit_4.0.5          
+ [25] xfun_0.40           cachem_1.0.8        aplot_0.2.1        
+ [28] jsonlite_1.8.7      later_1.3.1         broom_1.0.5        
+ [31] parallel_4.3.1      cluster_2.1.4       R6_2.5.1           
+ [34] bslib_0.5.1         stringi_1.7.12      RColorBrewer_1.1-3 
+ [37] car_3.1-2           numDeriv_2016.8-1.1 jquerylib_0.1.4    
+ [40] Rcpp_1.0.11         iterators_1.0.14    knitr_1.44         
+ [43] IRanges_2.34.1      httpuv_1.6.11       Matrix_1.6-1.1     
+ [46] igraph_1.5.1        timechange_0.2.0    tidyselect_1.2.0   
+ [49] viridis_0.6.4       rstudioapi_0.15.0   abind_1.4-5        
+ [52] yaml_2.3.7          doParallel_1.0.17   codetools_0.2-19   
+ [55] doRNG_1.8.6         lattice_0.21-8      withr_2.5.0        
+ [58] evaluate_0.21       gridGraphics_0.5-1  circlize_0.4.15    
+ [61] pillar_1.9.0        carData_3.0-5       rngtools_1.5.2     
+ [64] whisker_0.4.1       foreach_1.5.2       ggfun_0.1.3        
+ [67] generics_0.1.3      vroom_1.6.3         rprojroot_2.0.3    
+ [70] S4Vectors_0.38.2    hms_1.1.3           munsell_0.5.0      
+ [73] scales_1.2.1        apcluster_1.4.11    glue_1.6.2         
+ [76] lazyeval_0.2.2      tools_4.3.1         ggsignif_0.6.4     
+ [79] fs_1.6.3            colorspace_2.1-0    patchwork_1.1.3    
+ [82] nlme_3.1-163        cli_3.6.1           workflowr_1.7.1    
+ [85] fansi_1.0.5         viridisLite_0.4.2   svglite_2.1.1      
+ [88] gtable_0.3.4        yulab.utils_0.1.0   ggsci_3.0.0        
+ [91] rstatix_0.7.2       sass_0.4.7          digest_0.6.33      
+ [94] BiocGenerics_0.46.0 ggplotify_0.1.2     rjson_0.2.21       
+ [97] farver_2.1.1        memoise_2.0.1       htmltools_0.5.6    
+[100] lifecycle_1.0.3     httr_1.4.7          GlobalOptions_0.1.2
+[103] bit64_4.0.5        </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
