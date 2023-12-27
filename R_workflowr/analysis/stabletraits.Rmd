@@ -47,10 +47,679 @@ library(rms)
 library(patchwork)
 ```
 
-```{r}
-rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019WithBS_Run1_2.rates_tree')
-sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019WithBS_Run1_2.sqchange_tree')
-brlens <- read_tsv('../data/stableTraits/UphamEtAl2019WithBS_Run1_2.brlens')
-ancstates <- read_tsv('../data/stableTraits/UphamEtAl2019WithBS_Run1_2.ancstates')
+## Body Size
+
+```{r BS Trees}
+size_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.rates_tree') %>% 
+  as_tibble
+size_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.sqchange_tree') %>% 
+  as_tibble
+size_brlens <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.brlens')
+size_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.ancstates')
 ```
+
+```{r}
+size_ancstates
+```
+
+
+## Lifespan
+
+```{r Lifespan Trees}
+life_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.rates_tree') %>% 
+  as_tibble
+life_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.sqchange_tree') %>% 
+  as_tibble
+life_brlens <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.brlens')
+life_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.ancstates')
+```
+
+```{r}
+life_ancstates
+```
+
+
+## Summary
+```{r}
+ls.stats <- dplyr::bind_rows(
+  size_ancstates %>% dplyr::filter(stringr::str_starts(Parameter, "stable_")) %>% dplyr::mutate(Trait='Mass'),
+  life_ancstates %>% dplyr::filter(stringr::str_starts(Parameter, "stable_")) %>% dplyr::mutate(Trait='Lifespan')
+)
+```
+
+## PANCOVA
+
+
+```{r}
+library(phytools)
+library(geiger)
+library(nlme)
+library(evomap)
+library(magrittr)
+
+tr <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.tree')
+# ggtree(size_sq_tree %>% as.treedata)
+lifesize.dat <- dplyr::full_join(
+  life_ancstates %>% dplyr::select(Parameter, lnLife=Median),
+  size_ancstates %>% dplyr::select(Parameter, lnSize=Median)
+) %>% 
+  dplyr::filter(stringr::str_starts(Parameter, 'stable_', negate=T)) %>% 
+  dplyr::rename(label='Parameter')
+lifesize.trdat <- tidytree::full_join(tr, lifesize.dat)
+# lifesize.trdat %>% ggtree(aes(color=lnLife))
+
+lifesize.dat.noNode <- lifesize.dat %>% 
+  dplyr::filter(label %in% tr$tip.label) %>% 
+  tibble::column_to_rownames('label') %>% 
+  as.data.frame
+```
+
+```{r}
+data<-lifesize.dat.noNode
+tree<-tr
+Y<-"lnLife"
+X<-"lnSize"
+data<-data[,c(which(colnames(data)==Y),which(colnames(data)==X)),drop=F]
+data<-na.omit(data)
+tree<-treedata(tree,data,sort=T,warnings=T)$phy   #match the tree to the data
+data<-as.data.frame(treedata(tree,data,sort=T,warnings=T)$data)   #match the data to the tree
+colnames(data)<-c("Dependent","Independent")     #Note that naming the variables 'Dependent' and 'Independent' serves only to standardize the procedure below across different data sets.
+```
+
+
+```{r}
+node.chiroptera <- tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus'))
+node.laurasiatheria <- tidytree::MRCA(tree, c('Myotis_lucifugus','Sorex_fumeus'))
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera <- lifesize.trdat %>% 
+#   tidytree::as_tibble() %>% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %>% 
+#   dplyr::pull(label)
+
+Chiroptera <- getTips(tree, node.chiroptera)
+
+NotChiroptera <- setdiff(getTips(tree, tidytree::rootnode(tr)),Chiroptera)
+
+Laurasiatheria <- getTips(tree, node.laurasiatheria)
+
+NotLaurasiatheria <- setdiff(getTips(tree, tidytree::rootnode(tree)),Laurasiatheria)
+
+
+Laurasiatheria.NotChiroptera <- setdiff(getTips(tree, node.laurasiatheria), Chiroptera)
+
+```
+
+```{r}
+plot(lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade('lnLife','lnSize',tree = tr %>% as.phylo(), data=lifesize.dat.noNode)
+```
+
+```{r plot bats vs others}
+plot(lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tr %>% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model='BM',
+  group=NotChiroptera,
+  col='grey',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tr %>% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model='BM',
+  group=Laurasiatheria,
+  col='violet',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tr %>% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model='BM',
+  group=Chiroptera,
+  col='green',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+```
+
+### pANCOVA: Bats
+
+```{r groups: chiroptera vs not-chiroptera}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Chiroptera]<-"B" 
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Chiroptera]<-"B" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for Bats}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for Bats}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+### pANCOVA: Laurasiatheria
+
+```{r groups: Laurasiatheria vs not-Laurasiatheria}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Laurasiatheria]<-"B" 
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Laurasiatheria]<-"B" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for Laurasiatheria}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for Laurasiatheria}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+### pANCOVA: Laurasiatheria, no bats
+
+```{r groups: Laurasiatheria.NotChiroptera vs not-Laurasiatheria}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Laurasiatheria.NotChiroptera]<-"B" 
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Laurasiatheria.NotChiroptera]<-"B" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for Laurasiatheria.NotChiroptera}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for Laurasiatheria.NotChiropteraa}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+### pANCOVA: Yangochiroptera vs Yinpterochiroptera
+
+```{r}
+tree<-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus')), levels_back = 0)
+
+tree<-treedata(tree,data,sort=T,warnings=T)$phy   #match the tree to the data
+data<-as.data.frame(treedata(tree,data,sort=T,warnings=T)$data)   #match the data to the tree
+colnames(data)<-c("Dependent","Independent")     #Note that naming the variables 'Dependent' and 'Independent' serves only to standardize the procedure below across different data sets.
+```
+
+
+```{r}
+
+node.yinpterochiroptera = tidytree::MRCA(tree, 'Macroderma_gigas', 'Pteropus_giganteus')
+node.yangochiroptera = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Mystacina_tuberculata') 
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera <- lifesize.trdat %>% 
+#   tidytree::as_tibble() %>% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %>% 
+#   dplyr::pull(label)
+
+Yinpterochiroptera <- getTips(tree, node.yinpterochiroptera)
+
+Yangochiroptera <- getTips(tree,node.yangochiroptera)
+
+```
+
+```{r}
+plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade('Dependent','Independent',tree = tree, data=data)
+```
+
+```{r plot bats vs others}
+plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yangochiroptera,
+  col='violet',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yinpterochiroptera,
+  col='green',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+```
+
+```{r groups: Yangochiroptera vs Yinpterochiroptera}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Yangochiroptera]<-"B" 
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Yangochiroptera]<-"B" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for Yangochiroptera}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for Yangochiroptera}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+
+### pANCOVA: Within Yangochiroptera
+
+```{r}
+node.vespertilionidae = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Lasiurus_cinereus')
+node.myotis = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Myotis_emarginatus')
+node.molossidae = tidytree::MRCA(tree, 'Molossus_molossus', 'Chaerephon_pumilus')
+node.phyllostomidae = tidytree::MRCA(tree, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
+
+Vespertilionidae <- getTips(tree, node.vespertilionidae)
+Myotis <- getTips(tree, node.myotis)
+Molossidae <- getTips(tree, node.molossidae)
+Phyllostomidae <- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other <- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %>% 
+  setdiff(
+    .,
+    Molossidae
+  ) %>% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis <- setdiff(
+  Vespertilionidae,
+  Myotis
+)
+```
+
+
+```{r plot bats vs others}
+plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yinpterochiroptera,
+  col='black',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yangochiroptera.Other,
+  col='violet',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Vespertilionidae.NotMyotis,
+  col='green',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Myotis,
+  col='blue',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Molossidae,
+  col='yellow',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Phyllostomidae,
+  col='red',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+```
+
+```{r groups: allGroups}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Vespertilionidae]<-"B" 
+grpS[Myotis]<-"C"
+grpS[Molossidae]<-"D"
+grpS[Phyllostomidae]<-"E"  
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Vespertilionidae]<-"B" 
+grpI[Myotis]<-"C"
+grpI[Molossidae]<-"D"
+grpI[Phyllostomidae]<-"E" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for allGroups}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for allGroups}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+### PANCOVA: drop Myoits auriculus
+
+```{r}
+tree <- tree %>% tidytree::drop.tip(c('Myotis_auriculus'))
+data <- data[which(rownames(data) != "Myotis_auriculus"),]
+node.vespertilionidae = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Lasiurus_cinereus')
+node.myotis = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Myotis_emarginatus')
+node.molossidae = tidytree::MRCA(tree, 'Molossus_molossus', 'Chaerephon_pumilus')
+node.phyllostomidae = tidytree::MRCA(tree, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
+
+Vespertilionidae <- getTips(tree, node.vespertilionidae)
+Myotis <- getTips(tree, node.myotis)
+Molossidae <- getTips(tree, node.molossidae)
+Phyllostomidae <- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other <- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %>% 
+  setdiff(
+    .,
+    Molossidae
+  ) %>% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis <- setdiff(
+  Vespertilionidae,
+  Myotis
+)
+```
+
+
+```{r plot bats vs others}
+plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yinpterochiroptera,
+  col='black',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yangochiroptera.Other,
+  col='violet',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Vespertilionidae.NotMyotis,
+  col='green',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Myotis,
+  col='blue',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Molossidae,
+  col='yellow',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Phyllostomidae,
+  col='red',
+  lwd=5, 
+  cex=1,
+  pch=19
+)
+```
+
+```{r groups: allGroups}
+#For differences in slope: 
+grpS<-rep("A",length(rownames(data))) 
+grpS[Vespertilionidae]<-"B" 
+grpS[Myotis]<-"C"
+grpS[Molossidae]<-"D"
+grpS[Phyllostomidae]<-"E"  
+grpS<-as.factor(grpS) 
+names(grpS)<-rownames(data)
+
+#For differences in intercept: 
+grpI<-rep("A",length(rownames(data))) 
+grpI[Vespertilionidae]<-"B" 
+grpI[Myotis]<-"C"
+grpI[Molossidae]<-"D"
+grpI[Phyllostomidae]<-"E" 
+grpI<-as.factor(grpI) 
+names(grpI)<-rownames(data)
+```
+
+```{r Models for allGroups}
+
+Model<-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S<-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
+```
+
+```{r PANCOVA for allGroups}
+#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
+
+#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)
+
+#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)
+
+#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
+```
+
+### Remarks
+In conclusion, bats are weird. However, its not all bats, but really its just Yangochiroptera. In fact, within Yangochiroptera, most families either follow the mold (like Molossidae) or have no correlation (like Vespertilionidae and Phyllostomidae). Myotis auriculus is definitely an outlier - with it included, there is a negative correlation between body size and lifespan, but without it, genus Myotis follows the same trends as Vespertilionidae in general.
 

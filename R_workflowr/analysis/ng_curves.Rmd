@@ -93,6 +93,78 @@ assembly_stats.meta[str_detect(assembly_stats.meta$name, "T2T"),"Origin"] <- "T2
 
 ```
 
+### Table
+
+```{r}
+table.auNG <- assembly_stats.meta %>% 
+  filter(stat=='auNG') %>% 
+  arrange(v2) %>% 
+  mutate(v2=scales::label_comma()(v2),
+         species= species %>% str_replace_all('_', " ")) %>%
+  select(-v1, -contig, -Citation, -name) %>% 
+  select(Species=species, everything()) %>% 
+  dplyr::rename(auNG='v2')
+table.LG50 <- assembly_stats.meta %>% 
+  filter(stat=='LGx', v1==50) %>% 
+  arrange(v2) %>% 
+  mutate(v2=scales::label_comma()(v2),
+         species= species %>% str_replace_all('_', " ")) %>%
+  select(-v1, -contig, -Citation, -name) %>% 
+  select(Species=species, everything()) %>% 
+  dplyr::rename(LG50='v2')
+table.NG50 <- assembly_stats.meta %>% 
+  filter(stat=='NGx', v1==50) %>% 
+  arrange(desc(v2)) %>% 
+  mutate(v2=scales::label_comma()(v2),
+         species= species %>% str_replace_all('_', " ")) %>%
+  select(-v1, -contig, -Citation, -name) %>% 
+  select(Species=species, everything()) %>% 
+  dplyr::rename(NG50='v2')
+
+## TODO:
+# table.NScaff <- assembly_stats.meta %>% 
+#   filter(stat=='N', v1=='Scaffold') %>% 
+#   arrange(desc(v2)) %>% 
+#   mutate(v2=scales::label_comma()(v2),
+#          species= species %>% str_replace_all('_', " ")) %>%
+#   select(-v1, -contig, -Citation, -name) %>% 
+#   select(species, everything()) %>% 
+#   dplyr::rename(Scaffolds='v2')
+# table.NGap <- assembly_stats.meta %>% 
+#   filter(stat=='N', v1=='Gap') %>% 
+#   arrange(desc(v2)) %>% 
+#   mutate(v2=scales::label_comma()(v2),
+#          species= species %>% str_replace_all('_', " ")) %>%
+#   select(-v1, -contig, -Citation, -name) %>% 
+#   select(species, everything()) %>% 
+#   dplyr::rename(Gaps='v2')
+# table.NST2T <- assembly_stats.meta %>% 
+#   filter(stat=='N', v1=='Scaffolds_T2T') %>% 
+#   arrange(desc(v2)) %>% 
+#   mutate(v2=scales::label_comma()(v2),
+#          species= species %>% str_replace_all('_', " ")) %>%
+#   select(-v1, -contig, -Citation, -name) %>% 
+#   select(species, everything()) %>% 
+#   dplyr::rename(Scaffolds_T2T='v2')
+# table.NCT2T <- assembly_stats.meta %>% 
+#   arrange(desc(v2)) %>% 
+#   mutate(v2=scales::label_comma()(v2),
+#          species= species %>% str_replace_all('_', " ")) %>%
+#   select(-v1, -contig, -Citation, -name) %>% 
+#   select(species, everything()) %>% 
+#   dplyr::rename(Complete_Scaffolds='v2')
+
+table.stats <- table.auNG %>%
+  # full_join(table.NScaff) %>% 
+  # full_join(table.NGap) %>% 
+  # full_join(table.NST2T) %>% 
+  # full_join(table.NCT2T) %>% 
+  full_join(table.NG50) %>% 
+  full_join(table.LG50)
+
+```
+
+
 ### Notes about the tree
 
 In order to get TimeTree to play nicely with the phylogeny, a few changes were needed:
