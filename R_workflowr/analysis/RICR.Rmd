@@ -1470,7 +1470,7 @@ where  $t$ is lifespan and $D$ is body size. Given that we have predictions of b
 
 <!-- We saw in Vazquez & Lynch (2020) and Vazquez _et al._ (2022) that there is evidence for conservation of genes associated with increase tumor suppression at nodes with positive RICR scores -->
 
-```{r RICR Calculations}
+```{r RICR Calculations, eval=F}
 # Recalculate log2CancerSucceptabilityChange with real lifespans
 cancerSucceptibility.table <- tr.sizelife.lq %>%
   as_tibble %>% 
@@ -1525,6 +1525,17 @@ cancerSucceptibility.table %>%
   filter(label %in% tr.sizelife.lq.chiroptera@phylo$tip.label) %>% 
   select(parent,node,label, lnSize.median, lnLife.median, K1, K2, log2CancerSucceptabilityChange) %>% 
   arrange(log2CancerSucceptabilityChange)
+```
+
+```{r save RICR results, eval=F, include=F}
+tr.cancerSucceptibility %>% 
+  treeio::write.beast('../output/Upham2019-RICR-Data.nexus')
+```
+
+```{r load precalc RICR results}
+tr.cancerSucceptibility <- treeio::read.beast('../output/Upham2019-RICR-Data.nexus')
+tr.cancerSucceptibility@data <- tr.cancerSucceptibility@data %>% 
+  mutate_at(vars(-label.y, -node,-Ancestor),as.numeric)
 ```
 
 
@@ -1918,6 +1929,29 @@ p.tr.myotis <- tr.cancerSucceptibility %>%
     size=2.5,
   ) + 
   xlim(c(NA, 50))
+
+p.tr.myotis2 <- (tr.cancerSucceptibility %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>%
+  tidytree::tree_subset(MRCA(tr.upham %>%
+  keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
+  ggtree(
+    size=1
+  ) + 
+  geom_tiplab(
+    size=3
+  ) + 
+  geom_nodelab(
+    aes(label=label),
+    geom = 'shadowtext',
+    color='white',
+    fill='black',
+    hjust=1.5,
+    vjust=-0.2,
+    size=2.5,
+  )) #%>% 
+  # collapse(., node, 'max')
+
+
 
 
 fig.myotis.sizelifericr <- (

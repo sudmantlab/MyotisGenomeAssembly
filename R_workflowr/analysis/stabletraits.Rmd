@@ -8,10 +8,12 @@ editor_options:
 ---
 
 ```{r Libraries and functions, include = F}
-knitr::opts_chunk$set(eval=T, 
-                      #echo=F, message = F, warning = F, 
-                      out.width="6in", fig.pos = "H", out.extra = "",
-                      fig.retina = 2, dpi = 300, dev=c('cairo_pdf', 'svg', 'png','cairo_ps'))
+knitr::opts_chunk$set(
+  eval=T #, 
+  #echo=F, message = F, warning = F, 
+  # out.width="6in", fig.pos = "H", out.extra = "",
+  # fig.retina = 2, dpi = 300, dev=c('cairo_pdf', 'svg', 'png','cairo_ps')
+)
 
 # if(basename(getwd()) != "paper_PLOS") setwd("paper_PLOS")
 
@@ -24,8 +26,8 @@ options(readr.num_columns = 0)
 library(ape)
 library(geiger)
 library(nlme)
-library(treeio)
-library(tidytree)
+# library(treeio)
+# library(tidytree)
 library(ggtree)
 library(ggimage)
 library(ggpubr)
@@ -45,6 +47,11 @@ library(ggnewscale)
 library(ComplexHeatmap)
 library(rms)
 library(patchwork)
+library(phytools)
+library(geiger)
+library(nlme)
+library(evomap)
+library(magrittr)
 ```
 
 ## Body Size
@@ -91,11 +98,6 @@ ls.stats <- dplyr::bind_rows(
 
 
 ```{r}
-library(phytools)
-library(geiger)
-library(nlme)
-library(evomap)
-library(magrittr)
 
 tr <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.tree')
 # ggtree(size_sq_tree %>% as.treedata)
@@ -121,8 +123,8 @@ Y<-"lnLife"
 X<-"lnSize"
 data<-data[,c(which(colnames(data)==Y),which(colnames(data)==X)),drop=F]
 data<-na.omit(data)
-tree<-treedata(tree,data,sort=T,warnings=T)$phy   #match the tree to the data
-data<-as.data.frame(treedata(tree,data,sort=T,warnings=T)$data)   #match the data to the tree
+tree<-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data<-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
 colnames(data)<-c("Dependent","Independent")     #Note that naming the variables 'Dependent' and 'Independent' serves only to standardize the procedure below across different data sets.
 ```
 
@@ -153,13 +155,31 @@ Laurasiatheria.NotChiroptera <- setdiff(getTips(tree, node.laurasiatheria), Chir
 
 ```
 
-```{r}
-plot(lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r plot all mammals, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(
+  lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
+  col="white",
+  pch=21,
+  xlab="lnLife", 
+  ylab="lnSize",
+  asp=1,
+  cex.lab=2
+) 
 pGLS.plotGrade('lnLife','lnSize',tree = tr %>% as.phylo(), data=lifesize.dat.noNode)
+
+
 ```
 
-```{r plot bats vs others}
-plot(lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r plot bats vs others, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(
+  lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
+  col="white",
+  pch=21,
+  xlab="lnLife", 
+  ylab="lnSize",
+  asp=1,
+  cex.lab=2
+) 
 pGLS.plotGrade(
   'lnLife','lnSize',
   tree = tr %>% as.phylo(), 
@@ -167,9 +187,9 @@ pGLS.plotGrade(
   model='BM',
   group=NotChiroptera,
   col='grey',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'lnLife','lnSize',
@@ -178,9 +198,9 @@ pGLS.plotGrade(
   model='BM',
   group=Laurasiatheria,
   col='violet',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'lnLife','lnSize',
@@ -189,10 +209,12 @@ pGLS.plotGrade(
   model='BM',
   group=Chiroptera,
   col='green',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
+legend(15, 2, legend=c("Mammals", "Laurasiatheria", 'Bats'),
+       fill=c("grey",'violet', "green"), cex=0.8)
 ```
 
 ### pANCOVA: Bats
@@ -332,8 +354,8 @@ gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
 ```{r}
 tree<-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus')), levels_back = 0)
 
-tree<-treedata(tree,data,sort=T,warnings=T)$phy   #match the tree to the data
-data<-as.data.frame(treedata(tree,data,sort=T,warnings=T)$data)   #match the data to the tree
+tree<-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data<-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
 colnames(data)<-c("Dependent","Independent")     #Note that naming the variables 'Dependent' and 'Independent' serves only to standardize the procedure below across different data sets.
 ```
 
@@ -358,22 +380,22 @@ Yangochiroptera <- getTips(tree,node.yangochiroptera)
 
 ```
 
-```{r}
-plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade('Dependent','Independent',tree = tree, data=data)
 ```
 
-```{r plot bats vs others}
-plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r plot yinptero vs yango, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
   tree = tree, data=data,
   model='BM',
   group=Yangochiroptera,
   col='violet',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -381,10 +403,13 @@ pGLS.plotGrade(
   model='BM',
   group=Yinpterochiroptera,
   col='green',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
+
+legend(6, 2, legend=c("Yangochiroptera", 'Yinpterochiroptera'),
+       fill=c('violet', "green"), cex=0.8)
 ```
 
 ```{r groups: Yangochiroptera vs Yinpterochiroptera}
@@ -462,17 +487,17 @@ Vespertilionidae.NotMyotis <- setdiff(
 ```
 
 
-```{r plot bats vs others}
-plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r plot bat subtypes, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
   tree = tree, data=data,
   model='BM',
   group=Yinpterochiroptera,
   col='black',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -480,9 +505,9 @@ pGLS.plotGrade(
   model='BM',
   group=Yangochiroptera.Other,
   col='violet',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -490,9 +515,9 @@ pGLS.plotGrade(
   model='BM',
   group=Vespertilionidae.NotMyotis,
   col='green',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -500,9 +525,9 @@ pGLS.plotGrade(
   model='BM',
   group=Myotis,
   col='blue',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -510,9 +535,9 @@ pGLS.plotGrade(
   model='BM',
   group=Molossidae,
   col='yellow',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -520,10 +545,29 @@ pGLS.plotGrade(
   model='BM',
   group=Phyllostomidae,
   col='red',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
+
+legend(6.25, 2.5,
+        legend=c(
+          'Yinpterochiroptera',
+          'Yangochiroptera.Other',
+          'Vespertilionidae.NotMyotis',
+          'Myotis',
+          'Molossidae',
+          'Phyllostomidae'
+        ),
+       fill=c(
+          'black',
+          'violet',
+          'green',
+          'blue',
+          'yellow',
+          'red'
+       ), 
+       cex=0.8)
 ```
 
 ```{r groups: allGroups}
@@ -608,17 +652,17 @@ Vespertilionidae.NotMyotis <- setdiff(
 ```
 
 
-```{r plot bats vs others}
-plot(data$Dependent~data$Independent,col="white",pch=19,xlab="", ylab="",asp=1,cex.lab=2) 
+```{r plot bat subtypes without auriculus, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
   tree = tree, data=data,
   model='BM',
   group=Yinpterochiroptera,
   col='black',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -626,9 +670,9 @@ pGLS.plotGrade(
   model='BM',
   group=Yangochiroptera.Other,
   col='violet',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -636,9 +680,9 @@ pGLS.plotGrade(
   model='BM',
   group=Vespertilionidae.NotMyotis,
   col='green',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -646,9 +690,9 @@ pGLS.plotGrade(
   model='BM',
   group=Myotis,
   col='blue',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -656,9 +700,9 @@ pGLS.plotGrade(
   model='BM',
   group=Molossidae,
   col='yellow',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -666,13 +710,31 @@ pGLS.plotGrade(
   model='BM',
   group=Phyllostomidae,
   col='red',
-  lwd=5, 
+  lwd=3, 
   cex=1,
-  pch=19
+  pch=21
 )
+legend(6.25, 2.5,
+        legend=c(
+          'Yinpterochiroptera',
+          'Yangochiroptera.Other',
+          'Vespertilionidae.NotMyotis',
+          'Myotis',
+          'Molossidae',
+          'Phyllostomidae'
+        ),
+       fill=c(
+          'black',
+          'violet',
+          'green',
+          'blue',
+          'yellow',
+          'red'
+       ), 
+       cex=0.8)
 ```
 
-```{r groups: allGroups}
+```{r groups: allGroups no myoAui}
 #For differences in slope: 
 grpS<-rep("A",length(rownames(data))) 
 grpS[Vespertilionidae]<-"B" 
@@ -692,7 +754,7 @@ grpI<-as.factor(grpI)
 names(grpI)<-rownames(data)
 ```
 
-```{r Models for allGroups}
+```{r Models for allGroups no myoAui}
 
 Model<-model.matrix(as.formula(Dependent~Independent),data)
 
@@ -706,7 +768,7 @@ Model_I<-model.matrix(as.formula(Dependent~grpI + Independent),data)
 Model_SI<-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)
 ```
 
-```{r PANCOVA for allGroups}
+```{r PANCOVA for allGroups no myoAui}
 #(1) Differences in slopes, holding intercept constant:
 gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)
 

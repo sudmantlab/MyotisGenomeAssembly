@@ -382,11 +382,11 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-10-23
+<strong>Last updated:</strong> 2024-01-08
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span> 1
 </p>
@@ -408,6 +408,27 @@ versions</em> tab lists the development history.
 </div>
 <div id="checks" class="tab-pane fade">
 <div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -495,18 +516,60 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>Repository version:</strong> no
-version control </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>
+</a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongnoversioncontrol"
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Tracking code development and connecting the code version to the
-results is critical for reproducibility. To start using Git, open the
-Terminal and type <code>git init</code> in your project directory.</p>
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    R_workflowr/.RData
+    Ignored:    R_workflowr/.Rproj.user/
+    Ignored:    R_workflowr/data/
+    Ignored:    R_workflowr/output/pubFiles/
+    Ignored:    R_workflowr/output/webGestalt/
+    Ignored:    R_workflowr/renv/library/
+    Ignored:    R_workflowr/renv/staging/
+    Ignored:    R_workflowr/test.phy
+
+Unstaged changes:
+    Modified:   R_workflowr/analysis/RICR.Rmd
+    Modified:   R_workflowr/analysis/stabletraits.Rmd
+    Modified:   R_workflowr/output/draft_figs/Myotis_size_life_LQ_upham.pdf
+    Modified:   R_workflowr/output/subfigs/phylo_auNG_circ_col_withLine.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
 </div>
 </div>
 </div>
@@ -514,19 +577,104 @@ Terminal and type <code>git init</code> in your project directory.</p>
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-This project is not being versioned with Git. To obtain the full
-reproducibility benefits of using workflowr, please see
-<code>?wflow_start</code>.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>R_workflowr/analysis/stabletraits.Rmd</code>) and HTML
+(<code>R_workflowr/docs/stabletraits.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/6f1b4403ae2968d962ac387fe1b01ee443f05dd3/R_workflowr/analysis/stabletraits.Rmd" target="_blank">6f1b440</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-27
+</td>
+<td>
+PANCOVA
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/analysis/stabletraits.Rmd" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+<td>
+draft sub figs for F1&amp;2
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/stabletraits.html" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+<td>
+draft sub figs for F1&amp;2
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
 </div>
-<pre class="r"><code>rates_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019WithBS_Run1_2.rates_tree&#39;)
-sq_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019WithBS_Run1_2.sqchange_tree&#39;)
-brlens &lt;- read_tsv(&#39;../data/stableTraits/UphamEtAl2019WithBS_Run1_2.brlens&#39;)</code></pre>
-<pre><code>Rows: 3022 Columns: 4
+<div id="body-size" class="section level2">
+<h2>Body Size</h2>
+<pre class="r"><code>size_rates_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.rates_tree&#39;) %&gt;% 
+  as_tibble
+size_sq_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.sqchange_tree&#39;) %&gt;% 
+  as_tibble
+size_brlens &lt;- readr::read_tsv(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.brlens&#39;)</code></pre>
+<pre><code>Rows: 2312 Columns: 4
 ── Column specification ────────────────────────────────────────────────────────
 Delimiter: &quot;\t&quot;
 chr (1): Branch
@@ -534,8 +682,8 @@ dbl (3): Branch_midpoint_height, Orig_len, Rate
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>ancstates &lt;- read_tsv(&#39;../data/stableTraits/UphamEtAl2019WithBS_Run1_2.ancstates&#39;)</code></pre>
-<pre><code>Rows: 3025 Columns: 5
+<pre class="r"><code>size_ancstates &lt;- readr::read_tsv(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.ancstates&#39;)</code></pre>
+<pre><code>Rows: 2315 Columns: 5
 ── Column specification ────────────────────────────────────────────────────────
 Delimiter: &quot;\t&quot;
 chr (1): Parameter
@@ -543,6 +691,880 @@ dbl (4): Brownian, Median, 95%CI_Low, 95%CI_High
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>size_ancstates</code></pre>
+<pre><code># A tibble: 2,315 × 5
+   Parameter                Brownian Median `95%CI_Low` `95%CI_High`
+   &lt;chr&gt;                       &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+ 1 stable_alpha                2      1.66        1.56         1.75 
+ 2 stable_scale                0.150  0.128       0.112        0.145
+ 3 n0                          6.62   6.24        2.70        10.2  
+ 4 n1                          7.63   7.59        4.85        10.3  
+ 5 Ornithorhynchus_anatinus    7.30   7.30        7.30         7.30 
+ 6 Tachyglossus_aculeatus      8.41   8.41        8.41         8.41 
+ 7 n2                          6.48   6.03        2.82         9.52 
+ 8 n3                          6.80   6.04        4.60         7.64 
+ 9 n4                          6.49   5.77        4.49         7.12 
+10 n5                          6.41   5.58        4.22         7.08 
+# ℹ 2,305 more rows</code></pre>
+</div>
+<div id="lifespan" class="section level2">
+<h2>Lifespan</h2>
+<pre class="r"><code>life_rates_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.rates_tree&#39;) %&gt;% 
+  as_tibble
+life_sq_tree &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.sqchange_tree&#39;) %&gt;% 
+  as_tibble
+life_brlens &lt;- read_tsv(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.brlens&#39;)</code></pre>
+<pre><code>Rows: 2312 Columns: 4
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;\t&quot;
+chr (1): Branch
+dbl (3): Branch_midpoint_height, Orig_len, Rate
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>life_ancstates &lt;- readr::read_tsv(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.ancstates&#39;)</code></pre>
+<pre><code>Rows: 2315 Columns: 5
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;\t&quot;
+chr (1): Parameter
+dbl (4): Brownian, Median, 95%CI_Low, 95%CI_High
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>life_ancstates</code></pre>
+<pre><code># A tibble: 2,315 × 5
+   Parameter                Brownian Median `95%CI_Low` `95%CI_High`
+   &lt;chr&gt;                       &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+ 1 stable_alpha               2      1.72        1.63         1.79  
+ 2 stable_scale               0.0871 0.0651      0.0579       0.0722
+ 3 n0                         2.50   2.53        0.749        4.41  
+ 4 n1                         3.33   3.37        2.05         4.61  
+ 5 Ornithorhynchus_anatinus   3.12   3.12        3.12         3.12  
+ 6 Tachyglossus_aculeatus     3.91   3.91        3.91         3.91  
+ 7 n2                         2.38   2.39        0.832        4.00  
+ 8 n3                         2.40   2.41        1.83         3.01  
+ 9 n4                         2.36   2.37        1.85         2.89  
+10 n5                         2.35   2.35        1.82         2.90  
+# ℹ 2,305 more rows</code></pre>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<pre class="r"><code>ls.stats &lt;- dplyr::bind_rows(
+  size_ancstates %&gt;% dplyr::filter(stringr::str_starts(Parameter, &quot;stable_&quot;)) %&gt;% dplyr::mutate(Trait=&#39;Mass&#39;),
+  life_ancstates %&gt;% dplyr::filter(stringr::str_starts(Parameter, &quot;stable_&quot;)) %&gt;% dplyr::mutate(Trait=&#39;Lifespan&#39;)
+)</code></pre>
+</div>
+<div id="pancova" class="section level2">
+<h2>PANCOVA</h2>
+<pre class="r"><code>tr &lt;- read.tree(&#39;../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.tree&#39;)
+# ggtree(size_sq_tree %&gt;% as.treedata)
+lifesize.dat &lt;- dplyr::full_join(
+  life_ancstates %&gt;% dplyr::select(Parameter, lnLife=Median),
+  size_ancstates %&gt;% dplyr::select(Parameter, lnSize=Median)
+) %&gt;% 
+  dplyr::filter(stringr::str_starts(Parameter, &#39;stable_&#39;, negate=T)) %&gt;% 
+  dplyr::rename(label=&#39;Parameter&#39;)</code></pre>
+<pre><code>Joining with `by = join_by(Parameter)`</code></pre>
+<pre class="r"><code>lifesize.trdat &lt;- tidytree::full_join(tr, lifesize.dat)</code></pre>
+<pre><code>Joining with `by = join_by(label)`</code></pre>
+<pre class="r"><code># lifesize.trdat %&gt;% ggtree(aes(color=lnLife))
+
+lifesize.dat.noNode &lt;- lifesize.dat %&gt;% 
+  dplyr::filter(label %in% tr$tip.label) %&gt;% 
+  tibble::column_to_rownames(&#39;label&#39;) %&gt;% 
+  as.data.frame</code></pre>
+<pre class="r"><code>data&lt;-lifesize.dat.noNode
+tree&lt;-tr
+Y&lt;-&quot;lnLife&quot;
+X&lt;-&quot;lnSize&quot;
+data&lt;-data[,c(which(colnames(data)==Y),which(colnames(data)==X)),drop=F]
+data&lt;-na.omit(data)
+tree&lt;-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data&lt;-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
+colnames(data)&lt;-c(&quot;Dependent&quot;,&quot;Independent&quot;)     #Note that naming the variables &#39;Dependent&#39; and &#39;Independent&#39; serves only to standardize the procedure below across different data sets.</code></pre>
+<pre class="r"><code>node.chiroptera &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;))
+node.laurasiatheria &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Sorex_fumeus&#39;))
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera &lt;- lifesize.trdat %&gt;% 
+#   tidytree::as_tibble() %&gt;% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %&gt;% 
+#   dplyr::pull(label)
+
+Chiroptera &lt;- getTips(tree, node.chiroptera)
+
+NotChiroptera &lt;- setdiff(getTips(tree, tidytree::rootnode(tr)),Chiroptera)
+
+Laurasiatheria &lt;- getTips(tree, node.laurasiatheria)
+
+NotLaurasiatheria &lt;- setdiff(getTips(tree, tidytree::rootnode(tree)),Laurasiatheria)
+
+
+Laurasiatheria.NotChiroptera &lt;- setdiff(getTips(tree, node.laurasiatheria), Chiroptera)</code></pre>
+<pre class="r"><code>plot(
+  lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
+  col=&quot;white&quot;,
+  pch=21,
+  xlab=&quot;lnLife&quot;, 
+  ylab=&quot;lnSize&quot;,
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(&#39;lnLife&#39;,&#39;lnSize&#39;,tree = tr %&gt;% as.phylo(), data=lifesize.dat.noNode)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20all%20mammals-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(
+  lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
+  col=&quot;white&quot;,
+  pch=21,
+  xlab=&quot;lnLife&quot;, 
+  ylab=&quot;lnSize&quot;,
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(
+  &#39;lnLife&#39;,&#39;lnSize&#39;,
+  tree = tr %&gt;% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model=&#39;BM&#39;,
+  group=NotChiroptera,
+  col=&#39;grey&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;lnLife&#39;,&#39;lnSize&#39;,
+  tree = tr %&gt;% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model=&#39;BM&#39;,
+  group=Laurasiatheria,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;lnLife&#39;,&#39;lnSize&#39;,
+  tree = tr %&gt;% as.phylo(), 
+  data=lifesize.dat.noNode,
+  model=&#39;BM&#39;,
+  group=Chiroptera,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(15, 2, legend=c(&quot;Mammals&quot;, &quot;Laurasiatheria&quot;, &#39;Bats&#39;),
+       fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20bats%20vs%20others-1.png" width="576" style="display: block; margin: auto;" /></p>
+<div id="pancova-bats" class="section level3">
+<h3>pANCOVA: Bats</h3>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Chiroptera]&lt;-&quot;B&quot; 
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Chiroptera]&lt;-&quot;B&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 5811.1289      5.0356 27.6509      0
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3  5948.155      5.1544  0.4295 0.5124
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5789.7643      5.0215 15.9918      0
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5789.7643      5.0215 31.5427      0
+ReducedModel  3  5948.155      5.1544               </code></pre>
+</div>
+<div id="pancova-laurasiatheria" class="section level3">
+<h3>pANCOVA: Laurasiatheria</h3>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Laurasiatheria]&lt;-&quot;B&quot; 
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Laurasiatheria]&lt;-&quot;B&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 5921.8591      5.1316  5.5557 0.0186
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 5950.3624      5.1563  0.0013 0.9716
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5919.3388      5.1339  3.0221 0.0491
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5919.3388      5.1339  6.0429 0.0141
+ReducedModel  3 5950.3624      5.1563               </code></pre>
+</div>
+<div id="pancova-laurasiatheria-no-bats" class="section level3">
+<h3>pANCOVA: Laurasiatheria, no bats</h3>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Laurasiatheria.NotChiroptera]&lt;-&quot;B&quot; 
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Laurasiatheria.NotChiroptera]&lt;-&quot;B&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 5949.8922      5.1559  0.0925 0.7611
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 5948.9494      5.1551  0.2754 0.5999
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5947.7432      5.1585  0.2545 0.7753
+ReducedModel  2 5950.3689      5.1518               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df    Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4 5947.7432      5.1585  0.2338 0.6288
+ReducedModel  3 5948.9494      5.1551               </code></pre>
+</div>
+<div id="pancova-yangochiroptera-vs-yinpterochiroptera"
+class="section level3">
+<h3>pANCOVA: Yangochiroptera vs Yinpterochiroptera</h3>
+<pre class="r"><code>tree&lt;-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;)), levels_back = 0)</code></pre>
+<pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
+<pre class="r"><code>tree&lt;-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data&lt;-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
+colnames(data)&lt;-c(&quot;Dependent&quot;,&quot;Independent&quot;)     #Note that naming the variables &#39;Dependent&#39; and &#39;Independent&#39; serves only to standardize the procedure below across different data sets.</code></pre>
+<pre class="r"><code>node.yinpterochiroptera = tidytree::MRCA(tree, &#39;Macroderma_gigas&#39;, &#39;Pteropus_giganteus&#39;)
+node.yangochiroptera = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Mystacina_tuberculata&#39;) 
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera &lt;- lifesize.trdat %&gt;% 
+#   tidytree::as_tibble() %&gt;% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %&gt;% 
+#   dplyr::pull(label)
+
+Yinpterochiroptera &lt;- getTips(tree, node.yinpterochiroptera)
+
+Yangochiroptera &lt;- getTips(tree,node.yangochiroptera)</code></pre>
+<pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
+pGLS.plotGrade(&#39;Dependent&#39;,&#39;Independent&#39;,tree = tree, data=data)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<p><img src="figure/stabletraits.Rmd/unnamed-chunk-9-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yangochiroptera,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yinpterochiroptera,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(6, 2, legend=c(&quot;Yangochiroptera&quot;, &#39;Yinpterochiroptera&#39;),
+       fill=c(&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20yinptero%20vs%20yango-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Yangochiroptera]&lt;-&quot;B&quot; 
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Yangochiroptera]&lt;-&quot;B&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 252.7575      2.5792 32.1725      0
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     3 335.2878      3.4213  0.1309 0.7183
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4  243.829      2.5137 18.2811      0
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     4  243.829      2.5137 36.3841      0
+ReducedModel  3 335.2878      3.4213               </code></pre>
+</div>
+<div id="pancova-within-yangochiroptera" class="section level3">
+<h3>pANCOVA: Within Yangochiroptera</h3>
+<pre class="r"><code>node.vespertilionidae = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Lasiurus_cinereus&#39;)
+node.myotis = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Myotis_emarginatus&#39;)
+node.molossidae = tidytree::MRCA(tree, &#39;Molossus_molossus&#39;, &#39;Chaerephon_pumilus&#39;)
+node.phyllostomidae = tidytree::MRCA(tree, &#39;Macrotus_waterhousii&#39;, &#39;Artibeus_jamaicensis&#39;)
+
+Vespertilionidae &lt;- getTips(tree, node.vespertilionidae)
+Myotis &lt;- getTips(tree, node.myotis)
+Molossidae &lt;- getTips(tree, node.molossidae)
+Phyllostomidae &lt;- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other &lt;- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %&gt;% 
+  setdiff(
+    .,
+    Molossidae
+  ) %&gt;% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis &lt;- setdiff(
+  Vespertilionidae,
+  Myotis
+)</code></pre>
+<pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yinpterochiroptera,
+  col=&#39;black&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yangochiroptera.Other,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Vespertilionidae.NotMyotis,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Myotis,
+  col=&#39;blue&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Molossidae,
+  col=&#39;yellow&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Phyllostomidae,
+  col=&#39;red&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(6.25, 2.5,
+        legend=c(
+          &#39;Yinpterochiroptera&#39;,
+          &#39;Yangochiroptera.Other&#39;,
+          &#39;Vespertilionidae.NotMyotis&#39;,
+          &#39;Myotis&#39;,
+          &#39;Molossidae&#39;,
+          &#39;Phyllostomidae&#39;
+        ),
+       fill=c(
+          &#39;black&#39;,
+          &#39;violet&#39;,
+          &#39;green&#39;,
+          &#39;blue&#39;,
+          &#39;yellow&#39;,
+          &#39;red&#39;
+       ), 
+       cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20bat%20subtypes-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Vespertilionidae]&lt;-&quot;B&quot; 
+grpS[Myotis]&lt;-&quot;C&quot;
+grpS[Molossidae]&lt;-&quot;D&quot;
+grpS[Phyllostomidae]&lt;-&quot;E&quot;  
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Vespertilionidae]&lt;-&quot;B&quot; 
+grpI[Myotis]&lt;-&quot;C&quot;
+grpI[Molossidae]&lt;-&quot;D&quot;
+grpI[Phyllostomidae]&lt;-&quot;E&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     6 234.1716       2.465 10.3008      0
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     6 333.5421       3.511  0.1562 0.9598
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel    10 208.1129       2.287  6.9756      0
+ReducedModel  2 335.7355      3.3913               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel    10 208.1129       2.287 13.7114      0
+ReducedModel  6 333.5421       3.511               </code></pre>
+</div>
+<div id="pancova-drop-myoits-auriculus" class="section level3">
+<h3>PANCOVA: drop Myoits auriculus</h3>
+<pre class="r"><code>tree &lt;- tree %&gt;% tidytree::drop.tip(c(&#39;Myotis_auriculus&#39;))
+data &lt;- data[which(rownames(data) != &quot;Myotis_auriculus&quot;),]
+node.vespertilionidae = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Lasiurus_cinereus&#39;)
+node.myotis = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Myotis_emarginatus&#39;)
+node.molossidae = tidytree::MRCA(tree, &#39;Molossus_molossus&#39;, &#39;Chaerephon_pumilus&#39;)
+node.phyllostomidae = tidytree::MRCA(tree, &#39;Macrotus_waterhousii&#39;, &#39;Artibeus_jamaicensis&#39;)
+
+Vespertilionidae &lt;- getTips(tree, node.vespertilionidae)
+Myotis &lt;- getTips(tree, node.myotis)
+Molossidae &lt;- getTips(tree, node.molossidae)
+Phyllostomidae &lt;- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other &lt;- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %&gt;% 
+  setdiff(
+    .,
+    Molossidae
+  ) %&gt;% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis &lt;- setdiff(
+  Vespertilionidae,
+  Myotis
+)</code></pre>
+<pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
+pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yinpterochiroptera,
+  col=&#39;black&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yangochiroptera.Other,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Vespertilionidae.NotMyotis,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Myotis,
+  col=&#39;blue&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Molossidae,
+  col=&#39;yellow&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Phyllostomidae,
+  col=&#39;red&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(6.25, 2.5,
+        legend=c(
+          &#39;Yinpterochiroptera&#39;,
+          &#39;Yangochiroptera.Other&#39;,
+          &#39;Vespertilionidae.NotMyotis&#39;,
+          &#39;Myotis&#39;,
+          &#39;Molossidae&#39;,
+          &#39;Phyllostomidae&#39;
+        ),
+       fill=c(
+          &#39;black&#39;,
+          &#39;violet&#39;,
+          &#39;green&#39;,
+          &#39;blue&#39;,
+          &#39;yellow&#39;,
+          &#39;red&#39;
+       ), 
+       cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20bat%20subtypes%20without%20auriculus-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#For differences in slope: 
+grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpS[Vespertilionidae]&lt;-&quot;B&quot; 
+grpS[Myotis]&lt;-&quot;C&quot;
+grpS[Molossidae]&lt;-&quot;D&quot;
+grpS[Phyllostomidae]&lt;-&quot;E&quot;  
+grpS&lt;-as.factor(grpS) 
+names(grpS)&lt;-rownames(data)
+
+#For differences in intercept: 
+grpI&lt;-rep(&quot;A&quot;,length(rownames(data))) 
+grpI[Vespertilionidae]&lt;-&quot;B&quot; 
+grpI[Myotis]&lt;-&quot;C&quot;
+grpI[Molossidae]&lt;-&quot;D&quot;
+grpI[Phyllostomidae]&lt;-&quot;E&quot; 
+grpI&lt;-as.factor(grpI) 
+names(grpI)&lt;-rownames(data)</code></pre>
+<pre class="r"><code>Model&lt;-model.matrix(as.formula(Dependent~Independent),data)
+
+#(1) Differences in slopes, holding intercept constant: 
+Model_S&lt;-model.matrix(as.formula(Dependent~grpS:Independent),data) 
+
+#(2) Differences in intercept, holding slopes constant: 
+Model_I&lt;-model.matrix(as.formula(Dependent~grpI + Independent),data) 
+
+#(3) Differences in slopes and differences in intercept: 
+Model_SI&lt;-model.matrix(as.formula(Dependent~grpI + grpS:Independent),data)</code></pre>
+<pre class="r"><code>#(1) Differences in slopes, holding intercept constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_S)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     6 157.2253      1.6726  0.3514 0.8425
+ReducedModel  2 159.5764      1.6283               </code></pre>
+<pre class="r"><code>#(2) Differences in intercept, holding slopes constant:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_I)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel     6 156.6053       1.666  0.4458 0.7752
+ReducedModel  2 159.5764      1.6283               </code></pre>
+<pre class="r"><code>#(3) Differences in slopes and differences in intercept:
+gls.ancova(Dependent~Independent,vcv(tree),Model,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel    10 152.4912      1.6943  0.5227 0.8366
+ReducedModel  2 159.5764      1.6283               </code></pre>
+<pre class="r"><code>#(4) Differences in slopes vs differences in both
+gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)</code></pre>
+<pre><code>             df   Sum Sq Mean Sum Sq F value Pr(&gt;F)
+FullModel    10 152.4912      1.6943   0.607 0.6586
+ReducedModel  6 156.6053       1.666               </code></pre>
+</div>
+<div id="remarks" class="section level3">
+<h3>Remarks</h3>
+<p>In conclusion, bats are weird. However, its not all bats, but really
+its just Yangochiroptera. In fact, within Yangochiroptera, most families
+either follow the mold (like Molossidae) or have no correlation (like
+Vespertilionidae and Phyllostomidae). Myotis auriculus is definitely an
+outlier - with it included, there is a negative correlation between body
+size and lifespan, but without it, genus Myotis follows the same trends
+as Vespertilionidae in general.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -566,7 +1588,7 @@ locale:
  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
 [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
 
-time zone: America/Los_Angeles
+time zone: America/La_Paz
 tzcode source: system (glibc)
 
 attached base packages:
@@ -574,20 +1596,19 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.3       rms_6.7-1             Hmisc_5.1-1          
- [4] ComplexHeatmap_2.14.0 ggnewscale_0.4.9      stargazer_5.2.3      
- [7] kableExtra_1.3.4      broom.mixed_0.2.9.4   gghighlight_0.4.0    
-[10] magick_2.8.1          ggrepel_0.9.4         UpSetR_1.4.0         
-[13] ggplotify_0.1.2       plotly_4.10.2         ggstance_0.3.6       
-[16] ggsci_3.0.0           ggpubr_0.6.0          ggimage_0.3.3        
-[19] ggtree_3.6.2          tidytree_0.4.5        treeio_1.25.4        
-[22] nlme_3.1-163          geiger_2.0.11         phytools_1.9-16      
-[25] maps_3.4.1            ape_5.7-1             viridis_0.6.4        
-[28] viridisLite_0.4.2     magrittr_2.0.3        lubridate_1.9.2      
-[31] forcats_1.0.0         stringr_1.5.0         dplyr_1.1.3          
-[34] purrr_1.0.2           readr_2.1.4           tidyr_1.3.0          
-[37] tibble_3.2.1          ggplot2_3.4.3         tidyverse_2.0.0      
-[40] data.table_1.14.8    
+ [1] evomap_0.0.0.9000     patchwork_1.1.3       rms_6.7-1            
+ [4] Hmisc_5.1-1           ComplexHeatmap_2.14.0 ggnewscale_0.4.9     
+ [7] stargazer_5.2.3       kableExtra_1.3.4      broom.mixed_0.2.9.4  
+[10] gghighlight_0.4.0     magick_2.8.1          ggrepel_0.9.4        
+[13] UpSetR_1.4.0          ggplotify_0.1.2       plotly_4.10.2        
+[16] ggstance_0.3.6        ggsci_3.0.0           ggpubr_0.6.0         
+[19] ggimage_0.3.3         ggtree_3.6.2          nlme_3.1-163         
+[22] geiger_2.0.11         phytools_1.9-16       maps_3.4.1           
+[25] ape_5.7-1             viridis_0.6.4         viridisLite_0.4.2    
+[28] magrittr_2.0.3        lubridate_1.9.2       forcats_1.0.0        
+[31] stringr_1.5.0         dplyr_1.1.3           purrr_1.0.2          
+[34] readr_2.1.4           tidyr_1.3.0           tibble_3.2.1         
+[37] ggplot2_3.4.3         tidyverse_2.0.0       data.table_1.14.8    
 
 loaded via a namespace (and not attached):
   [1] splines_4.3.1           later_1.3.1             polspline_1.1.23       
@@ -602,38 +1623,41 @@ loaded via a namespace (and not attached):
  [28] TH.data_1.1-2           yulab.utils_0.1.0       nnet_7.3-19            
  [31] sandwich_3.0-2          git2r_0.32.0            circlize_0.4.15        
  [34] IRanges_2.34.1          S4Vectors_0.38.2        listenv_0.9.0          
- [37] MatrixModels_0.5-2      parallelly_1.36.0       svglite_2.1.1          
- [40] codetools_0.2-19        xml2_1.3.5              tidyselect_1.2.0       
- [43] shape_1.4.6             aplot_0.2.1             matrixStats_1.0.0      
- [46] stats4_4.3.1            base64enc_0.1-3         webshot_0.5.5          
- [49] jsonlite_1.8.7          GetoptLong_1.0.5        Formula_1.2-5          
- [52] survival_3.5-7          iterators_1.0.14        systemfonts_1.0.4      
- [55] foreach_1.5.2           tools_4.3.1             Rcpp_1.0.11            
- [58] glue_1.6.2              mnormt_2.1.1            gridExtra_2.3          
- [61] xfun_0.40               withr_2.5.0             numDeriv_2016.8-1.1    
- [64] combinat_0.0-8          fastmap_1.1.1           fansi_1.0.5            
- [67] SparseM_1.81            digest_0.6.33           timechange_0.2.0       
- [70] R6_2.5.1                gridGraphics_0.5-1      colorspace_2.1-0       
- [73] utf8_1.2.3              generics_0.1.3          clusterGeneration_1.3.8
- [76] httr_1.4.7              htmlwidgets_1.6.2       scatterplot3d_0.3-44   
- [79] pkgconfig_2.0.3         gtable_0.3.4            workflowr_1.7.1        
- [82] furrr_0.3.1             htmltools_0.5.6         carData_3.0-5          
- [85] clue_0.3-65             scales_1.2.1            png_0.1-8              
- [88] ggfun_0.1.3             knitr_1.44              rstudioapi_0.15.0      
- [91] tzdb_0.4.0              rjson_0.2.21            coda_0.19-4            
- [94] checkmate_2.2.0         zoo_1.8-12              cachem_1.0.8           
- [97] GlobalOptions_0.1.2     parallel_4.3.1          foreign_0.8-85         
-[100] pillar_1.9.0            vctrs_0.6.3             promises_1.2.1         
-[103] car_3.1-2               cluster_2.1.4           htmlTable_2.4.1        
-[106] evaluate_0.21           mvtnorm_1.2-3           cli_3.6.1              
-[109] compiler_4.3.1          rlang_1.1.1             crayon_1.5.2           
-[112] ggsignif_0.6.4          plyr_1.8.8              fs_1.6.3               
-[115] stringi_1.7.12          subplex_1.8             munsell_0.5.0          
-[118] lazyeval_0.2.2          optimParallel_1.0-2     quantreg_5.97          
-[121] Matrix_1.6-1.1          hms_1.1.3               bit64_4.0.5            
-[124] future_1.33.0           igraph_1.5.1            broom_1.0.5            
-[127] memoise_2.0.1           bslib_0.5.1             phangorn_2.11.1        
-[130] fastmatch_1.1-4         bit_4.0.5              </code></pre>
+ [37] tidytree_0.4.5          MatrixModels_0.5-2      parallelly_1.36.0      
+ [40] svglite_2.1.1           codetools_0.2-19        xml2_1.3.5             
+ [43] tidyselect_1.2.0        shape_1.4.6             aplot_0.2.1            
+ [46] matrixStats_1.0.0       stats4_4.3.1            base64enc_0.1-3        
+ [49] webshot_0.5.5           jsonlite_1.8.7          GetoptLong_1.0.5       
+ [52] Formula_1.2-5           survival_3.5-7          iterators_1.0.14       
+ [55] systemfonts_1.0.4       foreach_1.5.2           tools_4.3.1            
+ [58] treeio_1.25.4           Rcpp_1.0.11             glue_1.6.2             
+ [61] mnormt_2.1.1            gridExtra_2.3           xfun_0.40              
+ [64] withr_2.5.0             numDeriv_2016.8-1.1     combinat_0.0-8         
+ [67] fastmap_1.1.1           fansi_1.0.5             SparseM_1.81           
+ [70] digest_0.6.33           timechange_0.2.0        R6_2.5.1               
+ [73] gridGraphics_0.5-1      colorspace_2.1-0        utf8_1.2.3             
+ [76] generics_0.1.3          clusterGeneration_1.3.8 httr_1.4.7             
+ [79] htmlwidgets_1.6.2       scatterplot3d_0.3-44    whisker_0.4.1          
+ [82] pkgconfig_2.0.3         gtable_0.3.4            workflowr_1.7.1        
+ [85] furrr_0.3.1             htmltools_0.5.6         carData_3.0-5          
+ [88] clue_0.3-65             scales_1.2.1            png_0.1-8              
+ [91] ggfun_0.1.3             knitr_1.44              rstudioapi_0.15.0      
+ [94] tzdb_0.4.0              rjson_0.2.21            coda_0.19-4            
+ [97] checkmate_2.2.0         zoo_1.8-12              cachem_1.0.8           
+[100] GlobalOptions_0.1.2     parallel_4.3.1          foreign_0.8-85         
+[103] pillar_1.9.0            vctrs_0.6.3             promises_1.2.1         
+[106] car_3.1-2               cluster_2.1.4           htmlTable_2.4.1        
+[109] evaluate_0.21           mvtnorm_1.2-3           cli_3.6.1              
+[112] compiler_4.3.1          rlang_1.1.1             crayon_1.5.2           
+[115] ggsignif_0.6.4          plyr_1.8.8              fs_1.6.3               
+[118] stringi_1.7.12          subplex_1.8             munsell_0.5.0          
+[121] lazyeval_0.2.2          optimParallel_1.0-2     quantreg_5.97          
+[124] Matrix_1.6-1.1          hms_1.1.3               bit64_4.0.5            
+[127] future_1.33.0           igraph_1.5.1            broom_1.0.5            
+[130] memoise_2.0.1           bslib_0.5.1             phangorn_2.11.1        
+[133] fastmatch_1.1-4         bit_4.0.5              </code></pre>
+</div>
+</div>
 </div>
 
 

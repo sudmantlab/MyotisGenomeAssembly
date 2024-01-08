@@ -361,7 +361,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -382,13 +382,13 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-10-23
+<strong>Last updated:</strong> 2024-01-08
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
@@ -408,6 +408,24 @@ versions</em> tab lists the development history.
 </div>
 <div id="checks" class="tab-pane fade">
 <div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -495,18 +513,59 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>Repository version:</strong> no
-version control </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>
+</a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongnoversioncontrol"
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Tracking code development and connecting the code version to the
-results is critical for reproducibility. To start using Git, open the
-Terminal and type <code>git init</code> in your project directory.</p>
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    R_workflowr/.RData
+    Ignored:    R_workflowr/.Rproj.user/
+    Ignored:    R_workflowr/data/
+    Ignored:    R_workflowr/output/pubFiles/
+    Ignored:    R_workflowr/output/webGestalt/
+    Ignored:    R_workflowr/renv/library/
+    Ignored:    R_workflowr/renv/staging/
+    Ignored:    R_workflowr/test.phy
+
+Unstaged changes:
+    Modified:   R_workflowr/analysis/RICR.Rmd
+    Modified:   R_workflowr/output/draft_figs/Myotis_size_life_LQ_upham.pdf
+    Modified:   R_workflowr/output/subfigs/phylo_auNG_circ_col_withLine.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
 </div>
 </div>
 </div>
@@ -514,11 +573,143 @@ Terminal and type <code>git init</code> in your project directory.</p>
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-This project is not being versioned with Git. To obtain the full
-reproducibility benefits of using workflowr, please see
-<code>?wflow_start</code>.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>R_workflowr/analysis/sample_map.Rmd</code>) and HTML
+(<code>R_workflowr/docs/sample_map.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/8f66d05c66fd494567461d74f4110a0876566489/R_workflowr/analysis/sample_map.Rmd" target="_blank">8f66d05</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-21
+</td>
+<td>
+clean version of Fig 1, now with LQ
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/analysis/sample_map.Rmd" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+<td>
+draft sub figs for F1&amp;2
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/sample_map.html" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+<td>
+draft sub figs for F1&amp;2
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/0408a6b776b857654cc39b442128c9dbde43be6c/R_workflowr/analysis/sample_map.Rmd" target="_blank">0408a6b</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-05-09
+</td>
+<td>
+Figure 1 work
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/5848dd7f7eac78b5bbb781b0b101adaa002a6faa/R_workflowr/docs/sample_map.html" target="_blank">5848dd7</a>
+</td>
+<td>
+Juan M Vazquez (docmanny)
+</td>
+<td>
+2023-01-31
+</td>
+<td>
+Adding workflowr
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/ca0752885e2873b157615bd4dca8dd3c8b11d587/R_workflowr/analysis/sample_map.Rmd" target="_blank">ca07528</a>
+</td>
+<td>
+Juan M Vazquez (docmanny)
+</td>
+<td>
+2023-01-31
+</td>
+<td>
+wflow_git_commit(".")
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -648,6 +839,43 @@ p.map.collections</code></pre>
 <pre><code>Assuming `crs = 4326` in stat_spatial_identity()
 Assuming `crs = 4326` in stat_spatial_identity()</code></pre>
 <p><img src="figure/sample_map.Rmd/only%20collection%20points-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-only-collection-points-1">
+Past versions of "only collection points-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-only-collection-points-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/figure/sample_map.Rmd/only collection points-1.png" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p.map.collections.caaznv &lt;- ggplot() + 
   geom_sf(data= caaznv, color = &quot;#ABB0B8&quot;, fill = &quot;#6F7378&quot;, size = 0.1) +
   geom_spatial_point(data= datasheet.known, aes(group=species, y=Lattitude, x=Longitude, fill=species), size=4, pch=21, position=&quot;jitter&quot;) + 
@@ -661,6 +889,43 @@ p.map.collections.caaznv</code></pre>
 <pre><code>Assuming `crs = 4326` in stat_spatial_identity()
 Assuming `crs = 4326` in stat_spatial_identity()</code></pre>
 <p><img src="figure/sample_map.Rmd/Minimal%20collections%20map-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Minimal-collections-map-1">
+Past versions of "Minimal collections map-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Minimal-collections-map-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/figure/sample_map.Rmd/Minimal collections map-1.png" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>shape.myoLuc$geometry &lt;- shape.myoLuc$geometry %&gt;%
   s2::s2_rebuild() %&gt;%
   sf::st_as_sfc()
@@ -699,6 +964,54 @@ st_intersection(shape.myoLuc3, west2)</code></pre>
 p.mapMyo.split</code></pre>
 <pre><code>Assuming `crs = 4326` in stat_spatial_identity()</code></pre>
 <p><img src="figure/sample_map.Rmd/myotis%20ranges%20split-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-myotis-ranges-split-1">
+Past versions of "myotis ranges split-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-myotis-ranges-split-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/figure/sample_map.Rmd/myotis ranges split-1.png" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/5848dd7f7eac78b5bbb781b0b101adaa002a6faa/R_workflowr/docs/figure/sample_map.Rmd/myotis ranges split-1.png" target="_blank">5848dd7</a>
+</td>
+<td>
+Juan M Vazquez (docmanny)
+</td>
+<td>
+2023-01-31
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>#%&gt;% plotly::ggplotly()</code></pre>
 <pre class="r"><code>pic.myoLuc &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020/02/108746-19-e1593640880404.jpg&quot;) %&gt;% image_ggplot()
 pic.myoYum &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020/02/106605-56-812x600.jpg&quot;) %&gt;% image_ggplot()
@@ -709,6 +1022,15 @@ pic.myoThy &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020
 pic.myoOcc &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020/02/Arizona-myotis-Rick-and-Nora-Bowers-Alamy-Stock-Photo--812x600.jpeg&quot;) %&gt;% image_ggplot()
 pic.myoVel &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020/02/106463-19-e1642201625671-812x600.jpg&quot;) %&gt;% image_ggplot()
 pic.myoAui &lt;- image_read(&quot;https://www.batcon.org/wp-content/uploads/2020/02/106475-19-e1593638188243-812x600.jpg&quot;) %&gt;% image_ggplot()</code></pre>
+<pre class="r"><code>pic.myoLuc &lt;- image_read(path = &#39;../data/img/batCon-myoLuc.jpg&#39;) %&gt;% image_ggplot()
+pic.myoYum &lt;- image_read(&quot;../data/img/batCon-myoYum.jpg&quot;) %&gt;% image_ggplot()
+pic.myoCai &lt;- image_read(&quot;../data/img/batCon-myoCai.jpg&quot;) %&gt;% image_ggplot()
+pic.myoVol &lt;- image_read(&quot;../data/img/batCon-myoVol.jpg&quot;) %&gt;% image_ggplot()
+pic.myoEvo &lt;- image_read(&quot;../data/img/batCon-myoEvo-Michael-DurhamMinden-PIctures.jpeg&quot;) %&gt;% image_ggplot()
+pic.myoThy &lt;- image_read(&quot;../data/img/batCon-myoThy.jpg&quot;) %&gt;% image_ggplot()
+pic.myoOcc &lt;- image_read(&quot;../data/img/batCon-myoOcc-Rick-and-Nora-Bowers-Alamy.jpeg&quot;) %&gt;% image_ggplot()
+pic.myoVel &lt;- image_read(&quot;../data/img/batCon-myoVel.jpg&quot;) %&gt;% image_ggplot()
+pic.myoAui &lt;- image_read(&quot;../data/img/batCon-myoAui.jpg&quot;) %&gt;% image_ggplot()</code></pre>
 <pre class="r"><code>p.map.base &lt;- ggplot() + 
   geom_sf(data= west, color = &quot;#ABB0B8&quot;, fill = &quot;#6F7378&quot;, size = 0.1)
 
@@ -829,6 +1151,55 @@ p.mapPic &lt;- (p.map.pic.myoLuc | p.map.pic.myoYum | p.map.pic.myoCai)/
 
 p.mapPic</code></pre>
 <p><img src="figure/sample_map.Rmd/myotis%20ranges%20split%20with%20photo-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-myotis-ranges-split-with-photo-1">
+Past versions of "myotis ranges split with photo-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-myotis-ranges-split-with-photo-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/figure/sample_map.Rmd/myotis ranges split with photo-1.png" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/5848dd7f7eac78b5bbb781b0b101adaa002a6faa/R_workflowr/docs/figure/sample_map.Rmd/myotis ranges split with photo-1.png" target="_blank">5848dd7</a>
+</td>
+<td>
+Juan M Vazquez (docmanny)
+</td>
+<td>
+2023-01-31
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p.map.base.calaz &lt;- ggplot() + 
   geom_sf(data= calaz, color = &quot;#ABB0B8&quot;, fill = &quot;#6F7378&quot;, size = 0.1)
 
@@ -838,7 +1209,7 @@ p.map.myoLuc.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis lucifugus&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_lucifugus&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoYum.calaz &lt;- p.map.base.calaz + 
@@ -847,7 +1218,7 @@ p.map.myoYum.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis yumanensis&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_yumanensis&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoCai.calaz &lt;- p.map.base.calaz + 
@@ -856,7 +1227,7 @@ p.map.myoCai.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis californicus&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_californicus&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoVol.calaz &lt;- p.map.base.calaz + 
@@ -865,7 +1236,7 @@ p.map.myoVol.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis volans&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_volans&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoEvo.calaz &lt;- p.map.base.calaz + 
@@ -874,7 +1245,7 @@ p.map.myoEvo.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis evotis&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_evotis&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoThy.calaz &lt;- p.map.base.calaz + 
@@ -883,7 +1254,7 @@ p.map.myoThy.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis thysanodes&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_thysanodes&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoOcc.calaz &lt;- p.map.base.calaz + 
@@ -892,7 +1263,7 @@ p.map.myoOcc.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis occultus&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_occultus&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoVel.calaz &lt;- p.map.base.calaz + 
@@ -901,7 +1272,7 @@ p.map.myoVel.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis velifer&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_velifer&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 p.map.myoAui.calaz &lt;- p.map.base.calaz + 
@@ -910,7 +1281,7 @@ p.map.myoAui.calaz &lt;- p.map.base.calaz +
   scale_fill_manual(values = species_color) + 
   guides(fill=guide_none()) + 
   theme_void() + 
-  theme(title = element_text(face=&quot;bold&quot;, size=12, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
+  theme(title = element_text(face=&quot;bold&quot;, size=10, hjust = 0.5), plot.margin = margin(0,0,0,0, &quot;cm&quot;)) + 
   ggtitle(&quot;Myotis auriculus&quot;) +
   geom_spatial_point(data= datasheet.known %&gt;% filter(species == &quot;Myotis_auriculus&quot;), aes(group=species, y=Lattitude, x=Longitude), size=2)
 
@@ -932,6 +1303,54 @@ p.mapPic.calaz &lt;-
 
 p.mapPic.calaz</code></pre>
 <p><img src="figure/sample_map.Rmd/only%20CA%20AZ-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-only-CA-AZ-1">
+Past versions of "only CA AZ-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-only-CA-AZ-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/3d9fd9c8d0d597a96d92151d9d96dbea6c34799e/R_workflowr/docs/figure/sample_map.Rmd/only CA AZ-1.png" target="_blank">3d9fd9c</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2023-12-15
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/5848dd7f7eac78b5bbb781b0b101adaa002a6faa/R_workflowr/docs/figure/sample_map.Rmd/only CA AZ-1.png" target="_blank">5848dd7</a>
+</td>
+<td>
+Juan M Vazquez (docmanny)
+</td>
+<td>
+2023-01-31
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -955,7 +1374,7 @@ locale:
  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
 [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
 
-time zone: America/Los_Angeles
+time zone: America/La_Paz
 tzcode source: system (glibc)
 
 attached base packages:
@@ -974,21 +1393,21 @@ loaded via a namespace (and not attached):
  [5] digest_0.6.33      timechange_0.2.0   lifecycle_1.0.3    magrittr_2.0.3    
  [9] compiler_4.3.1     rlang_1.1.1        sass_0.4.7         tools_4.3.1       
 [13] utf8_1.2.3         yaml_2.3.7         knitr_1.44         ggsignif_0.6.4    
-[17] labeling_0.4.3     curl_5.0.2         bit_4.0.5          sp_2.1-1          
-[21] classInt_0.4-10    abind_1.4-5        KernSmooth_2.23-22 workflowr_1.7.1   
-[25] withr_2.5.0        grid_4.3.1         fansi_1.0.5        ggpubr_0.6.0      
-[29] git2r_0.32.0       e1071_1.7-13       colorspace_2.1-0   scales_1.2.1      
-[33] cli_3.6.1          rmarkdown_2.25     crayon_1.5.2       generics_0.1.3    
-[37] rstudioapi_0.15.0  httr_1.4.7         tzdb_0.4.0         DBI_1.1.3         
-[41] cachem_1.0.8       proxy_0.4-27       parallel_4.3.1     s2_1.1.4          
-[45] vctrs_0.6.3        jsonlite_1.8.7     carData_3.0-5      car_3.1-2         
-[49] hms_1.1.3          bit64_4.0.5        ggrepel_0.9.4      rstatix_0.7.2     
-[53] jquerylib_0.1.4    units_0.8-4        glue_1.6.2         stringi_1.7.12    
-[57] gtable_0.3.4       later_1.3.1        munsell_0.5.0      pillar_1.9.0      
-[61] htmltools_0.5.6    R6_2.5.1           wk_0.9.0           rprojroot_2.0.3   
-[65] vroom_1.6.3        evaluate_0.21      lattice_0.21-8     backports_1.4.1   
-[69] broom_1.0.5        ggsci_3.0.0        httpuv_1.6.11      bslib_0.5.1       
-[73] class_7.3-22       Rcpp_1.0.11        xfun_0.40          fs_1.6.3          
+[17] labeling_0.4.3     bit_4.0.5          sp_2.1-1           classInt_0.4-10   
+[21] abind_1.4-5        KernSmooth_2.23-22 workflowr_1.7.1    withr_2.5.0       
+[25] grid_4.3.1         fansi_1.0.5        ggpubr_0.6.0       git2r_0.32.0      
+[29] e1071_1.7-13       colorspace_2.1-0   scales_1.2.1       cli_3.6.1         
+[33] rmarkdown_2.25     crayon_1.5.2       generics_0.1.3     rstudioapi_0.15.0 
+[37] httr_1.4.7         tzdb_0.4.0         DBI_1.1.3          cachem_1.0.8      
+[41] proxy_0.4-27       parallel_4.3.1     s2_1.1.4           vctrs_0.6.3       
+[45] jsonlite_1.8.7     carData_3.0-5      car_3.1-2          hms_1.1.3         
+[49] bit64_4.0.5        ggrepel_0.9.4      rstatix_0.7.2      jquerylib_0.1.4   
+[53] units_0.8-4        glue_1.6.2         stringi_1.7.12     gtable_0.3.4      
+[57] later_1.3.1        munsell_0.5.0      pillar_1.9.0       htmltools_0.5.6   
+[61] R6_2.5.1           wk_0.9.0           rprojroot_2.0.3    vroom_1.6.3       
+[65] evaluate_0.21      lattice_0.21-8     backports_1.4.1    broom_1.0.5       
+[69] ggsci_3.0.0        httpuv_1.6.11      bslib_0.5.1        class_7.3-22      
+[73] Rcpp_1.0.11        whisker_0.4.1      xfun_0.40          fs_1.6.3          
 [77] pkgconfig_2.0.3   </code></pre>
 </div>
 
