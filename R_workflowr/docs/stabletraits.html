@@ -361,7 +361,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,9 +386,9 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
@@ -411,18 +411,21 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
@@ -513,15 +516,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree6e432fc74cb38674f5e77b9f571829dcb58c4d05targetblank6e432fca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreed20d9e09f4db5110714b644ef1110196bab57019targetblankd20d9e0a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/6e432fc74cb38674f5e77b9f571829dcb58c4d05" target="_blank">6e432fc</a>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/d20d9e09f4db5110714b644ef1110196bab57019" target="_blank">d20d9e0</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree6e432fc74cb38674f5e77b9f571829dcb58c4d05targetblank6e432fca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreed20d9e09f4db5110714b644ef1110196bab57019targetblankd20d9e0a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +534,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/6e432fc74cb38674f5e77b9f571829dcb58c4d05" target="_blank">6e432fc</a>.
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/d20d9e09f4db5110714b644ef1110196bab57019" target="_blank">d20d9e0</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -554,6 +557,9 @@ Ignored files:
     Ignored:    R_workflowr/renv/library/
     Ignored:    R_workflowr/renv/staging/
     Ignored:    R_workflowr/test.phy
+
+Unstaged changes:
+    Modified:   R_workflowr/analysis/stabletraits.Rmd
 
 </code></pre>
 <p>
@@ -600,6 +606,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/d20d9e09f4db5110714b644ef1110196bab57019/R_workflowr/docs/stabletraits.html" target="_blank">d20d9e0</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+misbuild
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1699,17 +1722,19 @@ ReducedModel  6 333.5421       3.511               </code></pre>
 </div>
 <div id="pancova-drop-myoits-auriculus" class="section level3">
 <h3>PANCOVA: drop Myoits auriculus</h3>
-<pre class="r"><code>tree &lt;- tree.og
-data &lt;- data.og
+<pre class="r"><code>data&lt;-lifesize.dat.noNode
+colnames(data) &lt;- c(&#39;Dependent&#39;, &#39;Independent&#39;)
+tree&lt;-tr
+
 tree &lt;- tree %&gt;% tidytree::drop.tip(c(&#39;Myotis_auriculus&#39;))
 data &lt;- data[which(rownames(data) != &quot;Myotis_auriculus&quot;),]
 node.vespertilionidae = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Lasiurus_cinereus&#39;)
 node.myotis = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Myotis_emarginatus&#39;)
 node.molossidae = tidytree::MRCA(tree, &#39;Molossus_molossus&#39;, &#39;Chaerephon_pumilus&#39;)
 node.phyllostomidae = tidytree::MRCA(tree, &#39;Macrotus_waterhousii&#39;, &#39;Artibeus_jamaicensis&#39;)
-
 node.chiroptera &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;))
 node.laurasiatheria &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Sorex_fumeus&#39;))
+
 Chiroptera &lt;- getTips(tree, node.chiroptera)
 
 NotChiroptera &lt;- setdiff(getTips(tree, tidytree::rootnode(tree)),Chiroptera)
@@ -1743,15 +1768,16 @@ Vespertilionidae.NotMyotis &lt;- setdiff(
 )</code></pre>
 <pre class="r"><code>plot(
   data$Dependent~data$Independent,
+  # lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
   col=&quot;white&quot;,
   pch=21,
-  xlab=&quot;Independent&quot;, 
-  ylab=&quot;Dependent&quot;,
+  xlab=&quot;lnSize&quot;, 
+  ylab=&quot;lnLife&quot;,
   asp=1,
   cex.lab=2
 ) 
 pGLS.plotGrade(
-  &#39;Independent&#39;,&#39;Dependent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, 
   data= data,
   model=&#39;BM&#39;,
@@ -1770,7 +1796,7 @@ graphical parameter
 Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
 graphical parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Independent&#39;,&#39;Dependent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, 
   data= data,
   model=&#39;BM&#39;,
@@ -1790,7 +1816,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Independent&#39;,&#39;Dependent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, 
   data= data,
   model=&#39;BM&#39;,
@@ -1865,13 +1891,13 @@ docmanny
   data$Dependent~data$Independent,
   col=&quot;white&quot;,
   pch=21,
-  xlab=&quot;Dependent&quot;, 
-  ylab=&quot;Independent&quot;,
+  xlab=&quot;lnSize&quot;, 
+  ylab=&quot;lnLife&quot;,
   asp=1,
   cex.lab=2
 ) 
 pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, 
   data= data,
   model=&#39;BM&#39;,
@@ -1890,7 +1916,7 @@ graphical parameter
 Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
 graphical parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Yangochiroptera,
@@ -1909,7 +1935,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Yinpterochiroptera,
@@ -2030,7 +2056,7 @@ Vespertilionidae.NotMyotis &lt;- setdiff(
 )</code></pre>
 <pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
 pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Yinpterochiroptera,
@@ -2048,7 +2074,7 @@ graphical parameter
 Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
 graphical parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Yangochiroptera.Other,
@@ -2067,7 +2093,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Vespertilionidae.NotMyotis,
@@ -2086,7 +2112,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Myotis,
@@ -2105,7 +2131,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Molossidae,
@@ -2124,7 +2150,7 @@ parameter
 Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
 parameter</code></pre>
 <pre class="r"><code>pGLS.plotGrade(
-  &#39;Dependent&#39;,&#39;Independent&#39;,
+  &quot;Dependent&quot;, &quot;Independent&quot;,
   tree = tree, data=data,
   model=&#39;BM&#39;,
   group=Phyllostomidae,
