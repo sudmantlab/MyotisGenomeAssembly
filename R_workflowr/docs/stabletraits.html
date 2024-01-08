@@ -516,15 +516,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreef2fb9dae95b39346560dd9d5e135161c8594e790targetblankf2fb9daa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/f2fb9dae95b39346560dd9d5e135161c8594e790" target="_blank">f2fb9da</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreef2fb9dae95b39346560dd9d5e135161c8594e790targetblankf2fb9daa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -534,7 +534,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>.
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/f2fb9dae95b39346560dd9d5e135161c8594e790" target="_blank">f2fb9da</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -551,6 +551,7 @@ were generated:
 Ignored files:
     Ignored:    R_workflowr/.RData
     Ignored:    R_workflowr/.Rproj.user/
+    Ignored:    R_workflowr/analysis/figure/
     Ignored:    R_workflowr/data/
     Ignored:    R_workflowr/output/pubFiles/
     Ignored:    R_workflowr/output/webGestalt/
@@ -559,10 +560,7 @@ Ignored files:
     Ignored:    R_workflowr/test.phy
 
 Unstaged changes:
-    Modified:   R_workflowr/analysis/RICR.Rmd
     Modified:   R_workflowr/analysis/stabletraits.Rmd
-    Modified:   R_workflowr/output/draft_figs/Myotis_size_life_LQ_upham.pdf
-    Modified:   R_workflowr/output/subfigs/phylo_auNG_circ_col_withLine.pdf
 
 </code></pre>
 <p>
@@ -609,6 +607,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/f2fb9dae95b39346560dd9d5e135161c8594e790/R_workflowr/analysis/stabletraits.Rmd" target="_blank">f2fb9da</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: no myoAui section
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/79c57337740227092717274624c245c1b190a505/R_workflowr/analysis/stabletraits.Rmd" target="_blank">79c5733</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: last commit pre dropping myoAui
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/79c57337740227092717274624c245c1b190a505/R_workflowr/docs/stabletraits.html" target="_blank">79c5733</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: last commit pre dropping myoAui
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1024,7 +1073,9 @@ ReducedModel  3 5948.9494      5.1551               </code></pre>
 <div id="pancova-yangochiroptera-vs-yinpterochiroptera"
 class="section level3">
 <h3>pANCOVA: Yangochiroptera vs Yinpterochiroptera</h3>
-<pre class="r"><code>tree&lt;-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;)), levels_back = 0)</code></pre>
+<pre class="r"><code>tree.og &lt;- tree
+data.og &lt;- data
+tree&lt;-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;)), levels_back = 0)</code></pre>
 <pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
@@ -1347,8 +1398,211 @@ ReducedModel  6 333.5421       3.511               </code></pre>
 </div>
 <div id="pancova-drop-myoits-auriculus" class="section level3">
 <h3>PANCOVA: drop Myoits auriculus</h3>
-<pre class="r"><code>tree &lt;- tree %&gt;% tidytree::drop.tip(c(&#39;Myotis_auriculus&#39;))
+<pre class="r"><code>tree &lt;- tree.og
+data &lt;- data.og
+tree &lt;- tree %&gt;% tidytree::drop.tip(c(&#39;Myotis_auriculus&#39;))
 data &lt;- data[which(rownames(data) != &quot;Myotis_auriculus&quot;),]
+node.vespertilionidae = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Lasiurus_cinereus&#39;)
+node.myotis = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Myotis_emarginatus&#39;)
+node.molossidae = tidytree::MRCA(tree, &#39;Molossus_molossus&#39;, &#39;Chaerephon_pumilus&#39;)
+node.phyllostomidae = tidytree::MRCA(tree, &#39;Macrotus_waterhousii&#39;, &#39;Artibeus_jamaicensis&#39;)
+
+node.chiroptera &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;))
+node.laurasiatheria &lt;- tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Sorex_fumeus&#39;))
+Chiroptera &lt;- getTips(tree, node.chiroptera)
+
+NotChiroptera &lt;- setdiff(getTips(tree, tidytree::rootnode(tree)),Chiroptera)
+
+Laurasiatheria &lt;- getTips(tree, node.laurasiatheria)
+
+NotLaurasiatheria &lt;- setdiff(getTips(tree, tidytree::rootnode(tree)),Laurasiatheria)
+
+
+Laurasiatheria.NotChiroptera &lt;- setdiff(getTips(tree, node.laurasiatheria), Chiroptera)
+Vespertilionidae &lt;- getTips(tree, node.vespertilionidae)
+Myotis &lt;- getTips(tree, node.myotis)
+Molossidae &lt;- getTips(tree, node.molossidae)
+Phyllostomidae &lt;- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other &lt;- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %&gt;% 
+  setdiff(
+    .,
+    Molossidae
+  ) %&gt;% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis &lt;- setdiff(
+  Vespertilionidae,
+  Myotis
+)</code></pre>
+<pre class="r"><code>plot(
+  data$Dependent~data$Independent,
+  col=&quot;white&quot;,
+  pch=21,
+  xlab=&quot;Independent&quot;, 
+  ylab=&quot;Dependent&quot;,
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(
+  &#39;Independent&#39;,&#39;Dependent&#39;,
+  tree = tree, 
+  data= data,
+  model=&#39;BM&#39;,
+  group=NotChiroptera,
+  col=&#39;grey&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Independent&#39;,&#39;Dependent&#39;,
+  tree = tree, 
+  data= data,
+  model=&#39;BM&#39;,
+  group=Laurasiatheria,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Independent&#39;,&#39;Dependent&#39;,
+  tree = tree, 
+  data= data,
+  model=&#39;BM&#39;,
+  group=Chiroptera,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(15, 2, legend=c(&quot;Mammals&quot;, &quot;Laurasiatheria&quot;, &#39;Bats&#39;),
+       fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20bats%20vs%20others%20no%20myoAui-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(
+  data$Dependent~data$Independent,
+  col=&quot;white&quot;,
+  pch=21,
+  xlab=&quot;Dependent&quot;, 
+  ylab=&quot;Independent&quot;,
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, 
+  data= data,
+  model=&#39;BM&#39;,
+  group=NotChiroptera,
+  col=&#39;grey&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.</code></pre>
+<pre><code>Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter
+
+Warning in plot.xy(xy.coords(x, y), type = type, ...): &quot;model&quot; is not a
+graphical parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yangochiroptera,
+  col=&#39;violet&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>pGLS.plotGrade(
+  &#39;Dependent&#39;,&#39;Independent&#39;,
+  tree = tree, data=data,
+  model=&#39;BM&#39;,
+  group=Yinpterochiroptera,
+  col=&#39;green&#39;,
+  lwd=3, 
+  cex=1,
+  pch=21
+)</code></pre>
+<pre><code>Warning in Initialize.corPhyl(X[[i]], ...): No covariate specified, species
+will be taken as ordered in the data frame. To avoid this message, specify a
+covariate containing the species names with the &#39;form&#39; argument.
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter
+
+Warning in Initialize.corPhyl(X[[i]], ...): &quot;model&quot; is not a graphical
+parameter</code></pre>
+<pre class="r"><code>legend(6, 2, legend=c(&quot;Other Mammals&quot;, &quot;Yangochiroptera&quot;, &#39;Yinpterochiroptera&#39;),
+       fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
+<p><img src="figure/stabletraits.Rmd/plot%20yinptero%20vs%20yango%20no%20myoAui-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>tree&lt;-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;)), levels_back = 0)</code></pre>
+<pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
+! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
+<pre class="r"><code>tree&lt;-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data&lt;-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
+colnames(data)&lt;-c(&quot;Dependent&quot;,&quot;Independent&quot;)     #Note that naming the variables &#39;Dependent&#39; and &#39;Independent&#39; serves only to standardize the procedure below across different data sets.
+node.yinpterochiroptera = tidytree::MRCA(tree, &#39;Macroderma_gigas&#39;, &#39;Pteropus_giganteus&#39;)
+node.yangochiroptera = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Mystacina_tuberculata&#39;) 
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera &lt;- lifesize.trdat %&gt;% 
+#   tidytree::as_tibble() %&gt;% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %&gt;% 
+#   dplyr::pull(label)
+
+Yinpterochiroptera &lt;- getTips(tree, node.yinpterochiroptera)
+
+Yangochiroptera &lt;- getTips(tree,node.yangochiroptera)
 node.vespertilionidae = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Lasiurus_cinereus&#39;)
 node.myotis = tidytree::MRCA(tree, &#39;Myotis_lucifugus&#39;, &#39;Myotis_emarginatus&#39;)
 node.molossidae = tidytree::MRCA(tree, &#39;Molossus_molossus&#39;, &#39;Chaerephon_pumilus&#39;)

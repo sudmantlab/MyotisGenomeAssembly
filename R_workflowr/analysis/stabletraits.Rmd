@@ -352,6 +352,8 @@ gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
 ### pANCOVA: Yangochiroptera vs Yinpterochiroptera
 
 ```{r}
+tree.og <- tree
+data.og <- data
 tree<-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus')), levels_back = 0)
 
 tree<-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
@@ -621,6 +623,8 @@ gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
 ### PANCOVA: drop Myoits auriculus
 
 ```{r}
+tree <- tree.og
+data <- data.og
 tree <- tree %>% tidytree::drop.tip(c('Myotis_auriculus'))
 data <- data[which(rownames(data) != "Myotis_auriculus"),]
 node.vespertilionidae = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Lasiurus_cinereus')
@@ -628,6 +632,18 @@ node.myotis = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Myotis_emarginatus')
 node.molossidae = tidytree::MRCA(tree, 'Molossus_molossus', 'Chaerephon_pumilus')
 node.phyllostomidae = tidytree::MRCA(tree, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
 
+node.chiroptera <- tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus'))
+node.laurasiatheria <- tidytree::MRCA(tree, c('Myotis_lucifugus','Sorex_fumeus'))
+Chiroptera <- getTips(tree, node.chiroptera)
+
+NotChiroptera <- setdiff(getTips(tree, tidytree::rootnode(tree)),Chiroptera)
+
+Laurasiatheria <- getTips(tree, node.laurasiatheria)
+
+NotLaurasiatheria <- setdiff(getTips(tree, tidytree::rootnode(tree)),Laurasiatheria)
+
+
+Laurasiatheria.NotChiroptera <- setdiff(getTips(tree, node.laurasiatheria), Chiroptera)
 Vespertilionidae <- getTips(tree, node.vespertilionidae)
 Myotis <- getTips(tree, node.myotis)
 Molossidae <- getTips(tree, node.molossidae)
@@ -656,13 +672,13 @@ plot(
   data$Dependent~data$Independent,
   col="white",
   pch=21,
-  xlab="lnLife", 
-  ylab="lnSize",
+  xlab="Independent", 
+  ylab="Dependent",
   asp=1,
   cex.lab=2
 ) 
 pGLS.plotGrade(
-  'lnLife','lnSize',
+  'Independent','Dependent',
   tree = tree, 
   data= data,
   model='BM',
@@ -673,7 +689,7 @@ pGLS.plotGrade(
   pch=21
 )
 pGLS.plotGrade(
-  'lnLife','lnSize',
+  'Independent','Dependent',
   tree = tree, 
   data= data,
   model='BM',
@@ -684,7 +700,7 @@ pGLS.plotGrade(
   pch=21
 )
 pGLS.plotGrade(
-  'lnLife','lnSize',
+  'Independent','Dependent',
   tree = tree, 
   data= data,
   model='BM',
@@ -703,13 +719,13 @@ plot(
   data$Dependent~data$Independent,
   col="white",
   pch=21,
-  xlab="lnLife", 
-  ylab="lnSize",
+  xlab="Dependent", 
+  ylab="Independent",
   asp=1,
   cex.lab=2
 ) 
 pGLS.plotGrade(
-  'lnLife','lnSize',
+  'Dependent','Independent',
   tree = tree, 
   data= data,
   model='BM',
@@ -742,6 +758,55 @@ pGLS.plotGrade(
 
 legend(6, 2, legend=c("Other Mammals", "Yangochiroptera", 'Yinpterochiroptera'),
        fill=c("grey",'violet', "green"), cex=0.8)
+```
+
+```{r}
+tree<-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c('Myotis_lucifugus','Pteropus_vampyrus')), levels_back = 0)
+
+tree<-geiger::treedata(tree,data,sort=T,warnings=F)$phy   #match the tree to the data
+data<-as.data.frame(geiger::treedata(tree,data,sort=T,warnings=F)$data)   #match the data to the tree
+colnames(data)<-c("Dependent","Independent")     #Note that naming the variables 'Dependent' and 'Independent' serves only to standardize the procedure below across different data sets.
+node.yinpterochiroptera = tidytree::MRCA(tree, 'Macroderma_gigas', 'Pteropus_giganteus')
+node.yangochiroptera = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Mystacina_tuberculata') 
+# tipnodes.chiroptera = tidytree::offspring(
+#   lifesize.trdat, 
+#   .node=node.chiroptera, 
+#   tiponly = T
+# )
+# Chiroptera <- lifesize.trdat %>% 
+#   tidytree::as_tibble() %>% 
+#   dplyr::filter(node %in% tipnodes.chiroptera) %>% 
+#   dplyr::pull(label)
+
+Yinpterochiroptera <- getTips(tree, node.yinpterochiroptera)
+
+Yangochiroptera <- getTips(tree,node.yangochiroptera)
+node.vespertilionidae = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Lasiurus_cinereus')
+node.myotis = tidytree::MRCA(tree, 'Myotis_lucifugus', 'Myotis_emarginatus')
+node.molossidae = tidytree::MRCA(tree, 'Molossus_molossus', 'Chaerephon_pumilus')
+node.phyllostomidae = tidytree::MRCA(tree, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
+
+Vespertilionidae <- getTips(tree, node.vespertilionidae)
+Myotis <- getTips(tree, node.myotis)
+Molossidae <- getTips(tree, node.molossidae)
+Phyllostomidae <- getTips(tree, node.phyllostomidae)
+
+Yangochiroptera.Other <- setdiff(
+  Yangochiroptera,
+  Vespertilionidae
+) %>% 
+  setdiff(
+    .,
+    Molossidae
+  ) %>% 
+  setdiff(
+    .,
+    Phyllostomidae
+  )
+Vespertilionidae.NotMyotis <- setdiff(
+  Vespertilionidae,
+  Myotis
+)
 ```
 
 ```{r plot bat subtypes without auriculus, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
@@ -876,4 +941,5 @@ gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
 
 ### Remarks
 In conclusion, bats are weird. However, its not all bats, but really its just Yangochiroptera. In fact, within Yangochiroptera, most families either follow the mold (like Molossidae) or have no correlation (like Vespertilionidae and Phyllostomidae). Myotis auriculus is definitely an outlier - with it included, there is a negative correlation between body size and lifespan, but without it, genus Myotis follows the same trends as Vespertilionidae in general.
+
 
