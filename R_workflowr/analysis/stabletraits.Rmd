@@ -155,7 +155,7 @@ Laurasiatheria.NotChiroptera <- setdiff(getTips(tree, node.laurasiatheria), Chir
 
 ```
 
-```{r plot all mammals, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r plot all mammals, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(
   lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
   col="white",
@@ -170,7 +170,7 @@ pGLS.plotGrade('lnLife','lnSize',tree = tr %>% as.phylo(), data=lifesize.dat.noN
 
 ```
 
-```{r plot bats vs others, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r plot bats vs others, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(
   lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
   col="white",
@@ -380,12 +380,12 @@ Yangochiroptera <- getTips(tree,node.yangochiroptera)
 
 ```
 
-```{r, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade('Dependent','Independent',tree = tree, data=data)
 ```
 
-```{r plot yinptero vs yango, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r plot yinptero vs yango, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -487,7 +487,7 @@ Vespertilionidae.NotMyotis <- setdiff(
 ```
 
 
-```{r plot bat subtypes, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r plot bat subtypes, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
@@ -651,8 +651,100 @@ Vespertilionidae.NotMyotis <- setdiff(
 )
 ```
 
+```{r plot bats vs others no myoAui, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
+plot(
+  data$Dependent~data$Independent,
+  col="white",
+  pch=21,
+  xlab="lnLife", 
+  ylab="lnSize",
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tree, 
+  data= data,
+  model='BM',
+  group=NotChiroptera,
+  col='grey',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tree, 
+  data= data,
+  model='BM',
+  group=Laurasiatheria,
+  col='violet',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tree, 
+  data= data,
+  model='BM',
+  group=Chiroptera,
+  col='green',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+legend(15, 2, legend=c("Mammals", "Laurasiatheria", 'Bats'),
+       fill=c("grey",'violet', "green"), cex=0.8)
+```
 
-```{r plot bat subtypes without auriculus, fig.height = 4, warnings = F, error = F, fig.width = 6, fig.align = "center"}
+```{r plot yinptero vs yango no myoAui, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
+plot(
+  data$Dependent~data$Independent,
+  col="white",
+  pch=21,
+  xlab="lnLife", 
+  ylab="lnSize",
+  asp=1,
+  cex.lab=2
+) 
+pGLS.plotGrade(
+  'lnLife','lnSize',
+  tree = tree, 
+  data= data,
+  model='BM',
+  group=NotChiroptera,
+  col='grey',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yangochiroptera,
+  col='violet',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+pGLS.plotGrade(
+  'Dependent','Independent',
+  tree = tree, data=data,
+  model='BM',
+  group=Yinpterochiroptera,
+  col='green',
+  lwd=3, 
+  cex=1,
+  pch=21
+)
+
+legend(6, 2, legend=c("Other Mammals", "Yangochiroptera", 'Yinpterochiroptera'),
+       fill=c("grey",'violet', "green"), cex=0.8)
+```
+
+```{r plot bat subtypes without auriculus, fig.height = 4, warnings = F, fig.width = 6, fig.align = "center"}
 plot(data$Dependent~data$Independent,col="white",pch=21,xlab="", ylab="",asp=1,cex.lab=2) 
 pGLS.plotGrade(
   'Dependent','Independent',
