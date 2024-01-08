@@ -940,6 +940,6 @@ gls.ancova(Dependent~Independent,vcv(tree),Model_I,Model_SI)
 ```
 
 ### Remarks
-In conclusion, bats are weird. However, its not all bats, but really its just Yangochiroptera. In fact, within Yangochiroptera, most families either follow the mold (like Molossidae) or have no correlation (like Vespertilionidae and Phyllostomidae). Myotis auriculus is definitely an outlier - with it included, there is a negative correlation between body size and lifespan, but without it, genus Myotis follows the same trends as Vespertilionidae in general.
+In conclusion, bats are weird. However, its not all bats, but really its just _Yangochiroptera._ In fact, within _Yangochiroptera_, most families either follow the mold (like _Molossidae_) or have no correlation (like _Vespertilionidae_ and _Phyllostomidae_). _Myotis auriculus_ is definitely an outlier - with it included, there is a negative correlation between body size and lifespan, but without it, genus _Myotis_ follows the same trends as _Vespertilionidae_ in general.
 
 

@@ -361,7 +361,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,9 +386,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
@@ -411,21 +411,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -516,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreef2fb9dae95b39346560dd9d5e135161c8594e790targetblankf2fb9daa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree294898978495f950848d792702a42bde4e02f74atargetblank2948989a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/f2fb9dae95b39346560dd9d5e135161c8594e790" target="_blank">f2fb9da</a>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/294898978495f950848d792702a42bde4e02f74a" target="_blank">2948989</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytreef2fb9dae95b39346560dd9d5e135161c8594e790targetblankf2fb9daa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree294898978495f950848d792702a42bde4e02f74atargetblank2948989a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -534,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/f2fb9dae95b39346560dd9d5e135161c8594e790" target="_blank">f2fb9da</a>.
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/294898978495f950848d792702a42bde4e02f74a" target="_blank">2948989</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -551,16 +548,12 @@ were generated:
 Ignored files:
     Ignored:    R_workflowr/.RData
     Ignored:    R_workflowr/.Rproj.user/
-    Ignored:    R_workflowr/analysis/figure/
     Ignored:    R_workflowr/data/
     Ignored:    R_workflowr/output/pubFiles/
     Ignored:    R_workflowr/output/webGestalt/
     Ignored:    R_workflowr/renv/library/
     Ignored:    R_workflowr/renv/staging/
     Ignored:    R_workflowr/test.phy
-
-Unstaged changes:
-    Modified:   R_workflowr/analysis/stabletraits.Rmd
 
 </code></pre>
 <p>
@@ -607,6 +600,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/e7aa96961f3c73126896e65d84183de9774cb5a9/R_workflowr/analysis/stabletraits.Rmd" target="_blank">e7aa969</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: no myoAui section
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/e7aa96961f3c73126896e65d84183de9774cb5a9/R_workflowr/docs/stabletraits.html" target="_blank">e7aa969</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: no myoAui section
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -867,6 +894,43 @@ pGLS.plotGrade(&#39;lnLife&#39;,&#39;lnSize&#39;,tree = tr %&gt;% as.phylo(), da
 will be taken as ordered in the data frame. To avoid this message, specify a
 covariate containing the species names with the &#39;form&#39; argument.</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20all%20mammals-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-all-mammals-1">
+Past versions of "plot all mammals-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-all-mammals-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot all mammals-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(
   lifesize.dat.noNode$lnLife~lifesize.dat.noNode$lnSize,
   col=&quot;white&quot;,
@@ -938,6 +1002,43 @@ parameter</code></pre>
 <pre class="r"><code>legend(15, 2, legend=c(&quot;Mammals&quot;, &quot;Laurasiatheria&quot;, &#39;Bats&#39;),
        fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20bats%20vs%20others-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-bats-vs-others-1">
+Past versions of "plot bats vs others-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-bats-vs-others-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot bats vs others-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div id="pancova-bats" class="section level3">
 <h3>pANCOVA: Bats</h3>
 <pre class="r"><code>#For differences in slope: 
@@ -1104,6 +1205,43 @@ pGLS.plotGrade(&#39;Dependent&#39;,&#39;Independent&#39;,tree = tree, data=data)
 will be taken as ordered in the data frame. To avoid this message, specify a
 covariate containing the species names with the &#39;form&#39; argument.</code></pre>
 <p><img src="figure/stabletraits.Rmd/unnamed-chunk-9-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/unnamed-chunk-9-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(data$Dependent~data$Independent,col=&quot;white&quot;,pch=21,xlab=&quot;&quot;, ylab=&quot;&quot;,asp=1,cex.lab=2) 
 pGLS.plotGrade(
   &#39;Dependent&#39;,&#39;Independent&#39;,
@@ -1145,6 +1283,43 @@ parameter</code></pre>
 <pre class="r"><code>legend(6, 2, legend=c(&quot;Yangochiroptera&quot;, &#39;Yinpterochiroptera&#39;),
        fill=c(&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20yinptero%20vs%20yango-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-yinptero-vs-yango-1">
+Past versions of "plot yinptero vs yango-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-yinptero-vs-yango-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot yinptero vs yango-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>#For differences in slope: 
 grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
 grpS[Yangochiroptera]&lt;-&quot;B&quot; 
@@ -1348,6 +1523,43 @@ parameter</code></pre>
        ), 
        cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20bat%20subtypes-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-bat-subtypes-1">
+Past versions of "plot bat subtypes-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-bat-subtypes-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot bat subtypes-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>#For differences in slope: 
 grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
 grpS[Vespertilionidae]&lt;-&quot;B&quot; 
@@ -1511,6 +1723,44 @@ parameter</code></pre>
 <pre class="r"><code>legend(15, 2, legend=c(&quot;Mammals&quot;, &quot;Laurasiatheria&quot;, &#39;Bats&#39;),
        fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20bats%20vs%20others%20no%20myoAui-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-bats-vs-others-no-myoAui-1">
+Past versions of "plot bats vs others no myoAui-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-bats-vs-others-no-myoAui-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot bats vs others no myoAui-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(
   data$Dependent~data$Independent,
   col=&quot;white&quot;,
@@ -1580,6 +1830,44 @@ parameter</code></pre>
 <pre class="r"><code>legend(6, 2, legend=c(&quot;Other Mammals&quot;, &quot;Yangochiroptera&quot;, &#39;Yinpterochiroptera&#39;),
        fill=c(&quot;grey&quot;,&#39;violet&#39;, &quot;green&quot;), cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20yinptero%20vs%20yango%20no%20myoAui-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-yinptero-vs-yango-no-myoAui-1">
+Past versions of "plot yinptero vs yango no myoAui-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-yinptero-vs-yango-no-myoAui-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot yinptero vs yango no myoAui-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>tree&lt;-tidytree::tree_subset(tree, node = tidytree::MRCA(tree, c(&#39;Myotis_lucifugus&#39;,&#39;Pteropus_vampyrus&#39;)), levels_back = 0)</code></pre>
 <pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
@@ -1762,6 +2050,44 @@ parameter</code></pre>
        ), 
        cex=0.8)</code></pre>
 <p><img src="figure/stabletraits.Rmd/plot%20bat%20subtypes%20without%20auriculus-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-plot-bat-subtypes-without-auriculus-1">
+Past versions of "plot bat subtypes without auriculus-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-plot-bat-subtypes-without-auriculus-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/stabletraits.Rmd/plot bat subtypes without auriculus-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>#For differences in slope: 
 grpS&lt;-rep(&quot;A&quot;,length(rownames(data))) 
 grpS[Vespertilionidae]&lt;-&quot;B&quot; 
