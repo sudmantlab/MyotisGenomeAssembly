@@ -361,7 +361,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,9 +386,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>R_workflowr/analysis/</code>
@@ -411,21 +411,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -516,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree7008a637962975106fd6ef485c9200f99f7afd9btargetblank7008a63a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/7008a637962975106fd6ef485c9200f99f7afd9b" target="_blank">7008a63</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree9d4271fb67db5a54ed7df5703ae96751ebb342cetargetblank9d4271fa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomsudmantlabMyotisGenomeAssemblytree7008a637962975106fd6ef485c9200f99f7afd9btargetblank7008a63a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -534,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/9d4271fb67db5a54ed7df5703ae96751ebb342ce" target="_blank">9d4271f</a>.
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/tree/7008a637962975106fd6ef485c9200f99f7afd9b" target="_blank">7008a63</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -551,7 +548,6 @@ were generated:
 Ignored files:
     Ignored:    R_workflowr/.RData
     Ignored:    R_workflowr/.Rproj.user/
-    Ignored:    R_workflowr/analysis/figure/
     Ignored:    R_workflowr/data/
     Ignored:    R_workflowr/output/pubFiles/
     Ignored:    R_workflowr/output/webGestalt/
@@ -560,9 +556,7 @@ Ignored files:
     Ignored:    R_workflowr/test.phy
 
 Unstaged changes:
-    Modified:   R_workflowr/analysis/RICR.Rmd
     Modified:   R_workflowr/output/draft_figs/Myotis_size_life_LQ_upham.pdf
-    Modified:   R_workflowr/output/subfigs/phylo_auNG_circ_col_withLine.pdf
 
 </code></pre>
 <p>
@@ -608,6 +602,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/sudmantlab/MyotisGenomeAssembly/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/RICR.html" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: no myoAui section
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/79c57337740227092717274624c245c1b190a505/R_workflowr/analysis/RICR.Rmd" target="_blank">79c5733</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+<td>
+PANCOVA: last commit pre dropping myoAui
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -897,6 +925,43 @@ lgl (1): has.ali
 p.prediction</code></pre>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="figure/RICR.Rmd/lq%20prediction-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-lq-prediction-1">
+Past versions of "lq prediction-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-lq-prediction-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/lq prediction-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>df.lq.lm &lt;- df.lq %&gt;% 
   filter(!is.na(Order),
          !is.na(predLife),
@@ -938,6 +1003,44 @@ p.prediction.withEq &lt;- p.prediction +
 p.prediction.withEq</code></pre>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="figure/RICR.Rmd/manually%20add%20in%20equations%20to%20lq%20predictions-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-manually-add-in-equations-to-lq-predictions-1">
+Past versions of "manually add in equations to lq predictions-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-manually-add-in-equations-to-lq-predictions-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/manually add in equations to lq predictions-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>phylopic.codes &lt;- c(
   &#39;Artiodactyla&#39; = &#39;dc4c0e07-611f-41d0-b2fa-8c5bc3a22fba&#39;,
   &#39;Carnivora&#39; = &#39;b2dcd44f-1fb8-490e-b016-8279eb328f46&#39;,
@@ -996,6 +1099,43 @@ p.r2line &lt;- df.lq.lm %&gt;%
 
 p.r2line</code></pre>
 <p><img src="figure/RICR.Rmd/R2%20line%20plot-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-R2-line-plot-1">
+Past versions of "R2 line plot-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-R2-line-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/R2 line plot-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="stabletraits" class="section level2">
 <h2>StableTraits</h2>
@@ -1352,6 +1492,43 @@ LQ.scale.expanded.max &lt;- lifespan.scale.expanded[length(lifespan.scale.expand
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
 <pre class="r"><code>p.bodysize.myotis</code></pre>
 <p><img src="figure/RICR.Rmd/range%20plot%20size%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-range-plot-size---Myotis-1">
+Past versions of "range plot size - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-range-plot-size---Myotis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/range plot size - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="lifespan" class="section level3">
@@ -1425,6 +1602,43 @@ LQ.scale.expanded.max &lt;- lifespan.scale.expanded[length(lifespan.scale.expand
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
 <pre class="r"><code>p.lifespan.bats</code></pre>
 <p><img src="figure/RICR.Rmd/rangePlot%20Lifespan%20-%20Bats-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-rangePlot-Lifespan---Bats-1">
+Past versions of "rangePlot Lifespan - Bats-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-rangePlot-Lifespan---Bats-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/rangePlot Lifespan - Bats-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="myotis-1" class="section level4">
 <h4>Myotis</h4>
@@ -1495,6 +1709,43 @@ LQ.scale.expanded.max &lt;- lifespan.scale.expanded[length(lifespan.scale.expand
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
 <pre class="r"><code>p.lifespan.myotis</code></pre>
 <p><img src="figure/RICR.Rmd/rangePlot%20Lifespan%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-rangePlot-Lifespan---Myotis-1">
+Past versions of "rangePlot Lifespan - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-rangePlot-Lifespan---Myotis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/rangePlot Lifespan - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="lq" class="section level3">
@@ -1535,6 +1786,43 @@ p.tree.time &lt;- tr.upham %&gt;%
   xlim(c(NA,400))
 p.tree.time</code></pre>
 <p><img src="figure/RICR.Rmd/Time%20tree%20-%20all%20mammals-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Time-tree---all-mammals-1">
+Past versions of "Time tree - all mammals-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Time-tree---all-mammals-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Time tree - all mammals-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Body Size ###
 
 p.tree.size &lt;- tr.sizedata %&gt;% 
@@ -1565,6 +1853,44 @@ p.tree.size &lt;- tr.sizedata %&gt;%
   xlim(c(NA,1300))
 p.tree.size</code></pre>
 <p><img src="figure/RICR.Rmd/Body%20size%20evolution%20-%20all%20mammals-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Body-size-evolution---all-mammals-1">
+Past versions of "Body size evolution - all mammals-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Body-size-evolution---all-mammals-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Body size evolution - all mammals-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Lifespan ###
 
 p.tree.life &lt;- tr.lifedata %&gt;% 
@@ -1595,6 +1921,44 @@ p.tree.life &lt;- tr.lifedata %&gt;%
   xlim(c(NA,400))
 p.tree.life</code></pre>
 <p><img src="figure/RICR.Rmd/Lifespan%20evolution%20-%20all%20mammals-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Lifespan-evolution---all-mammals-1">
+Past versions of "Lifespan evolution - all mammals-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Lifespan-evolution---all-mammals-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Lifespan evolution - all mammals-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Lifespan ###
 d.tree.life &lt;- p.tree.life$data
 
@@ -1622,6 +1986,44 @@ p.tree.life.flipped &lt;- ggplot(data=d.tree.life) +
   )
 p.tree.life.flipped</code></pre>
 <p><img src="figure/RICR.Rmd/Lifespan%20evolution%20-%20all%20mammals%20flipped-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Lifespan-evolution---all-mammals-flipped-1">
+Past versions of "Lifespan evolution - all mammals flipped-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Lifespan-evolution---all-mammals-flipped-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Lifespan evolution - all mammals flipped-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>tr.sizedata.chiroptera &lt;- tr.sizedata %&gt;% 
   tidytree::tree_subset(MRCA(tr.sizedata, &#39;Myotis_lucifugus&#39;, &#39;Pteropus_vampyrus&#39;), levels_back = 0)</code></pre>
 <pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
@@ -1674,6 +2076,43 @@ p.tree.life.flipped</code></pre>
   xlim(c(NA,70))
 p.tree.size.bats</code></pre>
 <p><img src="figure/RICR.Rmd/Body%20size%20evolution%20-%20Bats-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Body-size-evolution---Bats-1">
+Past versions of "Body size evolution - Bats-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Body-size-evolution---Bats-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Body size evolution - Bats-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Lifespan ###
 
 tr.lifedata.chiroptera &lt;- tr.lifedata %&gt;% 
@@ -1730,6 +2169,43 @@ tr.lifedata.chiroptera &lt;- tr.lifedata %&gt;%
   xlim(c(NA,450))
 p.tree.life.bats #%&gt;% plotly::ggplotly()</code></pre>
 <p><img src="figure/RICR.Rmd/Lifespan%20evolution%20-%20Bats-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Lifespan-evolution---Bats-1">
+Past versions of "Lifespan evolution - Bats-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Lifespan-evolution---Bats-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Lifespan evolution - Bats-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Lifespan ###
 
 tr.sizelife.lq.chiroptera &lt;- tr.sizelife.lq %&gt;% 
@@ -1791,6 +2267,43 @@ tr.sizelife.lq.chiroptera &lt;- tr.sizelife.lq %&gt;%
   # xlim(c(NA,450))
 p.tree.LQ.bats #%&gt;% plotly::ggplotly()</code></pre>
 <p><img src="figure/RICR.Rmd/LQ%20evolution%20-%20Bats-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-LQ-evolution---Bats-1">
+Past versions of "LQ evolution - Bats-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-LQ-evolution---Bats-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/LQ evolution - Bats-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Double Tree ###
 p.tree.life.base &lt;- tr.lifedata %&gt;% 
   ggtree() + 
@@ -1869,6 +2382,44 @@ p.dbltree.sizelife &lt;-
 
 p.dbltree.sizelife</code></pre>
 <p><img src="figure/RICR.Rmd/DoubleTree%20Mammals%20Size%20Lifespan-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-DoubleTree-Mammals-Size-Lifespan-1">
+Past versions of "DoubleTree Mammals Size Lifespan-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-DoubleTree-Mammals-Size-Lifespan-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/DoubleTree Mammals Size Lifespan-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Double Tree ###
 p.tree.life.bats.base &lt;- tr.lifedata.chiroptera %&gt;% 
   ggtree() + 
@@ -1984,6 +2535,43 @@ p.dbltree.bats.sizelife &lt;-
 
 p.dbltree.bats.sizelife</code></pre>
 <p><img src="figure/RICR.Rmd/DoubleTree%20size%20+%20lifespan-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-DoubleTree-size-+-lifespan-1">
+Past versions of "DoubleTree size + lifespan-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-DoubleTree-size-+-lifespan-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/DoubleTree size + lifespan-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>### Double Tree ###
 p.tree.life.bats.base &lt;- tr.lifedata.chiroptera %&gt;%
   ggtree()
@@ -2109,6 +2697,43 @@ Ignoring unknown parameters: `direction`, `force`, and `segment.size`</code></pr
 <pre class="r"><code>p.dbltree.all</code></pre>
 <pre><code>Warning: Removed 189 rows containing missing values (`geom_label()`).</code></pre>
 <p><img src="figure/RICR.Rmd/DoubleTree%20lifespan%20+%20LQ-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-DoubleTree-lifespan-+-LQ-1">
+Past versions of "DoubleTree lifespan + LQ-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-DoubleTree-lifespan-+-LQ-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/DoubleTree lifespan + LQ-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="all-together-figure---myotis" class="section level3">
@@ -2156,6 +2781,43 @@ Ignoring unknown parameters: `direction`, `force`, and `segment.size`</code></pr
 
 fig.myotis.sizelifelq</code></pre>
 <p><img src="figure/RICR.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
+Past versions of unnamed-chunk-3-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/unnamed-chunk-3-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(
   &#39;../output/draft_figs/Myotis_size_life_LQ_upham.pdf&#39;, 
   plot=fig.myotis.sizelifelq,
@@ -2288,6 +2950,44 @@ tr.cancerSucceptibility@data &lt;- tr.cancerSucceptibility@data %&gt;%
 Adding another scale for y, which will replace the existing scale.</code></pre>
 <pre class="r"><code>p.cancerSucceptibility</code></pre>
 <p><img src="figure/RICR.Rmd/Plot%20RICR%20(time-scaled)%20-%20Mammals-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Plot-RICR-(time-scaled)---Mammals-1">
+Past versions of "Plot RICR (time-scaled) - Mammals-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Plot-RICR-(time-scaled)---Mammals-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Plot RICR (time-scaled) - Mammals-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>tr.RICR.chiroptera &lt;- tr.cancerSucceptibility %&gt;% 
   tidytree::tree_subset(MRCA(tr.cancerSucceptibility, &#39;Myotis_lucifugus&#39;, &#39;Pteropus_vampyrus&#39;), levels_back = 0)</code></pre>
 <pre><code>! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.
@@ -2346,6 +3046,44 @@ Adding another scale for y, which will replace the existing scale.</code></pre>
 Adding another scale for y, which will replace the existing scale.</code></pre>
 <pre class="r"><code>p.RICR.bats</code></pre>
 <p><img src="figure/RICR.Rmd/Plot%20RICR%20(time-scaled)%20-%20Bats-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Plot-RICR-(time-scaled)---Bats-1">
+Past versions of "Plot RICR (time-scaled) - Bats-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Plot-RICR-(time-scaled)---Bats-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Plot RICR (time-scaled) - Bats-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>It seems like overall, there’s not much change in cancer risk at
 nodes within the tree - all the changes happen at the tips. Within the
 root of <em>Myotis</em>, the RICR changes are small (&lt;1). In both
@@ -2426,6 +3164,43 @@ in Megabats, in <em>Pteropus gigantus</em> (-7.3).</p>
 ! # Invaild edge matrix for &lt;phylo&gt;. A &lt;tbl_df&gt; is returned.</code></pre>
 <pre class="r"><code>p.RICR.myotis</code></pre>
 <p><img src="figure/RICR.Rmd/RangePlot%20RICR%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-RangePlot-RICR---Myotis-1">
+Past versions of "RangePlot RICR - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-RangePlot-RICR---Myotis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/RangePlot RICR - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>tbl.RICR.myotis2 &lt;- tr.cancerSucceptibility %&gt;%
   tidytree::tree_subset(MRCA(tr.cancerSucceptibility, &#39;Myotis_lucifugus&#39;, &#39;Nycticeius_humeralis&#39;), levels_back = 0) %&gt;%
   as_tibble %&gt;% 
@@ -2526,6 +3301,43 @@ Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 generated.</code></pre>
 <pre class="r"><code>p.RICR.myotis2</code></pre>
 <p><img src="figure/RICR.Rmd/RangePlot%20RICR%20v2%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-RangePlot-RICR-v2---Myotis-1">
+Past versions of "RangePlot RICR v2 - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-RangePlot-RICR-v2---Myotis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/RangePlot RICR v2 - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p.RICR.myotis3.plot &lt;- tbl.RICR.myotis2 %&gt;% 
   ggplot(
     aes(
@@ -2634,6 +3446,43 @@ p.RICR.myotis3 &lt;- (p.RICR.myotis.text +
    
 p.RICR.myotis3</code></pre>
 <p><img src="figure/RICR.Rmd/RangePlot%20RICR%20v3%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-RangePlot-RICR-v3---Myotis-1">
+Past versions of "RangePlot RICR v3 - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-RangePlot-RICR-v3---Myotis-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/RangePlot RICR v3 - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(
   &#39;../output/subfigs/myotis_RICR_v3.pdf&#39;,
   p.RICR.myotis3,
@@ -2755,6 +3604,44 @@ fig.myotis.sizelifericr &lt;- (
 
 fig.myotis.sizelifericr</code></pre>
 <p><img src="figure/RICR.Rmd/myotis-only%20size-life-RICR%20fig-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-myotis-only-size-life-RICR-fig-1">
+Past versions of "myotis-only size-life-RICR fig-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-myotis-only-size-life-RICR-fig-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/myotis-only size-life-RICR fig-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(
   &#39;../output/draft_figs/Myotis_size_life_RICR_upham.pdf&#39;, 
   plot=fig.myotis.sizelifericr,
@@ -3002,6 +3889,44 @@ phyloOrder &lt;- p.tr.myotis$data %&gt;%
 
 p.RICR.myotis.sum</code></pre>
 <p><img src="figure/RICR.Rmd/RICR%20with%20Summarized%20Data%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-RICR-with-Summarized-Data---Myotis-1">
+Past versions of "RICR with Summarized Data - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-RICR-with-Summarized-Data---Myotis-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/RICR with Summarized Data - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p.bodysize.myotis.sum &lt;- tbl.RICR.myotis.withSummary %&gt;% 
   ggplot(
     aes(
@@ -3056,6 +3981,44 @@ p.RICR.myotis.sum</code></pre>
   )
 p.bodysize.myotis.sum</code></pre>
 <p><img src="figure/RICR.Rmd/Body%20Size%20with%20Summarized%20Data%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Body-Size-with-Summarized-Data---Myotis-1">
+Past versions of "Body Size with Summarized Data - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Body-Size-with-Summarized-Data---Myotis-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Body Size with Summarized Data - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p.lifespan.myotis.sum &lt;- tbl.RICR.myotis.withSummary %&gt;% 
   mutate(
     life.median = exp(lnLife.median),
@@ -3114,6 +4077,44 @@ p.bodysize.myotis.sum</code></pre>
   )
 p.lifespan.myotis.sum</code></pre>
 <p><img src="figure/RICR.Rmd/lifespan%20with%20summarized%20data%20-%20Myotis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-lifespan-with-summarized-data---Myotis-1">
+Past versions of "lifespan with summarized data - Myotis-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-lifespan-with-summarized-data---Myotis-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/lifespan with summarized data - Myotis-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.myotis.sizelifericr.sum &lt;- (
   (
     p.tr.myotis
@@ -3147,6 +4148,44 @@ p.lifespan.myotis.sum</code></pre>
 
 fig.myotis.sizelifericr.sum</code></pre>
 <p><img src="figure/RICR.Rmd/Myotis+Summary%20Size-Life-RICR%20fig-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-Myotis+Summary-Size-Life-RICR-fig-1">
+Past versions of "Myotis+Summary Size-Life-RICR fig-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-Myotis+Summary-Size-Life-RICR-fig-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/sudmantlab/MyotisGenomeAssembly/blob/294898978495f950848d792702a42bde4e02f74a/R_workflowr/docs/figure/RICR.Rmd/Myotis+Summary Size-Life-RICR fig-1.png" target="_blank">2948989</a>
+</td>
+<td>
+docmanny
+</td>
+<td>
+2024-01-08
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(
   &#39;../output/draft_figs/Myotis_size_life_RICR_upham_withSummary.pdf&#39;, 
   plot=fig.myotis.sizelifericr.sum,
