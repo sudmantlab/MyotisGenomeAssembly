@@ -18,6 +18,9 @@ All analyses in the `R_workflowr` folder that are compiled and pushed here are a
 [https://myotisgenomeanalysis.netlify.app/](https://myotisgenomeanalysis.netlify.app/). For more info on
 this, see [the workflowr documentation](https://jdblischak.github.io/workflowr/) or talk to Manny.
 
+Manuscript
+-----------
+https://docs.google.com/document/d/13XZOSGolYKMg-l5ZUD1s4t9CMGLdXSjlnZPTGiYW7lg/edit#heading=h.kcv1xb44xqxo
 
 Collaborators
 -------
