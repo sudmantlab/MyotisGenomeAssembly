@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>WebGestalt (WEB-based GEne SeT AnaLysis Toolkit)</title>
+<link rel="icon" type="image/png" href="https://s3-us-west-2.amazonaws.com/webgestalt/favicon.png">
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-42098540-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?flags=gated&features=es2015%2Ces2016%2Cfetch"></script>
+<script src="https://www.webgestalt.org//assets/0.4/build/vendor.min.js"></script>
+	<script>window.cytoscape = null;</script>
+	<link rel="stylesheet" href="https://www.webgestalt.org//assets/0.4/build/vendor.css">
+	<link rel="stylesheet" href="https://www.webgestalt.org//assets/0.4/build/wg.css">
+<link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css">
+</head>
+<body>
+<header>
+	<div id="header-img"><a href="https://www.webgestalt.org/"><img border="0" src="https://www.webgestalt.org//images/gsa.png"></a></div>
+	<div id="header-title">
+		<p id="header-title-text">WEB-based GEne SeT AnaLysis Toolkit</p>
+		<p id="header-subtitle-text">Translating gene lists into biological insights...</p>
+	</div>
+</header>
+<hr><main>
+<div id="app">
+<div class="loading-preinit" v-cloak><div class="loading-icon"></div></div>
+<div class="wrapper" v-cloak>
+<div class="level">
+	<div class="level-left">
+		<div class="level-item">
+			<h4 class="title is-4 has-text-primary">Summary</h4>
+		</div>
+	</div>
+	<div class="level-right">
+		<div class="level-item">
+			<a class="button is-text" href="Project_aBSREL.zip" target="_blank">Result Download</a>
+		</div>
+	</div>
+</div>
+
+<section id="summary" class="summary">
+<div class="card" v-bind:class="{active: summaryShown}" >
+	<div class="card-header" v-on:click="summaryShown=!summaryShown">
+		<p class="card-header-title">Job summary</p>
+		<a href="#" class="card-header-icon">
+			<b-icon :icon="summaryShown ? 'chevron-up' : 'chevron-down'"></b-icon>
+		</a>
+	</div>
+	<div class="card-content content" v-show="summaryShown">
+		<ul id="summary-list"> 
+		<li><b>Enrichment method:</b> ORA</li>
+		<li><b>Organism: </b>hsapiens</li>
+		<li>
+				<b>Enrichment Categories: </b>pathway_Reactome
+				<a class="has-text-info" href="https://www.webgestalt.org//api/geneset?organism=hsapiens&database=pathway_Reactome&fileType=gmt">
+					<b-icon icon="download" size="is-small"></b-icon>
+				</a>
+		</li>
+
+			<li><b>Interesting list: </b> a R object. <b> ID type: </b>genesymbol</li>
+			<li>The interesting list contains <b>5</b> user IDs in which <b>5</b> user IDs are unambiguously mapped to <b>5</b> unique entrezgene IDs and <b>0</b> user IDs can not be mapped to any entrezgene ID.</li>
+			<li>The GO Slim summary are based upon the <b>5</b> unique entrezgene IDs.</li>
+		<li>Among <b>5</b> unique entrezgene IDs, <b>3</b> IDs are annotated to the selected functional categories and also in the reference list, which are used for the enrichment analysis.</li>
+	<li><b>Reference list: </b>a R object. <b>ID type: </b>genesymbol</li>
+	<li>The reference list can be mapped to <b>15801</b> entrezgene IDs and <b> 8838</b> IDs are annotated to the selected functional categories that are used as the reference for the enrichment analysis.</li>
+</ul> 
+
+<p><b>Parameters for the enrichment analysis:</b></p>
+<ul><li><b>Minimum number of IDs in the category: </b>10</li>
+<li><b>Maximum number of IDs in the category: </b>1000</li>
+<li><b>FDR Method: </b>BH</li>
+<li><b>Significance Level:</b> Top 100</li>
+</ul>
+	<p>Based on the above parameters, <b>65</b> categories are identified as enriched categories and all are shown in this report.</p>
+
+	</div>
+</div>
+</section>
+<section id="go-summary" class="summary">
+<div class="card" v-bind:class="{active: goShown}" >
+	<div class="card-header" v-on:click="goShown=!goShown">
+		<p class="card-header-title">GO Slim summary for the user uploaded IDs</p>
+		<a href="#" class="card-header-icon">
+			<b-icon :icon="goShown ? 'chevron-up' : 'chevron-down'"></b-icon>
+		</a>
+	</div>
+	<div v-show="goShown">
+		<div class="card-content">
+			<p>Each Biological Process, Cellular Component and Molecular Function category is represented by a red, blue and green bar, repectively.</p>
+			<p>The height of the bar represents the number of IDs in the user list and also in the category.</p>
+		</div>
+		<div class="card-image">
+			<img src="goslim_summary_aBSREL.png" width="100%" height="100%" alt="Bar charts of enriched GO Slim terms"/>
+		</div>
+	</div>
+</div>
+</section> <h4 class="title is-4 has-text-primary">Enrichment Results</h4>
+<section id="enrich-result">
+	<p class="select-redundancy">
+		<b-tooltip label="Enriched gene sets are post-processed by two methods to reduce redundancy." type="is-dark" animated multilined dashed>
+			Redundancy reduction:
+		</b-tooltip>
+		<b-radio v-model="redundancy" native-value="all">All</b-radio>
+		<b-radio v-model="redundancy" native-value="ap">
+			<b-tooltip label="R package apcluster is used to cluster gene sets." type="is-dark" animated multilined dashed>
+				Affinity propagation
+			</b-tooltip>
+		</b-radio>
+		<b-radio v-model="redundancy" native-value="wsc">
+			<b-tooltip label="Find top gene sets while maximizing gene coverage." type="is-dark" animated multilined dashed>
+				Weighted set cover
+			</b-tooltip>
+		</b-radio>
+	</p>
+	<b-tabs v-model="activeTab" type="is-toggle">
+		<b-tab-item label="Table">
+			<wg-result-table
+				:data="enrichmentData"
+				:method="enrichMethod"
+			></wg-result-table>
+		</b-tab-item>
+		<b-tab-item label="Bar chart">
+		<div class="vertical-center-container">
+			<wg-bar-plot
+				:dimensions="bar.dimensions"
+				:label-width="bar.labelWidth"
+				:data="enrichmentData"
+				:value-key="bar.valueKey"
+				:x-label="bar.xLabel">
+			</wg-bar-plot>
+		</div>
+		</b-tab-item>
+		<b-tab-item label="Volcano plot">
+		<div class="vertical-center-container">
+			<wg-volcano-plot
+				:data="volcanoData"
+				:x="volcano.x"
+				:y="volcano.y"
+				:dimensions="volcano.dimensions"
+				:x-label="volcano.xLabel"
+				:label-types="volcano.labelTypes"
+				:x-transform="volcano.xTransform"
+				:radius="volcano.radius"
+				:color="volcano.color"
+				:tooltip-content="volcano.tooltipContent"
+				:show-all-labels="false"
+				:auto-place-labels="true"
+			></wg-volcano-plot>
+		</div>
+		</b-tab-item>
+	</b-tabs>
+	<wg-gene-table
+		:data="geneTables"
+		:info="enrichment"
+		:standard-id="standardId"
+		:method="enrichMethod"
+		:mapped-input-size="mappedInputSize"
+		:organism="organism"
+		:host-name="hostName"
+		:sets-with-net="false"
+	></wg-gene-table>
+</section> 
+
+</div>
+</div>
+</main>
+	<script type="text/javascript" src="https://www.webgestalt.org//assets/0.4/build/wg.min.js"></script>
+<script type="text/javascript">
+var enrichment = [{"geneSet":"R-HSA-450341","description":"Activation of the AP-1 family of transcription factors","link":"http://reactome.org/PathwayBrowser/#/R-HSA-450341","size":10,"overlap":1,"expect":0.0033944331296673455,"enrichmentRatio":294.60000000000002,"pValue":0.003390977128949979,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-376172","description":"DSCAM interactions","link":"http://reactome.org/PathwayBrowser/#/R-HSA-376172","size":10,"overlap":1,"expect":0.0033944331296673455,"enrichmentRatio":294.60000000000002,"pValue":0.003390977128949979,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-205043","description":"NRIF signals cell death from the nucleus","link":"http://reactome.org/PathwayBrowser/#/R-HSA-205043","size":13,"overlap":1,"expect":0.0044127630685675493,"enrichmentRatio":226.61538461538461,"pValue":0.0044067733454823399,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-450321","description":"JNK (c-Jun kinases) phosphorylation and  activation mediated by activated human TAK1","link":"http://reactome.org/PathwayBrowser/#/R-HSA-450321","size":19,"overlap":1,"expect":0.006449422946367956,"enrichmentRatio":155.05263157894737,"pValue":0.006436294603839432,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-1251985","description":"Nuclear signaling by ERBB4","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1251985","size":24,"overlap":1,"expect":0.0081466395112016286,"enrichmentRatio":122.75000000000001,"pValue":0.0081254539051136554,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-114452","description":"Activation of BH3-only proteins","link":"http://reactome.org/PathwayBrowser/#/R-HSA-114452","size":26,"overlap":1,"expect":0.0088255261371350986,"enrichmentRatio":113.30769230769231,"pValue":0.0088005812021457741,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-422475","description":"Axon guidance","link":"http://reactome.org/PathwayBrowser/#/R-HSA-422475","size":492,"overlap":2,"expect":0.16700610997963339,"enrichmentRatio":11.975609756097562,"pValue":0.0089361165951100663,"FDR":1,"overlapId":"5599;6387"},{"geneSet":"R-HSA-2871796","description":"FCERI mediated MAPK activation","link":"http://reactome.org/PathwayBrowser/#/R-HSA-2871796","size":29,"overlap":1,"expect":0.0098438560760353011,"enrichmentRatio":101.58620689655173,"pValue":0.0098126976256129872,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-450282","description":"MAPK targets/ Nuclear events mediated by MAP kinases","link":"http://reactome.org/PathwayBrowser/#/R-HSA-450282","size":30,"overlap":1,"expect":0.010183299389002037,"enrichmentRatio":98.200000000000003,"pValue":0.010149916595657449,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-5693565","description":"Recruitment and ATM-mediated phosphorylation of repair and signaling proteins at DNA double strand breaks","link":"http://reactome.org/PathwayBrowser/#/R-HSA-5693565","size":37,"overlap":1,"expect":0.012559402579769178,"enrichmentRatio":79.621621621621628,"pValue":0.012508305883034088,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-109606","description":"Intrinsic Pathway for Apoptosis","link":"http://reactome.org/PathwayBrowser/#/R-HSA-109606","size":38,"overlap":1,"expect":0.012898845892735912,"enrichmentRatio":77.526315789473685,"pValue":0.012844912528001129,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-5693606","description":"DNA Double Strand Break Response","link":"http://reactome.org/PathwayBrowser/#/R-HSA-5693606","size":38,"overlap":1,"expect":0.012898845892735912,"enrichmentRatio":77.526315789473685,"pValue":0.012844912528001129,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-1236394","description":"Signaling by ERBB4","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1236394","size":38,"overlap":1,"expect":0.012898845892735912,"enrichmentRatio":77.526315789473685,"pValue":0.012844912528001129,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-380108","description":"Chemokine receptors bind chemokines","link":"http://reactome.org/PathwayBrowser/#/R-HSA-380108","size":40,"overlap":1,"expect":0.013577732518669382,"enrichmentRatio":73.650000000000006,"pValue":0.013517896322097989,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-373752","description":"Netrin-1 signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-373752","size":47,"overlap":1,"expect":0.015953835709436523,"enrichmentRatio":62.680851063829792,"pValue":0.015870930808061678,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-193648","description":"NRAGE signals death through JNK","link":"http://reactome.org/PathwayBrowser/#/R-HSA-193648","size":55,"overlap":1,"expect":0.0186693822131704,"enrichmentRatio":53.563636363636363,"pValue":0.018555527855951603,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-2559580","description":"Oxidative Stress Induced Senescence","link":"http://reactome.org/PathwayBrowser/#/R-HSA-2559580","size":59,"overlap":1,"expect":0.020027155465037336,"enrichmentRatio":49.932203389830512,"pValue":0.019895993612724205,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-450294","description":"MAP kinase activation","link":"http://reactome.org/PathwayBrowser/#/R-HSA-450294","size":59,"overlap":1,"expect":0.020027155465037336,"enrichmentRatio":49.932203389830512,"pValue":0.019895993612724205,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-448424","description":"Interleukin-17 signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-448424","size":67,"overlap":1,"expect":0.022742701968771213,"enrichmentRatio":43.97014925373135,"pValue":0.022573262374112835,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-204998","description":"Cell death signalling via NRAGE, NRIF and NADE","link":"http://reactome.org/PathwayBrowser/#/R-HSA-204998","size":68,"overlap":1,"expect":0.023082145281737947,"enrichmentRatio":43.32352941176471,"pValue":0.022907577755811204,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-1266738","description":"Developmental Biology","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1266738","size":819,"overlap":2,"expect":0.27800407331975557,"enrichmentRatio":7.1941391941391952,"pValue":0.024147283224799754,"FDR":1,"overlapId":"5599;6387"},{"geneSet":"R-HSA-168142","description":"Toll Like Receptor 10 (TLR10) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168142","size":74,"overlap":1,"expect":0.025118805159538356,"enrichmentRatio":39.810810810810814,"pValue":0.024911869296024514,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168176","description":"Toll Like Receptor 5 (TLR5) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168176","size":74,"overlap":1,"expect":0.025118805159538356,"enrichmentRatio":39.810810810810814,"pValue":0.024911869296024514,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-975871","description":"MyD88 cascade initiated on plasma membrane","link":"http://reactome.org/PathwayBrowser/#/R-HSA-975871","size":74,"overlap":1,"expect":0.025118805159538356,"enrichmentRatio":39.810810810810814,"pValue":0.024911869296024514,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-198933","description":"Immunoregulatory interactions between a Lymphoid and a non-Lymphoid cell","link":"http://reactome.org/PathwayBrowser/#/R-HSA-198933","size":78,"overlap":1,"expect":0.026476578411405296,"enrichmentRatio":37.769230769230766,"pValue":0.026246539769963939,"FDR":1,"overlapId":"11314"},{"geneSet":"R-HSA-975138","description":"TRAF6 mediated induction of NFkB and MAP kinases upon TLR7/8 or 9 activation","link":"http://reactome.org/PathwayBrowser/#/R-HSA-975138","size":81,"overlap":1,"expect":0.027494908350305498,"enrichmentRatio":36.370370370370374,"pValue":0.027246742980754024,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168181","description":"Toll Like Receptor 7/8 (TLR7/8) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168181","size":82,"overlap":1,"expect":0.027834351663272233,"enrichmentRatio":35.926829268292686,"pValue":0.027579991784118074,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-975155","description":"MyD88 dependent cascade initiated on endosome","link":"http://reactome.org/PathwayBrowser/#/R-HSA-975155","size":82,"overlap":1,"expect":0.027834351663272233,"enrichmentRatio":35.926829268292686,"pValue":0.027579991784118074,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168249","description":"Innate Immune System","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168249","size":882,"overlap":2,"expect":0.29938900203665986,"enrichmentRatio":6.6802721088435382,"pValue":0.02786570540599187,"FDR":1,"overlapId":"11314;5599"},{"geneSet":"R-HSA-193704","description":"p75 NTR receptor-mediated signalling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-193704","size":85,"overlap":1,"expect":0.028852681602172435,"enrichmentRatio":34.658823529411769,"pValue":0.028579281515231925,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-9018519","description":"Estrogen-dependent gene expression","link":"http://reactome.org/PathwayBrowser/#/R-HSA-9018519","size":85,"overlap":1,"expect":0.028852681602172435,"enrichmentRatio":34.658823529411769,"pValue":0.028579281515231925,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-166058","description":"MyD88:MAL(TIRAP) cascade initiated on plasma membrane","link":"http://reactome.org/PathwayBrowser/#/R-HSA-166058","size":85,"overlap":1,"expect":0.028852681602172435,"enrichmentRatio":34.658823529411769,"pValue":0.028579281515231925,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168188","description":"Toll Like Receptor TLR6:TLR2 Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168188","size":85,"overlap":1,"expect":0.028852681602172435,"enrichmentRatio":34.658823529411769,"pValue":0.028579281515231925,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168138","description":"Toll Like Receptor 9 (TLR9) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168138","size":86,"overlap":1,"expect":0.029192124915139169,"enrichmentRatio":34.255813953488378,"pValue":0.028912225894925259,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168179","description":"Toll Like Receptor TLR1:TLR2 Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168179","size":87,"overlap":1,"expect":0.029531568228105907,"enrichmentRatio":33.862068965517238,"pValue":0.029245094190436305,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-181438","description":"Toll Like Receptor 2 (TLR2) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-181438","size":87,"overlap":1,"expect":0.029531568228105907,"enrichmentRatio":33.862068965517238,"pValue":0.029245094190436305,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-168164","description":"Toll Like Receptor 3 (TLR3) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168164","size":88,"overlap":1,"expect":0.029871011541072641,"enrichmentRatio":33.477272727272727,"pValue":0.029577886410459664,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-166166","description":"MyD88-independent TLR4 cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-166166","size":89,"overlap":1,"expect":0.030210454854039375,"enrichmentRatio":33.101123595505619,"pValue":0.029910602563690825,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-937061","description":"TRIF(TICAM1)-mediated TLR4 signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-937061","size":89,"overlap":1,"expect":0.030210454854039375,"enrichmentRatio":33.101123595505619,"pValue":0.029910602563690825,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-8939211","description":"ESR-mediated signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-8939211","size":91,"overlap":1,"expect":0.030889341479972843,"enrichmentRatio":32.373626373626372,"pValue":0.030575806704550512,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-166016","description":"Toll Like Receptor 4 (TLR4) Cascade","link":"http://reactome.org/PathwayBrowser/#/R-HSA-166016","size":117,"overlap":1,"expect":0.039714867617107942,"enrichmentRatio":25.179487179487179,"pValue":0.039195807035158126,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-2559583","description":"Cellular Senescence","link":"http://reactome.org/PathwayBrowser/#/R-HSA-2559583","size":119,"overlap":1,"expect":0.04039375424304141,"enrichmentRatio":24.756302521008404,"pValue":0.039856759225731619,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-2454202","description":"Fc epsilon receptor (FCERI) signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-2454202","size":120,"overlap":1,"expect":0.040733197556008148,"enrichmentRatio":24.550000000000001,"pValue":0.04018712162076743,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-5693532","description":"DNA Double-Strand Break Repair","link":"http://reactome.org/PathwayBrowser/#/R-HSA-5693532","size":121,"overlap":1,"expect":0.041072640868974879,"enrichmentRatio":24.347107438016529,"pValue":0.040517408227229712,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-446652","description":"Interleukin-1 family signaling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-446652","size":121,"overlap":1,"expect":0.041072640868974879,"enrichmentRatio":24.347107438016529,"pValue":0.040517408227229712,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-73887","description":"Death Receptor Signalling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-73887","size":126,"overlap":1,"expect":0.042769857433808553,"enrichmentRatio":23.380952380952383,"pValue":0.042167704735229794,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-9006931","description":"Signaling by Nuclear Receptors","link":"http://reactome.org/PathwayBrowser/#/R-HSA-9006931","size":130,"overlap":1,"expect":0.04412763068567549,"enrichmentRatio":22.661538461538463,"pValue":0.043486578634116646,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-168898","description":"Toll-like Receptor Cascades","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168898","size":139,"overlap":1,"expect":0.047182620502376101,"enrichmentRatio":21.194244604316548,"pValue":0.046449617208907168,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-109581","description":"Apoptosis","link":"http://reactome.org/PathwayBrowser/#/R-HSA-109581","size":146,"overlap":1,"expect":0.049558723693143243,"enrichmentRatio":20.178082191780824,"pValue":0.048749967533112004,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-5357801","description":"Programmed Cell Death","link":"http://reactome.org/PathwayBrowser/#/R-HSA-5357801","size":149,"overlap":1,"expect":0.050577053632043449,"enrichmentRatio":19.771812080536911,"pValue":0.04973469834606381,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-375276","description":"Peptide ligand-binding receptors","link":"http://reactome.org/PathwayBrowser/#/R-HSA-375276","size":164,"overlap":1,"expect":0.055668703326544465,"enrichmentRatio":17.963414634146343,"pValue":0.054648159686595976,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-376176","description":"Signaling by ROBO receptors","link":"http://reactome.org/PathwayBrowser/#/R-HSA-376176","size":178,"overlap":1,"expect":0.06042090970807875,"enrichmentRatio":16.55056179775281,"pValue":0.059218748926732623,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-73894","description":"DNA Repair","link":"http://reactome.org/PathwayBrowser/#/R-HSA-73894","size":258,"overlap":1,"expect":0.087576374745417518,"enrichmentRatio":11.41860465116279,"pValue":0.085054051946336418,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-373076","description":"Class A/1 (Rhodopsin-like receptors)","link":"http://reactome.org/PathwayBrowser/#/R-HSA-373076","size":283,"overlap":1,"expect":0.096062457569585868,"enrichmentRatio":10.409893992932863,"pValue":0.093029477191295395,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-2262752","description":"Cellular responses to stress","link":"http://reactome.org/PathwayBrowser/#/R-HSA-2262752","size":326,"overlap":1,"expect":0.11065852002715545,"enrichmentRatio":9.0368098159509209,"pValue":0.10663855389760346,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-418594","description":"G alpha (i) signalling events","link":"http://reactome.org/PathwayBrowser/#/R-HSA-418594","size":336,"overlap":1,"expect":0.1140529531568228,"enrichmentRatio":8.7678571428571441,"pValue":0.10978382076513393,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-8953897","description":"Cellular responses to external stimuli","link":"http://reactome.org/PathwayBrowser/#/R-HSA-8953897","size":388,"overlap":1,"expect":0.13170400543109301,"enrichmentRatio":7.5927835051546388,"pValue":0.12602026080867446,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-500792","description":"GPCR ligand binding","link":"http://reactome.org/PathwayBrowser/#/R-HSA-500792","size":396,"overlap":1,"expect":0.13441955193482688,"enrichmentRatio":7.4393939393939394,"pValue":0.12850051401967211,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-449147","description":"Signaling by Interleukins","link":"http://reactome.org/PathwayBrowser/#/R-HSA-449147","size":402,"overlap":1,"expect":0.13645621181262729,"enrichmentRatio":7.3283582089552235,"pValue":0.13035762134916751,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-6798695","description":"Neutrophil degranulation","link":"http://reactome.org/PathwayBrowser/#/R-HSA-6798695","size":418,"overlap":1,"expect":0.14188730482009504,"enrichmentRatio":7.0478468899521536,"pValue":0.13529700539032552,"FDR":1,"overlapId":"11314"},{"geneSet":"R-HSA-9006934","description":"Signaling by Receptor Tyrosine Kinases","link":"http://reactome.org/PathwayBrowser/#/R-HSA-9006934","size":419,"overlap":1,"expect":0.14222674813306177,"enrichmentRatio":7.0310262529832936,"pValue":0.13560509434327461,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-1280215","description":"Cytokine Signaling in Immune system","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1280215","size":575,"overlap":1,"expect":0.19517990495587237,"enrichmentRatio":5.1234782608695655,"pValue":0.18277619992075489,"FDR":1,"overlapId":"5599"},{"geneSet":"R-HSA-1280218","description":"Adaptive Immune System","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1280218","size":635,"overlap":1,"expect":0.21554650373387643,"enrichmentRatio":4.6393700787401579,"pValue":0.20045165441183332,"FDR":1,"overlapId":"11314"},{"geneSet":"R-HSA-388396","description":"GPCR downstream signalling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-388396","size":764,"overlap":1,"expect":0.25933469110658519,"enrichmentRatio":3.8560209424083771,"pValue":0.23758700269620669,"FDR":1,"overlapId":"6387"},{"geneSet":"R-HSA-372790","description":"Signaling by GPCR","link":"http://reactome.org/PathwayBrowser/#/R-HSA-372790","size":822,"overlap":1,"expect":0.27902240325865579,"enrichmentRatio":3.5839416058394162,"pValue":0.25390176279319709,"FDR":1,"overlapId":"6387"}];
+var background = [];
+var geneTables = {"R-HSA-450341":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-376172":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-205043":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-450321":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-1251985":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-114452":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-422475":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"},{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-2871796":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-450282":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-5693565":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-109606":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-5693606":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-1236394":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-380108":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-373752":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-193648":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-2559580":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-450294":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-448424":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-204998":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-1266738":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"},{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168142":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168176":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-975871":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-198933":[{"userId":"CD300A","geneSymbol":"CD300A","geneName":"CD300a molecule","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=11314","entrezgene":"11314"}],"R-HSA-975138":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168181":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-975155":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168249":[{"userId":"CD300A","geneSymbol":"CD300A","geneName":"CD300a molecule","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=11314","entrezgene":"11314"},{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-193704":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-9018519":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-166058":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168188":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168138":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168179":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-181438":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-168164":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-166166":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-937061":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-8939211":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-166016":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-2559583":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-2454202":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-5693532":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-446652":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-73887":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-9006931":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-168898":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-109581":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-5357801":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-375276":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-376176":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-73894":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-373076":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-2262752":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-418594":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-8953897":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-500792":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-449147":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-6798695":[{"userId":"CD300A","geneSymbol":"CD300A","geneName":"CD300a molecule","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=11314","entrezgene":"11314"}],"R-HSA-9006934":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-1280215":[{"userId":"MAPK8","geneSymbol":"MAPK8","geneName":"mitogen-activated protein kinase 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5599","entrezgene":"5599"}],"R-HSA-1280218":[{"userId":"CD300A","geneSymbol":"CD300A","geneName":"CD300a molecule","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=11314","entrezgene":"11314"}],"R-HSA-388396":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}],"R-HSA-372790":[{"userId":"CXCL12","geneSymbol":"CXCL12","geneName":"C-X-C motif chemokine ligand 12","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6387","entrezgene":"6387"}]};
+var clusters = {"ap":{"clusters":[["R-HSA-450341","R-HSA-205043","R-HSA-114452","R-HSA-2871796","R-HSA-5693606","R-HSA-193648","R-HSA-450294","R-HSA-448424","R-HSA-204998","R-HSA-168181","R-HSA-166058","R-HSA-168164","R-HSA-2559583","R-HSA-73887","R-HSA-168898","R-HSA-5357801","R-HSA-73894","R-HSA-8953897","R-HSA-449147","R-HSA-1280215"],["R-HSA-376172","R-HSA-450321","R-HSA-450282","R-HSA-5693565","R-HSA-109606","R-HSA-373752","R-HSA-2559580","R-HSA-168142","R-HSA-168176","R-HSA-975871","R-HSA-975138","R-HSA-975155","R-HSA-193704","R-HSA-168188","R-HSA-168138","R-HSA-168179","R-HSA-181438","R-HSA-166166","R-HSA-937061","R-HSA-166016","R-HSA-2454202","R-HSA-5693532","R-HSA-446652","R-HSA-109581","R-HSA-2262752"],["R-HSA-1251985","R-HSA-1236394","R-HSA-380108","R-HSA-9018519","R-HSA-8939211","R-HSA-9006931","R-HSA-375276","R-HSA-376176","R-HSA-373076","R-HSA-418594","R-HSA-500792","R-HSA-9006934","R-HSA-388396","R-HSA-372790"],["R-HSA-422475","R-HSA-1266738"],["R-HSA-198933","R-HSA-6798695","R-HSA-1280218"],["R-HSA-168249"]],"representatives":["R-HSA-450341","R-HSA-376172","R-HSA-1251985","R-HSA-422475","R-HSA-198933","R-HSA-168249"]},"wsc":{"representatives":["R-HSA-422475","R-HSA-198933"],"coverage":[1]}};
+
+wgLib({
+	enrichDatabase: "pathway_Reactome",
+	organism: "hsapiens",
+	hostName: "https://www.webgestalt.org/",
+	enrichment: enrichment,
+	background: background,
+	geneTables: geneTables,
+	clusters: clusters,
+	enrichMethod: "ora",
+	mappedInputSize: 3,
+	standardId: "entrezgene",
+	volcano: {
+		labelTypes: ["geneSet", "description"],
+		dimensions: { width: 960, height: 500 },
+		autoPlaceLabels: true,
+		y: "FDR",
+
+		x: "enrichmentRatio",
+		xLabel: "log2 of enrichment ratio",
+		radius: "overlap",
+		color: "overlap",
+			tooltipContent: ["geneSet", "description", "enrichmentRatio", "FDR", "pValue", "overlap"]
+	},
+	bar: {
+		dimensions: { width: 960, height: 300 },
+		labelWidth: 200,
+		tooltipContent: ["geneSet", "description", "enrichmentRatio", "FDR", "pValue", "overlap"],
+		valueKey: "enrichmentRatio",
+		xLabel: "Enrichment ratio"
+	}
+})
+
+
+</script>
+<footer class="footer has-text-centered">
+<p>WebGestalt is currently developed and maintained by Yuxing Liao, Suhas Vasaikar, Zhiao Shi and Bing Zhang at the <a target="_new" href=http://www.zhang-lab.org> Zhang Lab</a>. Other people who have made significant contribution to the project include Jing Wang, Dexter Duncan, Stefan Kirov and Jay Snoddy.</p>
+<p><b>Funding credits:</b> NIH/NCI (U24 CA210954); Leidos (15X038); CPRIT (RR160027); NIH/NIAAA (U01 AA016662, U01 AA013512); NIH/NIDA (P01 DA015027); NIH/NIMH (P50 MH078028, P50 MH096972); NIH/NCI (U24 CA159988); NIH/NIGMS (R01 GM088822).
+</p>
+</footer></body>
+</html>

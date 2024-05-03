@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>WebGestalt (WEB-based GEne SeT AnaLysis Toolkit)</title>
+<link rel="icon" type="image/png" href="https://s3-us-west-2.amazonaws.com/webgestalt/favicon.png">
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-42098540-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?flags=gated&features=es2015%2Ces2016%2Cfetch"></script>
+<script src="https://www.webgestalt.org//assets/0.4/build/vendor.min.js"></script>
+	<script>window.cytoscape = null;</script>
+	<link rel="stylesheet" href="https://www.webgestalt.org//assets/0.4/build/vendor.css">
+	<link rel="stylesheet" href="https://www.webgestalt.org//assets/0.4/build/wg.css">
+<link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css">
+</head>
+<body>
+<header>
+	<div id="header-img"><a href="https://www.webgestalt.org/"><img border="0" src="https://www.webgestalt.org//images/gsa.png"></a></div>
+	<div id="header-title">
+		<p id="header-title-text">WEB-based GEne SeT AnaLysis Toolkit</p>
+		<p id="header-subtitle-text">Translating gene lists into biological insights...</p>
+	</div>
+</header>
+<hr><main>
+<div id="app">
+<div class="loading-preinit" v-cloak><div class="loading-icon"></div></div>
+<div class="wrapper" v-cloak>
+<div class="level">
+	<div class="level-left">
+		<div class="level-item">
+			<h4 class="title is-4 has-text-primary">Summary</h4>
+		</div>
+	</div>
+	<div class="level-right">
+		<div class="level-item">
+			<a class="button is-text" href="Project_myoLuc_aBSREL_lnOmega.zip" target="_blank">Result Download</a>
+		</div>
+	</div>
+</div>
+
+<section id="summary" class="summary">
+<div class="card" v-bind:class="{active: summaryShown}" >
+	<div class="card-header" v-on:click="summaryShown=!summaryShown">
+		<p class="card-header-title">Job summary</p>
+		<a href="#" class="card-header-icon">
+			<b-icon :icon="summaryShown ? 'chevron-up' : 'chevron-down'"></b-icon>
+		</a>
+	</div>
+	<div class="card-content content" v-show="summaryShown">
+		<ul id="summary-list"> 
+		<li><b>Enrichment method:</b> GSEA</li>
+		<li><b>Organism: </b>hsapiens</li>
+		<li>
+				<b>Enrichment Categories: </b>pathway_Reactome
+				<a class="has-text-info" href="https://www.webgestalt.org//api/geneset?organism=hsapiens&database=pathway_Reactome&fileType=gmt">
+					<b-icon icon="download" size="is-small"></b-icon>
+				</a>
+		</li>
+
+			<li><b>Interesting list: </b> a R object. <b> ID type: </b>genesymbol</li>
+			<li>The interesting list contains <b>128</b> user IDs in which <b>126</b> user IDs are unambiguously mapped to <b>126</b> unique entrezgene IDs and <b>2</b> user IDs can not be mapped to any entrezgene ID.</li>
+			<li>The GO Slim summary are based upon the <b>126</b> unique entrezgene IDs.</li>
+		<li>Among the <b>126</b> unique entrezgene IDs, <b>75</b> IDs are annotated to the selected functional categories, which are used for the enrichment analysis.</li>
+</ul> 
+
+<p><b>Parameters for the enrichment analysis:</b></p>
+<ul><li><b>Minimum number of IDs in the category: </b>5</li>
+<li><b>Maximum number of IDs in the category: </b>500</li>
+<li><b>Significance Level:</b> FDR < 1</li>
+<li><b>Number of permutation: </b>1000</li>
+</ul>
+	<p>Based on the above parameters, <b>9 positive related </b>categories and <b>3 negative related </b>categories are identified as enriched categories
+	and all are shown in this report.
+
+	</div>
+</div>
+</section>
+<section id="go-summary" class="summary">
+<div class="card" v-bind:class="{active: goShown}" >
+	<div class="card-header" v-on:click="goShown=!goShown">
+		<p class="card-header-title">GO Slim summary for the user uploaded IDs</p>
+		<a href="#" class="card-header-icon">
+			<b-icon :icon="goShown ? 'chevron-up' : 'chevron-down'"></b-icon>
+		</a>
+	</div>
+	<div v-show="goShown">
+		<div class="card-content">
+			<p>Each Biological Process, Cellular Component and Molecular Function category is represented by a red, blue and green bar, repectively.</p>
+			<p>The height of the bar represents the number of IDs in the user list and also in the category.</p>
+		</div>
+		<div class="card-image">
+			<img src="goslim_summary_myoLuc_aBSREL_lnOmega.png" width="100%" height="100%" alt="Bar charts of enriched GO Slim terms"/>
+		</div>
+	</div>
+</div>
+</section> <h4 class="title is-4 has-text-primary">Enrichment Results</h4>
+<section id="enrich-result">
+	<p class="select-redundancy">
+		<b-tooltip label="Enriched gene sets are post-processed by two methods to reduce redundancy." type="is-dark" animated multilined dashed>
+			Redundancy reduction:
+		</b-tooltip>
+		<b-radio v-model="redundancy" native-value="all">All</b-radio>
+		<b-radio v-model="redundancy" native-value="ap">
+			<b-tooltip label="R package apcluster is used to cluster gene sets." type="is-dark" animated multilined dashed>
+				Affinity propagation
+			</b-tooltip>
+		</b-radio>
+		<b-radio v-model="redundancy" native-value="wsc">
+			<b-tooltip label="Find top gene sets while maximizing gene coverage." type="is-dark" animated multilined dashed>
+				Weighted set cover
+			</b-tooltip>
+		</b-radio>
+	</p>
+	<b-tabs v-model="activeTab" type="is-toggle">
+		<b-tab-item label="Table">
+			<wg-result-table
+				:data="enrichmentData"
+				:method="enrichMethod"
+			></wg-result-table>
+		</b-tab-item>
+		<b-tab-item label="Bar chart">
+		<div class="vertical-center-container">
+			<wg-bar-plot
+				:dimensions="bar.dimensions"
+				:label-width="bar.labelWidth"
+				:data="enrichmentData"
+				:value-key="bar.valueKey"
+				:x-label="bar.xLabel">
+			</wg-bar-plot>
+		</div>
+		</b-tab-item>
+		<b-tab-item label="Volcano plot">
+		<div class="vertical-center-container">
+			<wg-volcano-plot
+				:data="volcanoData"
+				:x="volcano.x"
+				:y="volcano.y"
+				:dimensions="volcano.dimensions"
+				:x-label="volcano.xLabel"
+				:label-types="volcano.labelTypes"
+				:x-transform="volcano.xTransform"
+				:radius="volcano.radius"
+				:color="volcano.color"
+				:tooltip-content="volcano.tooltipContent"
+				:show-all-labels="false"
+				:auto-place-labels="true"
+			></wg-volcano-plot>
+		</div>
+		</b-tab-item>
+	</b-tabs>
+	<wg-gene-table
+		:data="geneTables"
+		:info="enrichment"
+		:standard-id="standardId"
+		:method="enrichMethod"
+		:organism="organism"
+		:host-name="hostName"
+		:sets-with-net="false"
+	></wg-gene-table>
+</section> 
+
+</div>
+</div>
+</main>
+	<script type="text/javascript" src="https://www.webgestalt.org//assets/0.4/build/wg.min.js"></script>
+<script type="text/javascript">
+var enrichment = [{"geneSet":"R-HSA-109582","description":"Hemostasis","link":"http://reactome.org/PathwayBrowser/#/R-HSA-109582","enrichmentScore":0.84297520661157022,"normalizedEnrichmentScore":1.9915374915785899,"pValue":0,"FDR":0.022704339051463171,"size":5,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_109582.png","leadingEdgeNum":5,"leadingEdgeId":"5023;1084;140885;2811;57126"},{"geneSet":"R-HSA-168249","description":"Innate Immune System","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168249","enrichmentScore":0.42906742742636311,"normalizedEnrichmentScore":1.6886406020697029,"pValue":0.018018017855693534,"FDR":0.087411705348133195,"size":15,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_168249.png","leadingEdgeNum":6,"leadingEdgeId":"441864;6441;5023;1084;140885;290"},{"geneSet":"R-HSA-168256","description":"Immune System","link":"http://reactome.org/PathwayBrowser/#/R-HSA-168256","enrichmentScore":0.33145689812322215,"normalizedEnrichmentScore":1.5508567105538524,"pValue":0.030769230295857996,"FDR":0.11730575176589304,"size":23,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_168256.png","leadingEdgeNum":8,"leadingEdgeId":"441864;6441;5023;27181;1084;140885;290;3434"},{"geneSet":"R-HSA-6798695","description":"Neutrophil degranulation","link":"http://reactome.org/PathwayBrowser/#/R-HSA-6798695","enrichmentScore":0.45364520177815582,"normalizedEnrichmentScore":1.4487294405552835,"pValue":0.066176470101643597,"FDR":0.14019929364278508,"size":10,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_6798695.png","leadingEdgeNum":5,"leadingEdgeId":"441864;5023;1084;140885;290"},{"geneSet":"R-HSA-1280215","description":"Cytokine Signaling in Immune system","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1280215","enrichmentScore":0.57024793388429762,"normalizedEnrichmentScore":1.3846353982720125,"pValue":0.090163934056705183,"FDR":0.16165489404641775,"size":5,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_1280215.png","leadingEdgeNum":5,"leadingEdgeId":"3434;3454;4582;5897;1435"},{"geneSet":"R-HSA-198933","description":"Immunoregulatory interactions between a Lymphoid and a non-Lymphoid cell","link":"http://reactome.org/PathwayBrowser/#/R-HSA-198933","enrichmentScore":0.49791729649440597,"normalizedEnrichmentScore":1.2076387261160895,"pValue":0.18218623408021767,"FDR":0.27850655903128158,"size":5,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_198933.png","leadingEdgeNum":2,"leadingEdgeId":"6441;27181"},{"geneSet":"R-HSA-1280218","description":"Adaptive Immune System","link":"http://reactome.org/PathwayBrowser/#/R-HSA-1280218","enrichmentScore":0.36277948672110782,"normalizedEnrichmentScore":0.9477320463465565,"pValue":0.48309178510583678,"FDR":0.66556148190860598,"size":6,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_1280218.png","leadingEdgeNum":2,"leadingEdgeId":"6441;27181"},{"geneSet":"R-HSA-381753","description":"Olfactory Signaling Pathway","link":"http://reactome.org/PathwayBrowser/#/R-HSA-381753","enrichmentScore":0.3166666666666666,"normalizedEnrichmentScore":0.83872838924418169,"pValue":0.70046082626515749,"FDR":0.70332996972754791,"size":6,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_381753.png","leadingEdgeNum":6,"leadingEdgeId":"26211;219960;256144;26659;219484;119694"},{"geneSet":"R-HSA-392499","description":"Metabolism of proteins","link":"http://reactome.org/PathwayBrowser/#/R-HSA-392499","enrichmentScore":0.24270563039007817,"normalizedEnrichmentScore":0.88033091636262106,"pValue":0.66423357179391551,"FDR":0.71717330978809279,"size":14,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_392499.png","leadingEdgeNum":2,"leadingEdgeId":"6441;29093"},{"geneSet":"R-HSA-418555","description":"G alpha (s) signalling events","link":"http://reactome.org/PathwayBrowser/#/R-HSA-418555","enrichmentScore":-0.33355666076079621,"normalizedEnrichmentScore":-0.73475554815172117,"pValue":0.84410646280848356,"FDR":0.83943224661787541,"size":7,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_418555.png","leadingEdgeNum":3,"leadingEdgeId":"219484;119694;135"},{"geneSet":"R-HSA-388396","description":"GPCR downstream signalling","link":"http://reactome.org/PathwayBrowser/#/R-HSA-388396","enrichmentScore":-0.31407680174359148,"normalizedEnrichmentScore":-0.75280469974840047,"pValue":0.81829121441842212,"FDR":0.88631995268721819,"size":10,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_388396.png","leadingEdgeNum":4,"leadingEdgeId":"219484;119694;135;5173"},{"geneSet":"R-HSA-422475","description":"Axon guidance","link":"http://reactome.org/PathwayBrowser/#/R-HSA-422475","enrichmentScore":-0.35454291559908452,"normalizedEnrichmentScore":-0.77961476931406948,"pValue":0.79875776298290957,"FDR":0.92849654226899736,"size":7,"plotPath":"./Project_myoLuc_aBSREL_lnOmega_GSEA/R_HSA_422475.png","leadingEdgeNum":3,"leadingEdgeId":"23396;6336;1290"}];
+var background = [{"geneSet":"R-HSA-1430728","enrichmentScore":-0.39391149072738069,"normalizedEnrichmentScore":-0.89182633475740059,"pValue":0.63308457632700921,"FDR":1,"leadingEdgeNum":5,"_row":"R-HSA-1430728"},{"geneSet":"R-HSA-1266738","enrichmentScore":-0.44742646403676528,"normalizedEnrichmentScore":-1.0532788518016951,"pValue":0.4105011928275642,"FDR":1,"leadingEdgeNum":5,"_row":"R-HSA-1266738"},{"geneSet":"R-HSA-597592","enrichmentScore":-0.39759472082563779,"normalizedEnrichmentScore":-0.84402955944143199,"pValue":0.71409921577793833,"FDR":1,"leadingEdgeNum":1,"_row":"R-HSA-597592"},{"geneSet":"R-HSA-162582","enrichmentScore":-0.34823852540974098,"normalizedEnrichmentScore":-0.96497314164734438,"pValue":0.54653679594530646,"FDR":1,"leadingEdgeNum":10,"_row":"R-HSA-162582"},{"geneSet":"R-HSA-212436","enrichmentScore":-0.33849540584919713,"normalizedEnrichmentScore":-0.78860419735897802,"pValue":0.74878048689173116,"FDR":1,"leadingEdgeNum":5,"_row":"R-HSA-212436"},{"geneSet":"R-HSA-372790","enrichmentScore":-0.3472705305817757,"normalizedEnrichmentScore":-0.88868866030454929,"pValue":0.64408725528807431,"FDR":1,"leadingEdgeNum":6,"_row":"R-HSA-372790"},{"geneSet":"R-HSA-73857","enrichmentScore":-0.33849540584919713,"normalizedEnrichmentScore":-0.78860419735897802,"pValue":0.74878048689173116,"FDR":1,"leadingEdgeNum":5,"_row":"R-HSA-73857"},{"geneSet":"R-HSA-74160","enrichmentScore":-0.33849540584919713,"normalizedEnrichmentScore":-0.78860419735897802,"pValue":0.74878048689173116,"FDR":1,"leadingEdgeNum":5,"_row":"R-HSA-74160"},{"geneSet":"R-HSA-500792","enrichmentScore":-0.53971904203548804,"normalizedEnrichmentScore":-1.1266905715616113,"pValue":0.30078124960835773,"FDR":1,"leadingEdgeNum":4,"_row":"R-HSA-500792"},{"geneSet":"R-HSA-382551","enrichmentScore":-0.60458463547263108,"normalizedEnrichmentScore":-1.2779264330528397,"pValue":0.16182048019997411,"FDR":1,"leadingEdgeNum":3,"_row":"R-HSA-382551"}];
+var geneTables = {"R-HSA-109582":[{"userId":"CD177","geneSymbol":"CD177","geneName":"CD177 molecule","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=57126","entrezgene":"57126","score":-0.1122},{"userId":"CEACAM3","geneSymbol":"CEACAM3","geneName":"carcinoembryonic antigen related cell adhesion molecule 3","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1084","entrezgene":"1084","score":0.3218},{"userId":"GP1BA","geneSymbol":"GP1BA","geneName":"glycoprotein Ib platelet subunit alpha","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=2811","entrezgene":"2811","score":0.0512},{"userId":"P2RX1","geneSymbol":"P2RX1","geneName":"purinergic receptor P2X 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5023","entrezgene":"5023","score":0.7143},{"userId":"SIRPA","geneSymbol":"SIRPA","geneName":"signal regulatory protein alpha","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=140885","entrezgene":"140885","score":0.2323}],"R-HSA-168249":[{"userId":"ANPEP","geneSymbol":"ANPEP","geneName":"alanyl aminopeptidase, membrane","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=290","entrezgene":"290","score":0.216},{"userId":"CEACAM3","geneSymbol":"CEACAM3","geneName":"carcinoembryonic antigen related cell adhesion molecule 3","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1084","entrezgene":"1084","score":0.3218},{"userId":"P2RX1","geneSymbol":"P2RX1","geneName":"purinergic receptor P2X 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5023","entrezgene":"5023","score":0.7143},{"userId":"SFTPD","geneSymbol":"SFTPD","geneName":"surfactant protein D","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6441","entrezgene":"6441","score":1.6615},{"userId":"SIRPA","geneSymbol":"SIRPA","geneName":"signal regulatory protein alpha","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=140885","entrezgene":"140885","score":0.2323},{"userId":"TARM1","geneSymbol":"TARM1","geneName":"T cell-interacting, activating receptor on myeloid cells 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=441864","entrezgene":"441864","score":1.8084}],"R-HSA-168256":[{"userId":"ANPEP","geneSymbol":"ANPEP","geneName":"alanyl aminopeptidase, membrane","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=290","entrezgene":"290","score":0.216},{"userId":"CEACAM3","geneSymbol":"CEACAM3","geneName":"carcinoembryonic antigen related cell adhesion molecule 3","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1084","entrezgene":"1084","score":0.3218},{"userId":"IFIT1","geneSymbol":"IFIT1","geneName":"interferon induced protein with tetratricopeptide repeats 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=3434","entrezgene":"3434","score":0.1829},{"userId":"P2RX1","geneSymbol":"P2RX1","geneName":"purinergic receptor P2X 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5023","entrezgene":"5023","score":0.7143},{"userId":"SFTPD","geneSymbol":"SFTPD","geneName":"surfactant protein D","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6441","entrezgene":"6441","score":1.6615},{"userId":"SIGLEC8","geneSymbol":"SIGLEC8","geneName":"sialic acid binding Ig like lectin 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=27181","entrezgene":"27181","score":0.6854},{"userId":"SIRPA","geneSymbol":"SIRPA","geneName":"signal regulatory protein alpha","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=140885","entrezgene":"140885","score":0.2323},{"userId":"TARM1","geneSymbol":"TARM1","geneName":"T cell-interacting, activating receptor on myeloid cells 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=441864","entrezgene":"441864","score":1.8084}],"R-HSA-6798695":[{"userId":"ANPEP","geneSymbol":"ANPEP","geneName":"alanyl aminopeptidase, membrane","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=290","entrezgene":"290","score":0.216},{"userId":"CEACAM3","geneSymbol":"CEACAM3","geneName":"carcinoembryonic antigen related cell adhesion molecule 3","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1084","entrezgene":"1084","score":0.3218},{"userId":"P2RX1","geneSymbol":"P2RX1","geneName":"purinergic receptor P2X 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5023","entrezgene":"5023","score":0.7143},{"userId":"SIRPA","geneSymbol":"SIRPA","geneName":"signal regulatory protein alpha","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=140885","entrezgene":"140885","score":0.2323},{"userId":"TARM1","geneSymbol":"TARM1","geneName":"T cell-interacting, activating receptor on myeloid cells 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=441864","entrezgene":"441864","score":1.8084}],"R-HSA-1280215":[{"userId":"CSF1","geneSymbol":"CSF1","geneName":"colony stimulating factor 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1435","entrezgene":"1435","score":-0.6012},{"userId":"IFIT1","geneSymbol":"IFIT1","geneName":"interferon induced protein with tetratricopeptide repeats 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=3434","entrezgene":"3434","score":0.1829},{"userId":"IFNAR1","geneSymbol":"IFNAR1","geneName":"interferon alpha and beta receptor subunit 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=3454","entrezgene":"3454","score":-0.0975},{"userId":"MUC1","geneSymbol":"MUC1","geneName":"mucin 1, cell surface associated","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=4582","entrezgene":"4582","score":-0.3447},{"userId":"RAG2","geneSymbol":"RAG2","geneName":"recombination activating 2","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5897","entrezgene":"5897","score":-0.3786}],"R-HSA-198933":[{"userId":"SFTPD","geneSymbol":"SFTPD","geneName":"surfactant protein D","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6441","entrezgene":"6441","score":1.6615},{"userId":"SIGLEC8","geneSymbol":"SIGLEC8","geneName":"sialic acid binding Ig like lectin 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=27181","entrezgene":"27181","score":0.6854}],"R-HSA-1280218":[{"userId":"SFTPD","geneSymbol":"SFTPD","geneName":"surfactant protein D","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6441","entrezgene":"6441","score":1.6615},{"userId":"SIGLEC8","geneSymbol":"SIGLEC8","geneName":"sialic acid binding Ig like lectin 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=27181","entrezgene":"27181","score":0.6854}],"R-HSA-381753":[{"userId":"OR10Q1","geneSymbol":"OR10Q1","geneName":"olfactory receptor family 10 subfamily Q member 1","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=219960","entrezgene":"219960","score":-0.3255},{"userId":"OR2F1","geneSymbol":"OR2F1","geneName":"olfactory receptor family 2 subfamily F member 1 (gene/pseudogene)","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=26211","entrezgene":"26211","score":0.3911},{"userId":"OR4C3","geneSymbol":"OR4C3","geneName":"olfactory receptor family 4 subfamily C member 3","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=256144","entrezgene":"256144","score":-0.4414},{"userId":"OR51F2","geneSymbol":"OR51F2","geneName":"olfactory receptor family 51 subfamily F member 2","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=119694","entrezgene":"119694","score":-1.0609},{"userId":"OR5M8","geneSymbol":"OR5M8","geneName":"olfactory receptor family 5 subfamily M member 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=219484","entrezgene":"219484","score":-1.038},{"userId":"OR7A5","geneSymbol":"OR7A5","geneName":"olfactory receptor family 7 subfamily A member 5","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=26659","entrezgene":"26659","score":-0.6625}],"R-HSA-392499":[{"userId":"MRPL22","geneSymbol":"MRPL22","geneName":"mitochondrial ribosomal protein L22","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=29093","entrezgene":"29093","score":1.4957},{"userId":"SFTPD","geneSymbol":"SFTPD","geneName":"surfactant protein D","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6441","entrezgene":"6441","score":1.6615}],"R-HSA-418555":[{"userId":"ADORA2A","geneSymbol":"ADORA2A","geneName":"adenosine A2a receptor","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=135","entrezgene":"135","score":-1.4552},{"userId":"OR51F2","geneSymbol":"OR51F2","geneName":"olfactory receptor family 51 subfamily F member 2","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=119694","entrezgene":"119694","score":-1.0609},{"userId":"OR5M8","geneSymbol":"OR5M8","geneName":"olfactory receptor family 5 subfamily M member 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=219484","entrezgene":"219484","score":-1.038}],"R-HSA-388396":[{"userId":"ADORA2A","geneSymbol":"ADORA2A","geneName":"adenosine A2a receptor","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=135","entrezgene":"135","score":-1.4552},{"userId":"OR51F2","geneSymbol":"OR51F2","geneName":"olfactory receptor family 51 subfamily F member 2","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=119694","entrezgene":"119694","score":-1.0609},{"userId":"OR5M8","geneSymbol":"OR5M8","geneName":"olfactory receptor family 5 subfamily M member 8","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=219484","entrezgene":"219484","score":-1.038},{"userId":"PDYN","geneSymbol":"PDYN","geneName":"prodynorphin","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=5173","entrezgene":"5173","score":-1.5414}],"R-HSA-422475":[{"userId":"COL5A2","geneSymbol":"COL5A2","geneName":"collagen type V alpha 2 chain","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=1290","entrezgene":"1290","score":-1.6805},{"userId":"PIP5K1C","geneSymbol":"PIP5K1C","geneName":"phosphatidylinositol-4-phosphate 5-kinase type 1 gamma","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=23396","entrezgene":"23396","score":-0.9309},{"userId":"SCN10A","geneSymbol":"SCN10A","geneName":"sodium voltage-gated channel alpha subunit 10","gLink":"https://www.ncbi.nlm.nih.gov/gene/?term=6336","entrezgene":"6336","score":-1.1142}]};
+var clusters = {"ap":{"clusters":[["R-HSA-109582"],["R-HSA-168249","R-HSA-168256","R-HSA-6798695"],["R-HSA-1280215"],["R-HSA-198933","R-HSA-1280218","R-HSA-392499"],["R-HSA-418555","R-HSA-381753","R-HSA-388396"],["R-HSA-422475"]],"representatives":["R-HSA-109582","R-HSA-168249","R-HSA-1280215","R-HSA-198933","R-HSA-418555","R-HSA-422475"]},"wsc":{"representatives":["R-HSA-109582","R-HSA-168256","R-HSA-1280215","R-HSA-381753","R-HSA-422475","R-HSA-392499","R-HSA-388396"],"coverage":[1]}};
+
+wgLib({
+	enrichDatabase: "pathway_Reactome",
+	organism: "hsapiens",
+	hostName: "https://www.webgestalt.org/",
+	enrichment: enrichment,
+	background: background,
+	geneTables: geneTables,
+	clusters: clusters,
+	enrichMethod: "gsea",
+	standardId: "entrezgene",
+	volcano: {
+		labelTypes: ["geneSet", "description"],
+		dimensions: { width: 960, height: 500 },
+		autoPlaceLabels: true,
+		y: "FDR",
+
+		x: "normalizedEnrichmentScore",
+		xLabel: "normalizedEnrichmentScore",
+		xTransform: null,
+		radius: "leadingEdgeNum",
+		color: "leadingEdgeNum",
+			tooltipContent: ["geneSet", "description", "normalizedEnrichmentScore", "FDR", "pValue", "leadingEdgeNum"]
+	},
+	bar: {
+		dimensions: { width: 960, height: 300 },
+		labelWidth: 200,
+		tooltipContent: ["geneSet", "description", "enrichmentRatio", "FDR", "pValue", "overlap"],
+		valueKey: "normalizedEnrichmentScore",
+		xLabel: "Normalized Enrichment Score"
+	}
+})
+
+
+</script>
+<footer class="footer has-text-centered">
+<p>WebGestalt is currently developed and maintained by Yuxing Liao, Suhas Vasaikar, Zhiao Shi and Bing Zhang at the <a target="_new" href=http://www.zhang-lab.org> Zhang Lab</a>. Other people who have made significant contribution to the project include Jing Wang, Dexter Duncan, Stefan Kirov and Jay Snoddy.</p>
+<p><b>Funding credits:</b> NIH/NCI (U24 CA210954); Leidos (15X038); CPRIT (RR160027); NIH/NIAAA (U01 AA016662, U01 AA013512); NIH/NIDA (P01 DA015027); NIH/NIMH (P50 MH078028, P50 MH096972); NIH/NCI (U24 CA159988); NIH/NIGMS (R01 GM088822).
+</p>
+</footer></body>
+</html>

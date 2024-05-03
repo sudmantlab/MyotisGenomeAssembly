@@ -1,0 +1,6 @@
+userId	geneSymbol	geneName	entrezgene	gLink
+CD300A	CD300A	CD300a molecule	11314	https://www.ncbi.nlm.nih.gov/gene/?term=11314
+CXCL12	CXCL12	C-X-C motif chemokine ligand 12	6387	https://www.ncbi.nlm.nih.gov/gene/?term=6387
+MAPK8	MAPK8	mitogen-activated protein kinase 8	5599	https://www.ncbi.nlm.nih.gov/gene/?term=5599
+SMYD4	SMYD4	SET and MYND domain containing 4	114826	https://www.ncbi.nlm.nih.gov/gene/?term=114826
+ZNF862	ZNF862	zinc finger protein 862	643641	https://www.ncbi.nlm.nih.gov/gene/?term=643641
