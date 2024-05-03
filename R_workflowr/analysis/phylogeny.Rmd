@@ -422,49 +422,121 @@ agedata.hassizelifespan <- agedata.hassize %>% filter(!label %in% nolifespan)
 
 ```{r Data: DBatVir}
 vir <- readxl::read_xls("../data/DBatVir/DBatVir_From Myotis bats_20230509.xls", skip = 1) %>% 
+  bind_rows(
+    ., 
+    readxl::read_xls("../data/DBatVir/DBatVir_From Antrozous pallidus bats.xls", skip = 1) ,
+    readxl::read_xls("../data/DBatVir/DBatVir_From Tadarida brasiliensis bats.xls", skip = 1) 
+  )%>% 
   mutate(
     label = `From bat` %>% 
       str_replace("^Myotis$", "Myotis_spc.") %>% 
       str_replace_all("Myotis cf. californicus/ciliolabrum BL-2021", "Myotis californicus") %>% 
       str_replace_all("Myotis ciliolabrum", "Myotis californicus") %>% 
       str_replace_all(" ", "_")
-  )
+  ) 
 
 vir.summary.familyCount <- vir %>% group_by(label, `Viral family`) %>% dplyr::summarize(n=n())
 vir.summary.allCount <- vir %>% group_by(label) %>% dplyr::summarize(n=n())
-```
 
-```{r}
-p.spc <- tr.species %>% 
-  ggtree(branch.length = F) + 
-  geom_tiplab() + 
-  theme_tree2() + 
-  xlim_tree(c(NA, 0.02)) + 
-  coord_cartesian(clip='off')
 
-vir.summary.allCount.onlyOurs <- vir.summary.allCount %>% filter(label %in% tr.species$tip.label)
+tr.species.tmp <- drop.tip(tr.species, "Myotis_californicus")
+tip.label(tr.species.tmp) <- tip.label(tr.species.tmp) %>% str_replace("_", " ")
+vir.summary.allCount.onlyOurs <- vir.summary.allCount %>%
+  mutate(label=str_replace(label, "_"," ")) %>% 
+    filter(label %in% c(tr.species.tmp$tip.label, 'Antrozous pallidus', 'Tadarida brasiliensis'))
 age <- anage %>% 
-  filter(label %in% tr.species$tip.label) %>% 
+  mutate(label=str_replace(label, "_"," ")) %>% 
+  filter(label %in% c(tr.species.tmp$tip.label, 'Tadarida brasiliensis', "Antrozous pallidus")) %>% 
   select(label, lifespan)
 
-dat <- full_join(vir.summary.allCount.onlyOurs, age)
+dat.virus <- full_join(vir.summary.allCount.onlyOurs, age)
 
-p.spc.data <- p.spc + 
-  geom_facet(panel = "N.viruses", data = dat, geom = geom_col, 
-               mapping=aes(x = n), orientation = 'y', width = .6) +
-  geom_facet(panel = "age", data = dat, geom = geom_col, 
-               mapping=aes(x = lifespan), orientation = 'y', width = .6)
-p.spc.data
+tr.species.tmp <- tr.species.tmp %>% keep.tip(intersect(tr.species.tmp$tip.label, dat.virus$label)) 
+
+
+color_cara <- c(RColorBrewer::brewer.pal(8, 'Dark2'), '#000000') %>% magrittr::set_names(., dat.virus$label)
 ```
 
 ```{r}
-dat %>% 
+
+lm_eqn <- function(df){
+    m <- lm(y ~ x, df);
+    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+         list(a = format(unname(coef(m)[1]), digits = 2),
+              b = format(unname(coef(m)[2]), digits = 2),
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));
+}
+
+
+p.spc <- tr.species.tmp %>% 
+  ggtree(branch.length = 'none') + 
+  geom_tiplab() + 
+  # theme_tree2() + 
+  xlim_tree(c(NA, 15)) + 
+  coord_cartesian(clip='off')
+
+
+p.dat <- dat.virus %>% 
+  filter(label != "Tadarida brasiliensis")%>%
+  rename(`Virus Families`=n, Lifespan=lifespan) %>% 
+  pivot_longer(-label) %>% 
+  filter(label != "Myotis californicus") %>%
+  mutate(label=str_replace(label, "_"," ")) %>% 
+  ggplot(
+    aes(
+      x= value,
+      y= label,
+      color= label, 
+      fill=label
+    )
+  ) + 
+  scale_color_manual(values=color_cara, guide=guide_none()) + 
+  scale_fill_manual(values=color_cara, guide=guide_none()) +
+  geom_col(width=0.3) + 
+  facet_grid(cols=vars(name), scales = 'free_x') + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+p.dat
+
+p.coor <-
+  dat.virus %>%
+  filter(label != "Tadarida brasiliensis")%>%
   ggplot(
     aes(x=n,
         y=lifespan)
   ) + 
-  geom_point() +
-  geom_smooth(method = 'lm')
+  geom_point(
+    aes(color=label),size=2
+  ) +
+  labs(x='Virus Families', y='Lifespan') + 
+  geom_smooth(method = 'lm') +
+  scale_color_manual('Species', values=color_cara,
+                     guide=guide_legend(ncol=2, nrow=4)) +
+  geom_text(
+    aes(x=-Inf,y=Inf, label=lm_eqn(
+      dat.virus %>%
+  filter(label != "Tadarida brasiliensis")%>%
+    select(x=n, y=lifespan)
+    )),
+    vjust=1, parse=T,
+    hjust=-1
+  ) +
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(legend.position = c(0.7,0.2),
+        legend.direction = 'horizontal',
+        legend.background = element_blank())
+
+p.coor
+
+p.dat %>% aplot::insert_left(p.spc, width = 0.4)
+
 ```
 
 ```{r LQ using my data}

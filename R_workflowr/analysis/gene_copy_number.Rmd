@@ -1,0 +1,1313 @@
+---
+title: "gene_copy_number"
+author: "docmanny"
+date: "2024-03-03"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(tidyverse)
+library(ape)
+library(aplot)
+library(ggtree)
+library(ggpubr)
+library(ggdist)
+library(ComplexHeatmap)
+library(WebGestaltR)
+library(ggnewscale)
+library(ggrepel)
+library(grid)
+library(cowplot)
+library(patchwork)
+
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+genome_species= c(
+  "mMyoAui1"="Myotis_auriculus",
+  "mMyoCai1"="Myotis_californicus",
+  "mMyoOcc1"="Myotis_occultus",
+  "mMyoLuc1"="Myotis_lucifugus",
+  "mMyoYum1"="Myotis_yumanensis",
+  "mMyoVol1"="Myotis_volans",
+  "mMyoVel1"="Myotis_velifer",
+  "mMyoEvo1"="Myotis_evotis",
+  "mMyoThy1"="Myotis_thysanodes"
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
+```
+
+```{r}
+is.cancer <- function(desc) {
+  str_detect(desc, "APC|[Cc]yclin|[Cc]ell[Cc]ycle|Ubiq|NER|ROS|DNA|G1|[Mm]eiotic|[Mm]itotic|[Cc]heckpoint|[Cc]ancer|IGF|[Rr]ecombination|D-Loop|AURK|HDR|[Ii]nterphase|[Aa]popto|[Cc]entrosome|Fanconi|TP53|MMR|[Rr]epair|Insulin|FGF|NHEJ|ATR|Hyaluronan|[Tt]elomere|AKT|[Nn]icotinamide")
+}
+```
+
+
+```{r, eval=F}
+df <- dir('../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/', pattern=".*20230622.tsv") %>% 
+  .[str_detect(., 'summary', negate=T)] %>% 
+  lapply(
+    function(x){
+      read_tsv(str_c('../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/', x)) %>% 
+        mutate(species = str_c('Myotis_', str_extract(x, '^[a-z]+(?=\\.)')))
+    }
+  ) %>% 
+  bind_rows %>% 
+  select(species, human_gene_name, cds_seqname) %>% 
+  filter(!is.na(human_gene_name)) %>% 
+  group_by(species, human_gene_name) %>% 
+  count()
+
+df %>% write_tsv('../data/genes/gene_copy_MyotisAnnotation.tsv')
+```
+
+```{r}
+df <- read_tsv('../data/genes/gene_copy_MyotisAnnotation.tsv')
+
+all_genes <- df$human_gene_name %>% unique
+list.all_genes_perspecies <- df %>% 
+  group_by(species) %>% 
+  group_split(.keep = 'human_gene_name') %>% 
+  lapply(. %>% pull(human_gene_name) %>% unique) %>% 
+  magrittr::set_names(., group_keys(df %>% 
+               group_by(species)) %>% pull(species))
+
+tr <- read.tree('../data/trees/536Mammals-rooted-nodeNames.noBL.nwk')
+```
+
+## Poisson method
+
+```{r}
+df <- df %>%
+  mutate(pois = dpois(n, lambda=1))
+
+df.sigpois <- df %>% 
+  filter(pois<=0.05)
+
+all.sigpois <- df.sigpois %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+list.sigpois <- df.sigpois %>% 
+  group_by(species) %>% 
+  group_split(.keep = 'human_gene_name') %>% 
+  lapply(. %>% pull(human_gene_name) %>% unique) %>% 
+  magrittr::set_names(., group_keys(df.sigpois %>% 
+               group_by(species)) %>% pull(species))
+```
+
+### WebGestalt
+
+```{r dirs}
+dir.create('../output/webGestalt/geneCN', recursive=T, showWarnings = F)
+
+for (set in names(list.sigpois)) {
+  opath <- paste0('../output/webGestalt/geneCN/', set)
+  dir.create(opath, recursive=T, showWarnings = F)
+  list.sigpois[[set]] %>% write_lines(paste0(opath, '/geneCN-', set, '.txt'))
+  list.all_genes_perspecies[[set]] %>% write_lines(paste0(opath, '/geneCN-allGenes.txt'))
+}
+```
+
+```{r WebGestaltR Batch, eval=F}
+
+run_ORA <- function(geneSet, refGeneSet, outputDirectory, enrichmentDB, fdrThr, projName){
+  WebGestaltR(
+    enrichMethod = "ORA",
+    enrichDatabase = enrichmentDB,
+    organism = "hsapiens",
+    interestGene = geneSet,
+    interestGeneType = "genesymbol",
+    referenceGene = refGeneSet,
+    referenceGeneType = "genesymbol",
+    maxNum=1000,
+    sigMethod="fdr",
+    topThr=100,
+    fdrThr=as.numeric(fdrThr),
+    reportNum=100,
+    isOutput = T,
+    outputDirectory = outputDirectory,
+    hostName="https://www.webgestalt.org/",
+    projectName=projName
+  )
+}
+
+enrichments.pois <- lapply(
+  names(list.sigpois),
+  function(n, s=list.sigpois, a=list.all_genes_perspecies, e='pathway_Reactome', f=0.5, p = 'geneCN-'){
+    try(
+      run_ORA(
+      geneSet = s[[n]],
+  refGeneSet = a[[n]], 
+  outputDirectory = paste0('../output/webGestalt/geneCN/', n), 
+  enrichmentDB = e, 
+  fdrThr = f, 
+  projName = paste0(p, n)
+  )
+    )
+  }
+)
+```
+
+## Bulk method
+
+```{r}
+
+df.dup <- df %>% 
+  filter(n>1)
+
+list_dups <- df.dup %>% 
+  group_by(species) %>% 
+  group_split(.keep = 'human_gene_name') %>% 
+  lapply(. %>% pull(human_gene_name) %>% unique) %>% 
+  magrittr::set_names(., group_keys(df.dup %>% 
+               group_by(species)) %>% pull(species))
+  
+```
+
+
+### WebGestalt
+
+```{r dirs}
+dir.create('../output/webGestalt/geneCN-bulk', recursive=T, showWarnings = F)
+
+for (set in names(list_dups)) {
+  opath <- paste0('../output/webGestalt/geneCN-bulk/', set)
+  dir.create(opath, recursive=T, showWarnings = F)
+  list_dups[[set]] %>% write_lines(paste0(opath, '/geneCN-', set, '.txt'))
+  list.all_genes_perspecies[[set]] %>% write_lines(paste0(opath, '/geneCN-allGenes.txt'))
+}
+```
+
+```{r WebGestaltR Batch, eval=F}
+
+run_ORA <- function(geneSet, refGeneSet, outputDirectory, enrichmentDB, fdrThr, projName){
+  WebGestaltR(
+    enrichMethod = "ORA",
+    enrichDatabase = enrichmentDB,
+    organism = "hsapiens",
+    interestGene = geneSet,
+    interestGeneType = "genesymbol",
+    referenceGene = refGeneSet,
+    referenceGeneType = "genesymbol",
+    maxNum=1000,
+    sigMethod="fdr",
+    topThr=100,
+    fdrThr=as.numeric(fdrThr),
+    reportNum=100,
+    isOutput = T,
+    outputDirectory = outputDirectory,
+    hostName="https://www.webgestalt.org/",
+    projectName=projName
+  )
+}
+
+enrichments.dups <- lapply(
+  names(list.sigpois),
+  function(n, s=list.sigpois, a=list.all_genes_perspecies, e='pathway_Reactome', f=1, p = 'geneCN-'){
+    try(
+      run_ORA(
+      geneSet = s[[n]],
+  refGeneSet = a[[n]], 
+  outputDirectory = paste0('../output/webGestalt/geneCN-bulk/', n), 
+  enrichmentDB = e, 
+  fdrThr = f, 
+  projName = paste0(p, n)
+  )
+    )
+  }
+)
+```
+
+
+```{r}
+enrichments.pois <- lapply(
+  names(list.sigpois),
+  function(n){
+    str_c('../output/webGestalt/geneCN-poisson/', n) %>% 
+      dir(., pattern =  'enrichment_results.*.txt', full.names = T) %>%
+      read_tsv() %>% 
+      mutate(species = n)
+  }
+) %>% bind_rows %>% 
+  mutate(isCancer = description %>% is.cancer)
+```
+
+```{r}
+enrichments.pois %>% 
+  ggplot(
+    aes(
+      x=enrichmentRatio,
+      y=-log(FDR,base=10),
+      size=overlap,
+      label == description,
+      color=isCancer
+    )
+  ) + 
+  geom_point() + 
+  facet_wrap(~species) +
+  gghighlight::gghighlight(FDR<=0.1) +
+  labs(
+    title='Gene Duplications (Poisson-tested)',
+    x = 'Enrichment Ratio',
+    y = "-log10(FDR)"
+  ) + 
+  theme_pubr() + 
+  labs_pubr()
+```
+
+```{r}
+enrichments.dups <- lapply(
+  names(list_dups),
+  function(n){
+    str_c('../output/webGestalt/geneCN-bulk/', n) %>% 
+      dir(., pattern =  'enrichment_results.*.txt', full.names = T) %>%
+      read_tsv() %>% 
+      mutate(species = n)
+  }
+) %>% bind_rows %>% 
+  mutate(isCancer = description %>% is.cancer)
+```
+
+```{r}
+enrichments.dups %>% 
+  ggplot(
+    aes(
+      x=enrichmentRatio,
+      y=-log(FDR,base=10),
+      size=overlap,
+      label == description,
+      color = isCancer
+    )
+  ) + 
+  geom_point(data = . %>% filter(!isCancer)) +
+  geom_point(data = . %>% filter(isCancer)) + 
+  gghighlight::gghighlight(FDR<=0.3) +
+  scale_color_manual(
+    "Cancer Pathway",
+    values = c("#AF3E4D", "#623CEA")
+  ) + 
+  facet_wrap(~species) +
+  labs(
+    title='Gene Duplications (CN>1)',
+    x = 'Enrichment Ratio',
+    y = "-log10(FDR)"
+  ) + 
+  theme_pubr() + 
+  labs_pubr()
+```
+
+## Examples:
+
+### FBXO31
+```{r}
+cn.fbxo31 <- df %>% 
+  filter(human_gene_name == 'FBXO31')
+
+p.cn.FBXO31 <- cn.fbxo31 %>% 
+  ggplot(
+    aes(
+      x=n, 
+      y=species
+    )
+  ) + 
+  geom_point() + 
+  theme_pubclean()+ 
+  labs_pubr() + 
+  theme(
+    axis.line.y = element_blank(),
+    # axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+  )
+p.tr <-tr %>% 
+  ggtree() + 
+  geom_tiplab()
+```
+
+## Manhattan Plot
+
+```{r Gene Positions}
+df.chr.all <- lapply(
+  names(genome_species), 
+  function(genome, gs=genome_species){
+    f.chr = str_c('../data/genomes/',genome,'.fa.fai')
+    chr_prefix = ifelse(genome == 'mMyoYum1', 'SCAF__', 'SUPER__')
+    df.chr <- read_tsv(f.chr, col_names=c('chr','len','x','y')) %>% 
+      select(-x,-y) %>% 
+      mutate(genome = genome,
+             species = gs[genome])
+    return(df.chr)
+  }
+) %>% 
+  bind_rows %>% 
+  ungroup
+
+df.tt.all <- lapply(
+  names(genome_species), 
+  function(genome, gs=genome_species){
+    f.gff = str_c(
+      '../../data/GFFs/geneAnnotations/', 
+      genome, 
+      '_finalAnnotation.gff3'
+    )
+    f.genepos = str_c(
+      '../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/', 
+      str_remove(gs[genome], 'Myotis_'),
+      '.cross_cds_myotis_ali_and_gff_final_curated_files_20230622.tsv'
+      )
+    chr_prefix = ifelse(genome == 'mMyoYum1', 'SCAF__', 'SUPER__')
+    
+    gff <- read_tsv(
+      f.gff,
+      comment = "#",
+      col_names = c(
+        'chr','src','type','s','e','score','strand','frame','aux'
+      )
+    )
+    
+    tt.n <- read_tsv(
+      f.genepos
+    ) %>% 
+      mutate(
+        cds_seqname = str_remove(
+          cds_seqname, 
+          gs[genome] %>% str_remove("Myotis_") %>% str_c("_")
+        )
+      ) %>% 
+      mutate(genome = genome,
+             species=gs[genome])
+    return(tt.n)
+  }
+) %>% 
+  bind_rows %>% 
+  mutate(seqname = str_replace(seqname, "SCAF__", "SUPER__"))
+```
+
+```{r Copy numbers projected on lucifugus}
+main_chr <- str_c("SUPER__", 1:23)
+
+genes.all <- df.tt.all %>% 
+  filter(!is.na(human_gene_name)) %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+genes.luc <- df.tt.all %>% 
+  filter(
+    genome == 'mMyoLuc1', 
+    seqname %in% main_chr, 
+    !is.na(human_gene_name)
+  ) %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+genes.missing.luc <- setdiff(genes.all, genes.luc)
+
+genes.complement.vel <- df.tt.all %>% 
+  filter(
+    genome=='mMyoVel1', 
+    seqname %in% main_chr,
+    human_gene_name %in% genes.missing.luc
+  ) %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+genes.missing <- setdiff(genes.missing.luc, genes.complement.vel)
+
+# df.tt.all %>% filter(human_gene_name %in% genes.missing) %>% group_by(human_gene_name) %>% filter(!is.na(seqname)) %>% summarize(chrs = paste0(seqname %>% unique, collapse = ','), genomes = paste0(genome %>% unique, collapse = ','))
+
+genes.complement.aui <- df.tt.all %>% 
+  filter(
+    genome=='mMyoAui1', 
+    seqname %in% main_chr,
+    human_gene_name %in% genes.missing
+  ) %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+df.tt.project <- bind_rows(
+  df.tt.all %>% filter(genome == 'mMyoLuc1', human_gene_name %in% genes.luc,seqname %in% main_chr),
+  df.tt.all %>% filter(genome == 'mMyoVel1', human_gene_name %in% genes.complement.vel,seqname %in% main_chr),
+  df.tt.all %>% filter(genome == 'mMyoAui1', human_gene_name %in% genes.complement.aui,seqname %in% main_chr)
+) %>%
+  select(human_gene_name, chr=seqname, s=start, e=end) %>% 
+distinct()
+
+df.dup.pos <- df.tt.project %>%
+    group_by(human_gene_name) %>% 
+    mutate(copy = row_number()) %>%
+    # filter(copy == 1) %>% 
+    ungroup() %>% 
+    left_join(
+      df, 
+      by=c('human_gene_name')
+    )%>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor)
+
+df.dup.highlight <- df %>% select(species, human_gene_name, n) %>% unique %>% group_by(species) %>% arrange(desc(n)) %>% mutate(i=row_number()) %>% filter(i<=20) %>% select(-i) %>% ungroup() %>% filter(n>1) %>% 
+  left_join(df.dup.pos %>% select(-n) %>% filter(copy==1), by=c('species','human_gene_name'))
+```
+
+
+```{r Manhattan plot all copies everywhere log-scaled}
+df.dup.pos %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=n,
+        alpha=-log(pois),
+        color=species)
+  
+  ) +
+  geom_text_repel(
+    data = df.dup.highlight,
+    aes(x=s,
+        y=n,
+        label=human_gene_name),
+    size=3,
+    max.overlaps = Inf,
+    min.segment.length = 0
+  ) + 
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr') + 
+  ylab('log(Copy Number)') + 
+  theme_pubr() + 
+  labs_pubr() +
+  scale_y_log10() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+
+```{r Manhattan plot all copies everywhere}
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=n,
+        alpha=-log(pois),
+        color=species)
+  
+  ) +
+  geom_text_repel(
+    data = df.dup.highlight,
+    aes(x=s,
+        y=n,
+        label=human_gene_name),
+    size=3,
+    max.overlaps = Inf,
+    min.segment.length = 0
+  ) + 
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+
+```{r Manhattan plot only first copy}
+(df.dup.pos %>% filter(copy == 1) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=n,
+        # alpha=-log(pois),
+        # color=species,
+        color=n,
+        text=human_gene_name)
+  
+  ) +
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  # scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_color_viridis_c(
+    values = c(0,0.3),
+    na.value = "#FDE725FF",
+    guide=guide_none()
+  ) + 
+  # scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr') + 
+  ylab('Copy Number') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )) #%>% plotly::ggplotly()
+```
+
+```{r}
+df %>% arrange(desc(n)) %>% group_by(human_gene_name) %>% filter(n==max(n)) %>% ungroup %>%  select(-species, -pois) %>% distinct %>% filter(n>1) %>% arrange(human_gene_name) %>%  View
+```
+
+
+```{r FBXO31}
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=n,
+        alpha=-log(pois),
+        color=if_else(human_gene_name=='FBXO31', 'red', 'black'))
+  ) +
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  # scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_color_identity(guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('FBXO31') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+```{r FBXO31 and nearest 3 genes up/downstream}
+generank.fbxo31 <- df.tt.all %>% filter(genome == 'mMyoLuc1',!is.na(human_gene_name)) %>% arrange(seqname, start) %>% mutate(generank = row_number()) %>% filter(human_gene_name == 'FBXO31') %>% pull(generank) %>% .[1]
+
+fbxo31.neighbors <- df.tt.all %>% filter(genome == 'mMyoLuc1',!is.na(human_gene_name)) %>% arrange(seqname, start) %>% mutate(generank = row_number()) %>% filter(generank>=(generank.fbxo31-3) & generank <= (generank.fbxo31+3)) %>% pull(human_gene_name)
+
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    data = . %>% filter(!(human_gene_name %in% fbxo31.neighbors)),
+    aes(x=s,
+        y=n,
+        alpha=-log(pois)),
+    color='black'
+  ) +
+  geom_point(
+    data = . %>% filter(human_gene_name %in% fbxo31.neighbors),
+    aes(x=s,
+        y=n,
+        color=human_gene_name)
+  ) +
+  scale_color_brewer('Gene', palette='Dark2') + 
+  scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('FBXO31 neighbors') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+```{r Butyrophilins}
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    data = . %>% filter(!str_starts(human_gene_name, 'BTN')),
+    aes(x=s,
+        y=n,
+        alpha=-log(pois)),
+    color='black'
+  ) +
+  geom_point(
+    data = . %>% filter(str_starts(human_gene_name, 'BTN')),
+    aes(x=s,
+        y=n,
+        color=human_gene_name)
+  ) +
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  # scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_color_brewer('Gene', palette='Dark2') + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('Butyrophilins') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8))
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+```{r CCDC}
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    data = . %>% filter(!str_starts(human_gene_name, 'CCDC')),
+    aes(x=s,
+        y=n,
+        alpha=-log(pois)),
+    color='black'
+  ) +
+  geom_point(
+    data = . %>% filter(str_starts(human_gene_name, 'CCDC')),
+    aes(x=s,
+        y=n),
+    fill='gold',
+    color='black',
+    pch=21
+  ) +
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('Coiled-Coil Domain-Containing Proteins') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8))
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+```{r VPREB1}
+df.dup.pos  %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=n,
+        alpha=-log(pois),
+        color=if_else(human_gene_name=='VPREB1', 'red', 'black'))
+  ) +
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  # scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_color_identity(guide=guide_none()) + 
+  scale_alpha(range = c(0.1,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('VPREB1') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+```
+
+```{r Zoom in on Chr11}
+(df.dup.pos  %>% 
+  filter(chr == 'SUPER__11') %>% 
+  ggplot() +
+  geom_point(
+    aes(x=s,
+        y=n,
+        color=n,
+        text=human_gene_name),
+  ) +
+  scale_color_viridis_c() + 
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr 11 (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('Chr 11') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8))
+    # strip.text.y = element_text(size=5)
+  )) %>% plotly::ggplotly()
+```
+
+```{r Zoom in on Chr11}
+(df.dup.pos  %>% 
+  filter(chr == 'SUPER__21') %>% 
+  ggplot() +
+  geom_point(
+    aes(x=s,
+        y=n,
+        color=n,
+        text=human_gene_name),
+  ) +
+  scale_color_viridis_c() + 
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr 21 (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('chr21') +
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8))
+    # strip.text.y = element_text(size=5)
+  )) %>% plotly::ggplotly()
+```
+
+
+```{r Zoom in on X}
+(df.dup.pos  %>% 
+  filter(chr == 'SUPER__4') %>% 
+  ggplot() +
+  geom_point(
+    aes(x=s,
+        y=n,
+        color=n,
+        text=human_gene_name),
+  ) +
+  scale_color_viridis_c() + 
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr X (mMyoLuc1 projection)') + 
+  ylab('Copy Number') +
+  ggtitle('X Chr') +
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8))
+    # strip.text.y = element_text(size=5)
+  )) %>% plotly::ggplotly()
+```
+
+```{r load MSA and calculate JSD between copies of a gene}
+
+```
+
+```{r plot CN vs JSD}
+
+```
+
+```{r look at genes next to highly duplicated to see if they're also duplicated}
+
+df.dup.pos %>% 
+  group_by
+
+```
+
+```{r look at correlation between CN of neighbors }
+
+```
+
+```{r sliding window: count # duplicated genes in each window}
+myoLuc <- read_tsv('../data/genomes/mMyoLuc1.fa.fai', col_names = c('chr', 'e','a','b','c')) %>% 
+  select(chr, e) %>% 
+  mutate(s = 1)
+
+year.groups = function(start.years, n) {
+  ll = length(start.years)
+  start.years = sort(start.years[-c((ll-(n-2)):ll)])
+  map(as.numeric(as.character(start.years)), function(x) x:(x+(n-1)))
+}
+
+df.dup.pos %>% 
+  filter(species == 'Myotis_lucifugus')
+  group_by(chr)
+
+```
+
+```{r}
+immune = read_tsv('../data/geneLists/ImmuneSystem.tsv') %>% 
+  select(MoleculeName) %>% 
+  separate(MoleculeName, c('UniProt','ID'), sep=' ') %>% 
+  mutate(UniProt = UniProt %>% str_remove('UniProt:'))
+senescence = read_tsv('../data/geneLists/senescence.tsv') %>% 
+  select(MoleculeName) %>% 
+  separate(MoleculeName, c('UniProt','ID'), sep=' ') %>% 
+  mutate(UniProt = UniProt %>% str_remove('UniProt:'))
+
+innate = read_tsv('../data/geneLists/InnateImmuneSystem.tsv') %>% 
+  select(MoleculeName) %>% 
+  separate(MoleculeName, c('UniProt','ID'), sep=' ') %>% 
+  mutate(UniProt = UniProt %>% str_remove('UniProt:'))
+
+cyto = read_tsv('../data/geneLists/CytokineSignalingImmuneSystem.tsv') %>% 
+  select(MoleculeName) %>% 
+  separate(MoleculeName, c('UniProt','ID'), sep=' ') %>% 
+  mutate(UniProt = UniProt %>% str_remove('UniProt:'))
+
+sasp = read_tsv('../data/geneLists/SASP.tsv') %>% 
+  select(MoleculeName) %>% 
+  separate(MoleculeName, c('UniProt','ID'), sep=' ') %>% 
+  mutate(UniProt = UniProt %>% str_remove('UniProt:'))
+
+library(UpSetR)
+
+
+UpSetR::fromList(list(immune=immune$ID, senescence=senescence$ID)) %>% 
+  upset()
+
+
+UpSetR::fromList(list(sasp=sasp$ID, cyto=cyto$ID)) %>% 
+  upset()
+
+UpSetR::fromList(list(innate=innate$ID, senescence=senescence$ID)) %>% 
+  upset()
+
+
+UpSetR::fromList(list(
+  immune=immune$ID,
+  # innate=innate$ID, 
+  # cytokine=cyto$ID,
+  senescence=senescence$ID
+  # sasp = sasp$ID
+  )) %>% 
+  upset()
+
+
+```
+
+```{r}
+df.dup %>% 
+  filter(
+    human_gene_name %in% (
+      df.dup %>% 
+        dplyr::select(-pois) %>% 
+        group_by(human_gene_name) %>% 
+        arrange(desc(n)) %>% 
+        mutate(i = row_number()) %>% 
+        filter(i<=3, n>9) %>% 
+        ungroup %>% 
+        pull(human_gene_name) %>% 
+        unique()
+    )
+    ) %>% 
+  arrange(desc(n)) %>% 
+  mutate(
+    human_gene_name=factor(human_gene_name,levels=human_gene_name %>% unique())
+  ) %>% 
+  ggplot(aes(y=human_gene_name,x=n, fill=species)) + 
+  geom_bar(stat='identity') + 
+  facet_wrap(~species) +
+  scale_fill_manual(values=species_color) + 
+  labs(x='Copy Number', y='Genes with N>9') + 
+  labs_pubr() + 
+  theme_pubr() + 
+  theme(axis.text.y=element_text(size=10), legend.position = 'none')
+```
+
+```{r}
+pathway_color = tribble(
+  ~Pathway, ~color,
+  "Aging",                      "",
+  "Cancer",                     "",
+  "Cancer & Aging",             "",
+  "Cancer & Immunity",          "",
+  "Immunity",                   "",
+  "Immunity & Aging",           "",
+  "Immunity & Cancer & Aging",  "",
+  "Other",                      "",
+  "Transcription",              "",
+  "Immunity & VIP",                        "",
+  "Immunity & VIP & Translation",          "",
+  "Immunity & VIP & Translation & Cancer", "",
+) %>%
+  mutate(
+    color = ggsci::pal_d3(palette="category20")(n()),
+    Aging = str_detect(Pathway, "Aging") %>% as.numeric,
+    Cancer = str_detect(Pathway, "Cancer") %>% as.numeric,
+    Translation = str_detect(Pathway, "Translation") %>% as.numeric,
+    Immunity = str_detect(Pathway, "Immunity") %>% as.numeric,
+    VIP = str_detect(Pathway, "VIP") %>% as.numeric,
+    Other = str_detect(Pathway, "Other") %>% as.numeric
+  )
+
+
+
+# Note: Cancer = DNA, cell cycle, proliferation, cell stress
+#       Aging = Insulin, IGF, mTOR
+#       Senescence is both Cancer and Aging
+dupgenes_pathway = tribble(
+  ~human_gene_name, ~Pathway,
+"FBXO31",        "Cancer & Immunity",
+"IGHV3OR16-17",  "Immunity",
+"ZNF551",        "Other", #might be cancer
+"VPREB1",        "Immunity",
+"CEACAM21",      "Other", #might be cancer
+"OR1J4",         "Other",
+"OR7A5",         "Other",
+"OR7A17",        "Other",
+"TCL1A",         "Cancer",
+"CCDC88C",       "Other",
+"MARK2",         "Cancer & Aging",
+"PPIA",          "Immunity & Cancer & Aging",
+"TFPT",          "Cancer & Aging",
+"CREBBP",        "Immunity & Cancer & Aging",
+"OR7A10",        "Other",
+"ANKRD26",       "Other",
+"ADAM20",        "Cancer",
+"FAM170A",       "Cancer",
+"PIK3R2",        "Immunity & Cancer & Aging",
+"PPP1R12C",      "Aging",
+"DDX54",         "Cancer",
+"OR6C2",         "Other",
+"RPL32",         "Immunity & VIP & Translation & Cancer",
+"RPS4X",         "Immunity & VIP & Translation",
+"MAGEA11",       "Cancer",
+"CCNYL1",        "Cancer",
+"BTN3A3",        "Immunity & Aging",
+"HSPD1",         "Cancer",
+"SPATA31D1",     "Other",
+"TPT1",          "Cancer",
+"ZNF709",        "Transcription",
+"CTSV",          "Immunity",
+"IFITM3",        "Immunity & VIP",
+"MRGPRX2",       "Immunity",
+"OR51G2",        "Other",
+"PRAMEF12",      "Cancer",
+"RPLP1",         "Immunity & VIP & Translation",
+"TAS2R42",       "Other",
+"TPSB2",         "Immunity",
+"TUBA1B",        "Cancer",
+"KLK7",          "Cancer",
+"HLA-A",         "Immunity & VIP",
+"RPL27A",        "Immunity & VIP & Translation & Cancer",
+"RPS2",          "Immunity & VIP & Translation",
+)
+
+df.dup.plot <- df.dup %>% 
+  filter(
+    human_gene_name %in% (
+      df.dup %>% 
+        dplyr::select(-pois) %>% 
+        group_by(human_gene_name) %>% 
+        arrange(desc(n)) %>% 
+        mutate(i = row_number()) %>% 
+        filter(i<=3, n>6) %>% 
+        ungroup %>% 
+        pull(human_gene_name) %>% 
+        unique()
+    )
+    ) %>% 
+  arrange(desc(n)) %>% 
+  left_join(dupgenes_pathway) %>% 
+  left_join(pathway_color) %>% 
+  mutate(
+    human_gene_name=factor(human_gene_name,levels=human_gene_name %>% unique())
+  )
+
+p.dup.dotplot = df.dup.plot %>% 
+  ggplot(aes(y=human_gene_name,x=n, color=species, fill=species)) + 
+  # geom_point(
+  #   pch=21,
+  #   position=ggstance::position_dodgev(height = 0.5),
+  #   stroke=1,
+  #   size=1.5
+  # ) +
+  geom_point(
+    shape="-",
+    size=10,
+  position=ggstance::position_dodgev(height = 0.5),
+  ) +
+  # geom_point(
+  #   alpha=0.5,
+  #  position=ggstance::position_dodgev(height = 0.5),
+  # ) +
+  # geom_linerange(
+  #   aes(
+  #     xmin=0, xmax=n,
+  #     group=species,
+  #   ),
+  #     position=ggstance::position_dodgev(height = 0.5),
+  # ) +
+  # geom_bar(stat='identity') + 
+  scale_color_manual("Species", values=species_color) +
+  scale_fill_manual("Species", values=species_color) + 
+  labs(x='Copy Number', y='Genes with N>9') + 
+  labs_pubr() + 
+  theme_pubr() + 
+  theme(
+    # axis.text.y=element_text(size=10), 
+    axis.text.y = element_blank(), 
+    axis.title.y = element_blank(),
+    legend.position = c(.8,.5)
+  )
+p.dup.dotplot
+
+p.dup.dotplot.cat =df.dup.plot %>%
+    pivot_longer(c(Aging, Cancer,Translation, Immunity, VIP, Other)) %>%
+    filter(value!=0) %>% 
+    mutate(
+      name = name %>% factor(levels=c("Cancer", "Aging","Immunity", "VIP", "Translation", "Other"))
+    ) %>% 
+  ggplot(aes(y=human_gene_name,x=name, fill=name)) + 
+  geom_tile(
+    color='white'
+  ) +
+    scale_fill_brewer(palette = "Dark2", guide=guide_none()) + 
+  labs(x='Pathway', y='Genes with N>9') + 
+  labs_pubr() + 
+  # theme_pubr() + 
+    theme_void()+
+  theme(
+    axis.text.y=element_text(size=10), 
+    axis.text.x = element_text(angle=45, hjust = 1)
+  )
+
+p.dup.dotplot.cat + p.dup.dotplot + patchwork::plot_layout(widths=c(0.2,0.8))
+```
+
+```{r}
+df.dup %>% 
+  arrange(desc(n)) %>% 
+  mutate(
+    human_gene_name=factor(human_gene_name,levels=human_gene_name %>% unique())
+  ) %>% 
+  ggplot(
+    aes(
+      x=n, 
+      fill=species
+    )
+  ) + 
+  geom_histogram(
+    binwidth = 2
+  ) +  
+  facet_wrap(~species) +
+  scale_fill_manual(values=species_color) + 
+  # scale_y_log10() +
+  scale_y_sqrt() +
+  labs(x='Copy Number', y='Frequency') + 
+  labs_pubr() + 
+  theme_pubr() + 
+  theme(axis.text.y=element_text(size=10), legend.position = 'none')
+
+df.dup %>% 
+  arrange(desc(n)) %>% 
+  mutate(
+    human_gene_name=factor(human_gene_name,levels=human_gene_name %>% unique())
+  ) %>% 
+  filter(n>3) %>% 
+  ggplot(
+    aes(
+      x=n, 
+      fill=species
+    )
+  ) + 
+  geom_histogram(
+    binwidth = 2
+  ) +  
+  ggrepel::geom_label_repel(
+    aes(label=human_gene_name, 
+        y=0),
+    data = . %>% filter(n>10),
+    nudge_y = 7,
+    nudge_x=4,
+    min.segment.length = 0,
+    segment.angle = 90,
+    segment.curvature = 1e-20,
+    max.overlaps = Inf,
+    size=3,
+    seed=12121
+  )+
+  facet_wrap(~species) +
+  scale_fill_manual(values=species_color) + 
+  # scale_y_log10() +
+  scale_y_sqrt() +
+  labs(x='Copy Number', y='Frequency (n>3)') + 
+  labs_pubr() + 
+  theme_pubr() + 
+  theme(axis.text.y=element_text(size=10), legend.position = 'none')
+```
+
+

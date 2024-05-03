@@ -17,12 +17,24 @@ library(tidytree)
 library(ggpubr)
 library(MCMCtreeR)
 library(RRphylo)
+
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
 ```
 
 ```{r}
-phy <- readMCMCtree('../data/timetree/Run2_real_combined_allGenesAllSpecies/FigTree.tre')
+phy <- readMCMCtree('../data/timetree/Upham_NewBats/Runs_real_combined/FigTree.tre')
 
-phy.onlyMyotis <- phy$apePhy %>% extract.clade(MRCA(phy$apePhy, 'Myotis_lucifugus', 'Myotis_davidii'))
+phy.onlyMyotis <- phy$apePhy %>% extract.clade(MRCA(phy$apePhy, 'Myotis_lucifugus', 'Myotis_davidii')) %>% drop.tip("Myotis_daubentonii")
 
 df.nodeages <- phy$nodeAges %>% 
   as.data.frame %>% 
@@ -41,7 +53,12 @@ trdat.phy <- full_join(df.phy, df.nodeages, by='node') %>%
 
 myotis_node = MRCA(trdat.phy, 'Myotis_lucifugus', 'Myotis_davidii')
 
-trdat.phy.onlyMyotis <- trdat.phy %>% tidytree::drop.tip(trdat.phy@phylo$tip.label[str_detect(trdat.phy@phylo$tip.label, "Myotis", negate=T)])
+trdat.phy.onlyMyotis <- trdat.phy %>% tidytree::drop.tip(
+  c(
+    trdat.phy@phylo$tip.label[str_detect(trdat.phy@phylo$tip.label, "Myotis", negate=T)],
+    "Myotis_daubentonii"
+  )
+)
 
 phy.onlyMyotis <- trdat.phy.onlyMyotis@phylo
 df.nodeages.onlyMyotis <- trdat.phy.onlyMyotis@data %>% 
@@ -57,11 +74,13 @@ no.margin = TRUE, label.offset = 4)
 
 
 
-MCMC.tree.plot(phy, MCMC.chain = read_tsv('../data/timetree/Run2_real_combined_allGenesAllSpecies/Run2_real_combined124.mcmc'), cex.tips = 0.2,
-time.correction = 100, plot.type = "distributions", cex.age = 0.4,
-cex.labels = 0.5, relative.height = 0.08, col.tree = "grey40",
-scale.res = c("Eon", "Period"), no.margin = TRUE, label.offset = 4,
-density.col = "#00000050", density.border.col = "#00000080")
+MCMC.tree.plot(
+  phy, MCMC.chain = read_tsv('../data/timetree/Upham_NewBats/Runs_real_combined/Runs_real_combined.mcmc'), cex.tips = 0.2,
+  time.correction = 100, plot.type = "distributions", cex.age = 1,
+  cex.labels = 1, relative.height = 0.08, col.tree = "grey40",
+  scale.res = c("Eon", "Period"), no.margin = TRUE, label.offset = 2,
+  density.col = "#00000050", density.border.col = "#00000080"
+)
 
 test = list(
   "apePhy" = phy.onlyMyotis,
@@ -70,12 +89,48 @@ test = list(
 
 class(test) <- "MCMCtreer"
 
-MCMC.tree.plot(test, cex.tips = 0.6, time.correction = 100, scale.res = c("Eon",
+
+
+MCMC.tree.plot(test, cex.tips = 1, time.correction = 100, scale.res = c("Eon",
 "Period"), plot.type = "phylogram", cex.age = 1, cex.labels = 1,lwd.bar = 2,
-relative.height = 0.08, col.tree = "grey40", node.method = "bar", col.age = "navy",
+relative.height = 0.08, col.tree = "black", node.method = "bar", col.age = "navy",
 no.margin = TRUE, label.offset = 4)
 
+
+MCMC.tree.plot(
+  test,
+  # MCMC.chain = read_tsv('../data/timetree/Run2_real_combined_allGenesAllSpecies/Run2_real_combined124.mcmc'), 
+  cex.tips = 0.6, time.correction = 100, scale.res = c("Eon",
+"Period"), plot.type = "distributions", cex.age = 1, cex.labels = 1,lwd.bar = 2,
+relative.height = 0.08, col.tree = "grey40", node.method = "bar", col.age = "navy",
+no.margin = TRUE, label.offset = 4
+)
+
 ```
+
+```{r}
+trdat.phy.onlyOurMyotis <- trdat.phy %>% 
+  tidytree::drop.tip(trdat.phy@phylo$tip.label[!(trdat.phy@phylo$tip.label %in% c(our_genomes, "Myotis_brandtii", "Myotis_myotis"))])
+  
+phy.onlyOurMyotis <- trdat.phy.onlyOurMyotis@phylo
+df.nodeages.onlyOurMyotis <- trdat.phy.onlyOurMyotis@data %>% 
+  filter(!is.na(mean)) %>% 
+  column_to_rownames('node') %>% 
+  as.matrix()
+
+test = list(
+  "apePhy" = phy.onlyOurMyotis,
+  "nodeAges" = df.nodeages.onlyOurMyotis
+)
+
+class(test) <- "MCMCtreer"
+
+MCMC.tree.plot(test, cex.tips = 1, time.correction = 100, scale.res = c("Eon",
+"Period"), plot.type = "phylogram", cex.age = 1, cex.labels = 1,lwd.bar = 2,
+relative.height = 0.08, col.tree = "black", node.method = "bar", col.age = "navy",
+no.margin = TRUE, label.offset = 4)
+```
+
 
 ```{r}
 library(AstralPlane)
@@ -96,7 +151,16 @@ astralProjection(astral.plane = astral.data,
                  pie.chart.size = 0.5)
 ```
 
+## Upham Plus New Bats
+
 ```{r}
+# phy.new <- MCMCtreePhy('../data/timetree/Bats_Upham_only/FigTree.tre')
+```
+
+
+## Old stuff
+
+```{r, eval=F}
 astral.tree <-  treeio::read.astral("../data/ASTRALIII/batsPlus_MP.trees")
 
 tr.astral <- ggtree(astral.tree@phylo, ladderize=T, branch.length = "none") + geom_tiplab(size=3.5, hjust= -0.05) + xlim_tree(70) + ggtitle("All genes")
@@ -117,7 +181,7 @@ tr.astral + geom_inset(pies_0all)
 
 ```
 
-```{r}
+```{r, eval=F}
 astral.tree.onlyBats <- astral.tree@phylo %>% extract.clade(astral.tree %>% MRCA('Myotis_lucifugus', 'Pteropus_vampyrus'))
 
 astral.tree.onlyBats <- astral.tree@phylo %>% extract.clade(astral.tree %>% MRCA('Myotis_lucifugus', 'Pteropus_vampyrus'))

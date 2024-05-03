@@ -57,12 +57,19 @@ library(magrittr)
 ## Body Size
 
 ```{r BS Trees}
-size_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.rates_tree') %>% 
+# size_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.rates_tree') %>% 
+#   as_tibble
+# size_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.sqchange_tree') %>% 
+#   as_tibble
+# size_brlens <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.brlens')
+# size_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.ancstates')
+
+size_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera.rates_tree') %>% 
   as_tibble
-size_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.sqchange_tree') %>% 
+size_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera.sqchange_tree') %>% 
   as_tibble
-size_brlens <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.brlens')
-size_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.ancstates')
+size_brlens <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera.brlens')
+size_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera.ancstates')
 ```
 
 ```{r}
@@ -73,12 +80,18 @@ size_ancstates
 ## Lifespan
 
 ```{r Lifespan Trees}
-life_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.rates_tree') %>% 
+# life_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.rates_tree') %>% 
+#   as_tibble
+# life_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.sqchange_tree') %>% 
+#   as_tibble
+# life_brlens <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.brlens')
+# life_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.ancstates')
+life_rates_tree <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.rates_tree') %>%
   as_tibble
-life_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.sqchange_tree') %>% 
+life_sq_tree <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.sqchange_tree') %>%
   as_tibble
-life_brlens <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.brlens')
-life_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.ancstates')
+life_brlens <- read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.brlens')
+life_ancstates <- readr::read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.ancstates')
 ```
 
 ```{r}
@@ -99,7 +112,7 @@ ls.stats <- dplyr::bind_rows(
 
 ```{r}
 
-tr <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.tree')
+tr <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.tree')
 # ggtree(size_sq_tree %>% as.treedata)
 lifesize.dat <- dplyr::full_join(
   life_ancstates %>% dplyr::select(Parameter, lnLife=Median),

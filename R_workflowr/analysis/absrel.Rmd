@@ -11,32 +11,20 @@ editor_options:
 
 ```{r}
 library(tidyverse)
+library(ape)
 library(ggpubr)
+library(ggdist)
 library(ComplexHeatmap)
 library(WebGestaltR)
 library(ggnewscale)
 library(ggrepel)
 library(grid)
 library(cowplot)
-```
+library(tidytree)
 
-```{r data}
-df <- read_tsv('../data/absrel_highlight/BatsOnly_LQ_quartile4-branchAttributes.csv')
-
-tt <- read_csv('../data/Myotis_alignments_sequence_map_files_20230622 - Myotis_alignments_sequence_map_files_20230622.csv')
-
-df.lq.bats.ntiles <- read_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli_hasNTiles.tsv')
-
-df.tt <- df  %>% 
-  left_join(
-    tt,
-    by=c('gene' = 'myotis_ali_fn')
-  ) %>% 
-  mutate(p.val = `Corrected P-value`)
-  
-all_genes <- df.tt %>% 
-  pull(human_gene_name) %>% 
-  unique
+is.cancer <- function(desc) {
+  str_detect(desc, "APC|[Cc]yclin|[Cc]ell[Cc]ycle|Ubiq|NER|ROS|DNA|G1|[Mm]eiotic|[Mm]itotic|[Cc]heckpoint|[Cc]ancer|IGF|[Rr]ecombination|D-Loop|AURK|HDR|[Ii]nterphase|[Aa]popto|[Cc]entrosome|Fanconi|TP53|MMR|[Rr]epair|Insulin|FGF|NHEJ|ATR|Hyaluronan|[Tt]elomere|AKT|[Nn]icotinamide")
+}
 ```
 
 ```{r species colors}
@@ -52,6 +40,18 @@ our_genomes = c(
   "Myotis_thysanodes"
 )
 
+genome_species <- c(
+  'mMyoAui1' = 'Myotis_auriculus',
+  'mMyoCai1' = 'Myotis_californicus',
+  'mMyoOcc1' = 'Myotis_occultus',
+  'mMyoLuc1' = 'Myotis_lucifugus',
+  'mMyoYum1' = 'Myotis_yumanensis',
+  'mMyoVol1' = 'Myotis_volans',
+  'mMyoVel1' = 'Myotis_velifer',
+  'mMyoEvo1' = 'Myotis_evotis',
+  'mMyoThy1' = 'Myotis_thysanodes'
+)
+
 species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
   set_names(., c(our_genomes, "Other"))
 
@@ -59,11 +59,1084 @@ species_color["Myotis_evotis"] = "#17BECF"
 species_color["Other"] = "#7F7F7F"
 ```
 
+```{r data}
+df <- read_tsv('../data/absrel_highlight/BatsOnly_ABSREL_highlight-bats-nodeNames_Myotis-everything.tsv.bz2')
+
+# df.20pc <- read_tsv('../data/absrel_highlight/BatsOnly_LQ_quartile4-branchAttributes.csv')
+# 
+df.lq.bats.ntiles <- read_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli_hasNTiles.tsv')
+
+tr <- read.tree('../data/trees/536Mammals-rooted-nodeNames.noBL.nwk')
+
+
+```
+
+```{r}
+df.val <- df %>%
+  # filter(stat %in% c("LRT","Corrected P-value", 'Baseline MG94xREV omega ratio')) %>% 
+  # select(species, gene, stat, value) %>% 
+  group_by(species, gene) %>% 
+  pivot_wider(names_from='stat', values_from = 'value') %>% 
+  mutate(LRT=as.numeric(LRT),
+         pval = as.numeric(`Corrected P-value`),
+         omega = as.numeric(`Baseline MG94xREV omega ratio`)) %>% 
+  select(-`Corrected P-value`, -`Baseline MG94xREV omega ratio`) %>% 
+  ungroup() %>% 
+  arrange(species, gene) 
+
+```
+
+```{r}
+tr <- tr %>% keep.tip(our_genomes)
+
+node.names <- tribble(
+  ~`node`, ~`id`, 
+  "Node_288_", "Luc-Occ",
+  "Node_287_", "Luc-Vel",
+  "Node_289_", "Vel-Yum",
+  "Node_283_", "Luc-Evo",
+  "Node_286_", "Evo-Thy",
+  "Node_285_", "Evo-Aui",
+  "Node_284_", "Evo-Cai",
+  "Node_282_", "Luc-Vol"
+)
+
+tr %>% as_tibble
+
+```
+
+
+```{r manhattan - one only, eval=F, include=F}
+df.chr <- read_tsv('../data/genomes/mMyoLuc1.fa.fai', col_names=c('chr','len','x','y')) %>% 
+        select(-x,-y) %>% 
+        mutate(genome = "mMyoLuc1",
+               species = 'Myotis_lucifugus',
+               chr = factor(chr, levels=str_c('SUPER__', 1:23))) %>% 
+      filter(!is.na(chr))
+
+tt <- read_tsv('../data/genes/536Mammals/split_by_species_merge/Myotis_lucifugus/Myotis_lucifugus_DavidGenes.tsv') %>% 
+  mutate(`536Mammals`=str_remove(`536Mammals`, "_Myotis_lucifugus"))
+
+cds.header <- read_tsv('../data/genes/536Mammals/prot_CDS/mMyoLuc1.CDS.header.tsv',
+                       col_names = c('cds_ID', "gene", "chr", "type")) %>% 
+  select(cds_ID, gene)
+
+tt.cds <- tt %>% 
+  left_join(cds.header, by=c('finalAnnotation'='cds_ID'))
+
+gff <- read_tsv(
+                '../../data/GFFs/geneAnnotations/mMyoLuc1_finalAnnotation.gff3',
+                comment = "#",
+                col_names = c('chr','src','type','s','e','score','strand','frame','aux')
+                )
+
+tt.n <- read_tsv(
+  '../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/lucifugus.cross_cds_myotis_ali_and_gff_final_curated_files_20230622.tsv'
+) %>% 
+  mutate(cds_seqname = str_remove(cds_seqname, "lucifugus_")) %>% 
+  select(-myotis_ali_fn) %>% 
+  left_join(tt.cds, by=c('gff3_geneID'="gene"))
+
+gff.genepos <- tt.n %>% select(cds_seqname, human_gene_name, `536Mammals`, chr=seqname,s=start) %>% filter(!is.na(`536Mammals`))
+
+
+df.val.geneID.lucifugus <- df.val %>% 
+  filter(species == 'Myotis_lucifugus') %>% 
+  left_join(gff.genepos,
+            by=c('gene'='536Mammals')) %>% 
+  mutate(chr = factor(chr, levels=str_c('SUPER__', 1:23))) %>% 
+  filter(!is.na(chr))
+
+gene.pos <- tt.n %>% 
+      mutate(chr = factor(seqname, levels=str_c('SUPER__', 1:23))) %>% 
+      filter(!is.na(chr)) %>% 
+  select(chr, start,end)
+
+df.chr %>% 
+  ggplot(
+    
+  ) +
+  geom_segment(
+    aes(
+      x=0,
+      xend=len,
+      y=0.5,
+      yend=0.5
+    ),
+    color='black'
+  ) +
+  geom_rect(
+    data=gene.pos,
+    aes(
+      xmin=start,
+      xmax=end,
+      ymin=0,
+      ymax=1
+    ),
+    color='blue'
+  ) +
+  geom_point(
+    data = df.val.geneID.lucifugus,
+    aes(x=s,
+        y=-log(pval))
+  
+  ) +
+  geom_text_repel(
+    data = df.val.geneID.lucifugus %>% 
+      filter(pval<=0.05),
+    aes(x=s,
+        y=-log(pval),
+        label=human_gene_name)
+  )+
+  facet_wrap(~chr, scales = 'free_x') + 
+  theme_pubr()
+
+```
+
+
+```{r hits - all data, eval=F, include=F}
+df.val.geneID.all <- lapply(
+  names(genome_species), 
+  function(genome, gs=genome_species){
+    f.tt = str_c('../data/genes/536Mammals/split_by_species_merge/', gs[genome], "/", gs[genome], '_DavidGenes.tsv')
+    f.cds = str_c('../data/genes/536Mammals/prot_CDS/', genome, '.CDS.header.tsv')
+    f.gff = str_c('../../data/GFFs/geneAnnotations/', genome, '_finalAnnotation.gff3')
+    f.oldnamepos = str_c('../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/', 
+                         str_remove(gs[genome], 'Myotis_'),
+                         '.cross_cds_myotis_ali_and_gff_final_curated_files_20230622.tsv')
+    chr_prefix = ifelse(genome == 'mMyoYum1', 'SCAF__', 'SUPER__')
+    
+    tt <- read_tsv(f.tt) %>% 
+      mutate(`536Mammals`=str_remove(`536Mammals`, "_Myotis_[a-z]+"))
+    
+    cds.header <- read_tsv(f.cds,
+                           col_names = c('cds_ID', "gene", "chr", "type")) %>% 
+      select(cds_ID, gene)
+    
+    tt.cds <- tt %>% 
+      left_join(cds.header, by=c('finalAnnotation'='cds_ID'))
+    
+    gff <- read_tsv(
+      f.gff,
+      comment = "#",
+      col_names = c('chr','src','type','s','e','score','strand','frame','aux')
+    )
+    
+    tt.n <- read_tsv(
+      f.oldnamepos
+    ) %>% 
+      mutate(cds_seqname = str_remove(cds_seqname, str_c(str_remove(gs[genome], "Myotis_"), "_"))) %>% 
+      select(-myotis_ali_fn) %>% 
+      left_join(tt.cds, by=c('gff3_geneID'="gene"))
+    
+    gff.genepos <- tt.n %>% select(cds_seqname, human_gene_name, `536Mammals`, chr=seqname,s=start) %>% filter(!is.na(`536Mammals`))
+    
+    df.val.geneID.one <- df.val %>% 
+      filter(species == gs[genome]) %>% 
+      left_join(gff.genepos,
+                by=c('gene'='536Mammals')) %>% 
+      mutate(chr = factor(chr, levels=str_c(chr_prefix, 1:23))) %>% 
+      filter(!is.na(chr))
+  }
+) %>% 
+  bind_rows %>% 
+  ungroup
+```
+
+
+```{r hits - metadata}
+df.chr.all <- lapply(
+  names(genome_species), 
+  function(genome, gs=genome_species){
+    f.chr = str_c('../data/genomes/',genome,'.fa.fai')
+    chr_prefix = ifelse(genome == 'mMyoYum1', 'SCAF__', 'SUPER__')
+    df.chr <- read_tsv(f.chr, col_names=c('chr','len','x','y')) %>% 
+      select(-x,-y) %>% 
+      mutate(genome = genome,
+             species = gs[genome])
+    return(df.chr)
+  }
+) %>% 
+  bind_rows %>% 
+  ungroup
+
+df.tt.all <- lapply(
+  names(genome_species), 
+  function(genome, gs=genome_species){
+    f.gff = str_c(
+      '../../data/GFFs/geneAnnotations/', 
+      genome, 
+      '_finalAnnotation.gff3'
+    )
+    f.genepos = str_c(
+      '../../data/cross_cds_myotis_ali_evm_gff3_toga_gff3_files_20230622/', 
+      str_remove(gs[genome], 'Myotis_'),
+      '.cross_cds_myotis_ali_and_gff_final_curated_files_20230622.tsv'
+      )
+    chr_prefix = ifelse(genome == 'mMyoYum1', 'SCAF__', 'SUPER__')
+    
+    gff <- read_tsv(
+      f.gff,
+      comment = "#",
+      col_names = c(
+        'chr','src','type','s','e','score','strand','frame','aux'
+      )
+    )
+    
+    tt.n <- read_tsv(
+      f.genepos
+    ) %>% 
+      mutate(
+        cds_seqname = str_remove(
+          cds_seqname, 
+          gs[genome] %>% str_remove("Myotis_") %>% str_c("_")
+        )
+      ) %>% 
+      mutate(genome = genome,
+             species=gs[genome])
+    return(tt.n)
+  }
+) %>% 
+  bind_rows
+```
+
+```{r reconcile gene names, eval=F, include=F}
+
+tt.byGeneNumber <- df.tt.all %>% 
+  select(gene=`536Mammals`, human_gene_name) %>% 
+  filter(!is.na(gene),
+         !is.na(human_gene_name)) %>% 
+  distinct
+
+genes.uncertain <- tt.byGeneNumber %>% 
+  filter(
+    gene %in% (tt.byGeneNumber %>% 
+                 group_by(gene) %>% 
+                 summarize(n=n()) %>% 
+                 filter(n>1) %>% 
+                 pull(gene))
+    
+  ) %>% 
+  arrange(gene)
+
+geneID_by_majority <- df.tt.all %>% 
+  filter(!is.na(`536Mammals`),
+         !is.na(human_gene_name)) %>% 
+  select(genome, gene=`536Mammals`, human_gene_name) %>% 
+  group_by(gene) %>% 
+  summarize(n=n_distinct(human_gene_name)) %>% 
+  filter(gene %in% genes.uncertain$gene) %>% 
+  group_by(gene) %>% 
+  filter(n==max(n))
+
+genes.unknown <- geneID_by_majority %>% 
+  filter(n>1) %>% 
+  pull(gene)
+
+geneID_by_majority <- geneID_by_majority %>% 
+  filter(!(gene %in% genes.unknown))
+
+tt.byGeneNumber <- tt.byGeneNumber %>% 
+  filter(!(gene %in% genes.uncertain$gene)) %>% 
+  bind_rows(geneID_by_majority %>% select(-n))
+
+df.tt <- df %>% 
+  left_join(tt.byGeneNumber,
+            by='gene') %>% 
+  filter(!is.na(human_gene_name))
+
+# df.tt <- df.tt %>% 
+#   left_join(
+#     df.tt.all %>% select(-human_gene_name),
+#     by=c('gene' = '536Mammals',
+#          'species')
+#   ) 
+
+
+df.omega <- df.tt %>% 
+  filter(stat == 'Baseline MG94xREV omega ratio') %>% 
+  mutate(value=as.numeric(value))
+
+all_genes <- df.tt %>% 
+  pull(human_gene_name) %>% 
+  unique
+
+# This is a much cleaner set:
+df.val.geneID.all <- df.val.geneID.all %>% 
+  select(-human_gene_name) %>% 
+  left_join(
+    tt.byGeneNumber,
+    by='gene'
+  )
+
+df.val <- df.val %>% 
+  left_join(tt.byGeneNumber,
+            by='gene')
+```
+
+```{r reconcile gene names v2}
+
+david.geneID <- read_tsv('../data/536mammals_gene_correspondence.txt', col_names= c('ENSG', "gene"))
+
+df <- df %>% 
+  left_join(david.geneID)
+
+df.val <- df.val %>% 
+  left_join(david.geneID)
+
+
+
+# ## Note: these are unclear gene dups
+# df.tt.all %>% 
+#     select(species, ENSG=human_ID, source, seqname, start, end,strand, human_gene_name) %>% 
+#     mutate(ENSG=ENSG %>% str_remove('\\.\\d+')) %>% filter(!is.na(ENSG)) %>% distinct %>% group_by(species, ENSG) %>% count() %>% filter(n>1)
+
+df.tt.clean <- df.tt.all %>% 
+      select(species, ENSG=human_ID, source, seqname, start, end,strand) %>% 
+      mutate(ENSG=ENSG %>% str_remove('\\.\\d+')) %>% 
+  filter(!is.na(ENSG)) %>% 
+  distinct %>% 
+  group_by(ENSG, species) %>% 
+  mutate(i = row_number()) %>% 
+  filter(i==min(i))
+
+df.tt.min <- df.tt.all %>% 
+  filter(!is.na(human_ID)) %>%
+  select(ENSG=human_ID, human_gene_name) %>% 
+  mutate(
+    ENSG=ENSG %>% str_remove('\\.\\d+'),
+    human_gene_name = human_gene_name %>% 
+      sapply(
+        function(x){
+          if_else(str_starts(x, 'ENSG\\d+'), str_remove(x,'\\.\\d+'), x)
+        }
+      )
+  ) %>% 
+  distinct
+
+df.tt <- df %>% 
+  left_join(
+    df.tt.clean,
+    by=c('ENSG', 'species')
+  ) %>% 
+  left_join(
+    df.tt.min,
+    by='ENSG'
+  )
+  
+df.omega <- df.val %>% 
+  left_join(
+    df.tt.clean,
+    by=c('ENSG', 'species')
+  ) %>% 
+  left_join(
+    df.tt.min,
+    by='ENSG'
+  )
+
+df.omega.plot <- df.omega %>% 
+    filter(omega <1e10) %>% 
+    filter(species %in% our_genomes) %>% 
+  filter(!is.na(human_gene_name)) %>% 
+  mutate(species_clean = species %>% str_replace("_","\n"))
+
+```
+
+```{r omega}
+df.omega %>% 
+  filter(omega != 0) %>% 
+  filter(omega < 1e10) %>% 
+  ggplot(
+    aes(
+      x=species, 
+      y=omega
+    )
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    aes(
+      color = species
+    )
+  ) + 
+  scale_color_manual('Species', values = species_color) + 
+  theme_pubr() + 
+  theme(
+    legend.position='top',
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+p.omega <- df.omega.plot %>% 
+  ggplot(
+    aes(
+      x=species, 
+      y=omega,
+      text=human_gene_name,
+    )
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval>0.05),
+    color='grey'
+  ) + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      color = species
+    )
+  ) + 
+  # scale_y_log10() +
+  # ggrepel::geom_text_repel(data = . %>% filter(value>5), aes(label=human_gene_name)) + 
+  scale_color_manual('Species', values = species_color) + 
+  theme_pubr() + 
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+p.omega
+```
+
+```{r omega raincloud}
+p.omega.raincloud <- df.omega.plot %>% 
+  ggplot(
+    aes(
+      x=species_clean, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=1,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  ggrepel::geom_text_repel(
+    data = df.omega.plot %>% filter(omega>2, pval<=0.05),
+    aes(label=human_gene_name),
+    max.overlaps = Inf,
+    hjust=1,
+    nudge_x = -0.2,
+    direction = "y"
+  ) +
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  scale_color_manual('Species', values = species_color, guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color, guide=guide_none()) + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+p.omega.raincloud #%>% plotly::ggplotly()
+```
+
+```{r omega raincloud sighits only }
+p.omega.raincloud2 <- df.omega.plot %>% 
+  ggplot(
+    aes(
+      x=species, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  stat_halfeye(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=11,
+    stroke=2,
+    alpha=0.5,
+    position = position_nudge(x=0.05)
+  ) +
+  ggrepel::geom_text_repel(
+    data = df.omega.plot %>% filter(omega>2, pval<=0.05),
+    aes(label=human_gene_name),
+    max.overlaps = Inf,
+    hjust=1,
+    nudge_x = -0.2,
+    direction = "y"
+  ) +
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  scale_color_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+p.omega.raincloud2
+```
+
+```{r}
+cellCycle <- read_tsv('../data/geneLists/cellCycleReactome.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='Cell Cycle')
+dnaRepair <- read_tsv('../data/geneLists/DNARepair.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='DNA Repair/Replication')
+dnaReplication <- read_tsv('../data/geneLists/DNAReplication.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='DNA Repair/Replication')
+immuneSystem <- read_tsv('../data/geneLists/ImmuneSystem.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='Immunity')
+cellDeath <- read_tsv('../data/geneLists/ProgrammedCellDeath.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='Cell Death')
+chromOrg <- read_tsv('../data/geneLists/chromatinOrg.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='Chromatin')
+senescence <- read_tsv('../data/geneLists/senescence.tsv') %>% 
+  separate(MoleculeName, c('Uniprot', 'symbol'), sep=' ') %>% 
+  select(symbol) %>% 
+  mutate(cat='Chromatin')
+
+df.cat <- bind_rows(
+  cellCycle,
+  dnaRepair,
+  dnaReplication,
+  immuneSystem,
+  cellDeath,
+  chromOrg,
+  senescence
+) %>% 
+  distinct() %>% 
+  group_by(symbol) %>%
+  arrange(cat) %>% 
+  # summarize(n=n())
+  # summarize(cat = paste0(cat, collapse=";"))
+  mutate(n=n())
+
+df.cat[(!df.cat$symbol %in% chromOrg$symbol & 
+          # !df.cat$symbol %in% dnaRepair$symbol & 
+          # !df.cat$symbol %in% dnaReplication$symbol & 
+          df.cat$n>1),]$cat <- 'Multiple'
+df.cat[(df.cat$symbol %in% chromOrg$symbol),]$cat <- 'Chromatin'
+df.cat[(df.cat$symbol %in% senescence$symbol),]$cat <- 'Senescence'
+# df.cat[(df.cat$symbol %in% dnaRepair$symbol | df.cat$symbol %in% dnaReplication$symbol),]$cat <- 'DNA Repair/Replication'
+
+df.omega.plot.colored <- df.omega.plot %>% 
+  ungroup %>% 
+  left_join(df.cat %>% select(-n) %>% unique,
+            by=c(human_gene_name='symbol'))
+df.omega.plot.colored[is.na(df.omega.plot.colored$cat),]$cat <- "Other"
+```
+
+
+```{r omega raincloud colored - only terminal selection }
+
+highlight_me = c(
+  "FTH1",
+  "PARP3",
+  "PARP4",
+  "SETDB1",
+  "APOBEC3A",
+  "CASP4",
+  "CASP7",
+  "DNAJB12",
+  "FTH1",
+  "HERC2",
+  "HERC6",
+  "IGFBP7",
+  "IGFBP1",
+  "KIT",
+  "LAMTOR2",
+  "MDM1",
+  "NLRP3",
+  "RADX",
+  "SERPINA1",
+  "SERPINE3",
+  "SETDB1",
+  "SETD1A",
+  "SETD6",
+  "UBL5",
+  "USP50",
+  "USP2",
+  "VRK2",
+  "CDX4"
+)
+
+color_cat <- set_names( 
+  ggsci::pal_jama()(df.cat %>% 
+    pull(cat) %>% 
+    unique %>% 
+      length),
+  df.cat %>% 
+    pull(cat) %>% 
+    unique
+) %>% 
+  c(., "Other"="#000000")
+
+color_cat['Cell Death'] = "#1b9e77"
+color_cat["Cell Cycle"] = "#cc0000"
+
+p.omega.raincloud.coloredPathway <- df.omega.plot.colored %>% 
+  filter(species %in% our_genomes, omega<=100) %>% 
+  ggplot(
+    aes(
+      x=species_clean, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=. %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data=. %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  stat_halfeye(
+    data=. %>% filter(pval<=0.05),
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=11,
+    stroke=2,
+    alpha=0.5,
+    position = position_nudge(x=0.05)
+  ) +
+  scale_color_manual('Species', values = species_color, guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color, guide=guide_none()) + 
+  ggnewscale::new_scale_color() + 
+  ggrepel::geom_text_repel(
+    data = . %>% filter((human_gene_name %in% highlight_me | omega>2) & pval<=0.05),
+    aes(label=human_gene_name,
+        color=cat),
+    # max.overlaps = Inf,
+    hjust=1,
+    nudge_x = -0.2,
+    fontface='bold',
+    direction = "y"
+  ) +
+  scale_color_manual('Pathway', values=color_cat,
+                     # guide=guide_none()
+                     guide=guide_legend(override.aes = list(shape = 20))
+                     ) + 
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+p.omega.raincloud.coloredPathway
+```
+
+```{r omega raincloud2 but looking at negative selection }
+p.omega.raincloud3 <- df.omega.plot %>% 
+  ggplot(
+    aes(
+      x=species, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  stat_halfeye(
+    data=df.omega.plot %>% filter(pval<=0.05),
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=11,
+    stroke=2,
+    alpha=0.5,
+    position = position_nudge(x=0.05)
+  ) +
+  ggrepel::geom_text_repel(
+    data = df.omega.plot %>% filter(omega<1.5, pval<=0.05),
+    aes(label=human_gene_name),
+    max.overlaps = Inf,
+    hjust=1,
+    nudge_x = -0.2,
+    direction = "y"
+  ) +
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  scale_color_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+p.omega.raincloud3
+```
+
+```{r omega raincloud 2 with highlighted genes}
+
+p.omega.raincloud4 <- df.omega.plot.colored %>% 
+  filter(omega<=20) %>% 
+  ggplot(
+    aes(
+      x=species, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=. %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data=. %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  stat_halfeye(
+    data=. %>% filter(pval<=0.05),
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=11,
+    stroke=2,
+    alpha=0.5,
+    position = position_nudge(x=0.05)
+  ) +
+  scale_color_manual('Species', values = species_color, guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color, guide=guide_none()) + 
+  ggrepel::geom_text_repel(
+    data = . %>% 
+      # filter(human_gene_name %in% highlight_me, pval<=0.05),
+      filter(human_gene_name %in% highlight_me, pval<=0.05),
+    aes(label=human_gene_name),
+    max.overlaps = Inf,
+    hjust=1,
+    nudge_x = -0.2,
+    direction = "y"
+  ) +
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  scale_color_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color %>% set_names(., names(.) %>% str_replace('_', "\n")), guide=guide_none()) + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+p.omega.raincloud4
+```
+
+```{r omega raincloud 2 only luci}
+p.omega.raincloud.myoLuc <- df.omega.plot.colored %>% 
+  filter(species == 'Myotis_lucifugus')  %>% 
+      arrange(desc(omega)) %>% 
+      mutate(i = row_number() %% 8) %>% 
+  ggplot(
+    aes(
+      x=species_clean, 
+      y=omega,
+      # text=gene,
+    )
+  ) +
+  geom_hline(
+    yintercept = 1,
+    lty='dashed'
+  ) + 
+  ylab('Omega') + 
+  geom_point(
+    data=. %>% filter(pval>0.05),
+    color='grey',
+    # position = position_nudge(x=-0.05)
+  ) + 
+  geom_point(
+    data= . %>% filter(pval<=0.05),
+    aes(
+      color = species
+    ),
+    # position = position_nudge(x=-0.05)
+  ) + 
+  stat_halfeye(
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=21,
+    stroke=2,
+    position = position_nudge(x=0.05)
+  ) +
+  stat_halfeye(
+    data= . %>% filter(pval<=0.05),
+    aes(
+      fill=species
+      ),
+    normalize='all',
+    scale=0.8,
+    point_size=2,
+    shape=11,
+    stroke=2,
+    alpha=0.5,
+    position = position_nudge(x=0.05)
+  ) +
+  scale_y_sqrt(breaks=c(0,0.05,0.5,1,2.5,5,10,15)) +
+  scale_color_manual('Species', values = species_color, guide=guide_none()) + 
+  scale_fill_manual('Species', values = species_color , guide=guide_none()) +
+  ggnewscale::new_scale_color() + 
+  ggrepel::geom_text_repel(
+    data = . %>% filter(pval<=0.05),
+    aes(label=human_gene_name,
+        color=cat),
+    max.overlaps = Inf,
+    hjust=1,
+    # nudge_x = -0.2,
+    fontface='bold',
+    # direction = "y"
+  ) +
+  scale_color_manual('Pathway', values=color_cat,
+                     # guide=guide_none()
+                     guide=guide_legend(override.aes = list(shape = 20))
+                     ) + 
+  theme_pubr() + 
+  labs_pubr() + 
+  theme(
+    # axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  ) + 
+  facet_wrap(~i)
+
+p.omega.raincloud.myoLuc
+```
+
+```{r propotion of omegas in each category}
+
+df.omega.plotAll <- df.omega %>% 
+    filter(omega <1e10) %>% 
+  filter(!is.na(human_gene_name)) %>% 
+  mutate(species_clean = species %>% str_replace("_","\n"))
+
+
+df.omega.plotAll <- df.omega.plotAll %>% 
+  ungroup %>% 
+  left_join(df.cat %>% select(-n) %>% unique,
+            by=c(human_gene_name='symbol'))
+df.omega.plotAll[is.na(df.omega.plotAll$cat),]$cat <- "Other"
+
+df.omega.plotAll <- df.omega.plotAll %>% 
+  mutate(sel = if_else(omega>1, 'positive', if_else(omega<1, "negative", NA)))
+
+df.omega.plotAll %>% 
+  filter(pval<=0.05) %>% 
+  ggplot(
+    aes(
+      y=species,
+      # x=gene,
+      group=cat,
+      fill=cat
+    )
+  ) + 
+    geom_bar() + 
+  scale_fill_brewer('Pathway', palette = 'Dark2') + 
+    facet_wrap(~sel, scales = 'free_x') + 
+  theme_pubr() + 
+  labs_pubr()
+```
 
 ```{r Volcano plot}
-df.val <- df %>% 
-  select(species, gene, LRT, p.val = `Corrected P-value`) %>% 
-  filter(!is.na(p.val))
+df.volcano.plot <- df.omega %>% 
+  filter(omega<1e10,!is.na(human_gene_name))
+
+# Hack to prevent infinite values
+df.volcano.plot$pval[df.volcano.plot$pval==0] <- 1e-17
+
+df.volcano.plot.nsig = df.volcano.plot %>% filter(pval>0.05)
+df.volcano.plot.sig = df.volcano.plot %>% filter(pval<=0.05)
+df.volcano.plot.top20 = bind_rows(
+      df.volcano.plot.sig %>% 
+      group_by(species) %>% 
+      arrange(desc(omega),pval) %>% 
+      mutate(n=row_number()) %>% 
+      filter(n<=5),
+      df.volcano.plot.sig %>% 
+      group_by(species) %>% 
+      arrange(pval,desc(omega)) %>% 
+      mutate(n=row_number()) %>% 
+      filter(n<=5)
+    ) %>% 
+  ungroup
+
+df.volcano.plot %>% 
+  filter(species %in% our_genomes) %>% 
+  ggplot(
+    aes(
+      x=-log(omega),
+      y=-log(pval),
+      color=species
+    )
+  ) +
+  geom_point(
+    data=df.volcano.plot.nsig,
+    color='grey'
+  ) + 
+  geom_point(
+    data=df.volcano.plot.sig,
+  ) + 
+  ggrepel::geom_text_repel(
+    data = df.volcano.plot.top20, 
+    aes(label=human_gene_name), 
+    color='black', 
+    max.overlaps = Inf, 
+    # force = 0.5,
+    # ylim = c(1,6),
+    # xlim=c(2,4)
+  ) +
+  scale_y_sqrt(limits=c(0,40)) +
+  scale_x_sqrt() +
+  scale_color_manual('Species', values = species_color) + 
+  theme_pubr() + 
+  theme(legend.position = 'none') + 
+  facet_wrap(~species)
 ```
 
 ```{r stats}
@@ -71,70 +1144,213 @@ df.val %>%
   group_by(species) %>% 
   summarize(
     n = n(),
-    n.sig = sum(p.val<=0.05)
-  )
+    n.sig = sum(pval<=0.05)
+  ) %>% 
+  filter(!is.na(n.sig))
 ```
 
-
-```{r Volcano plot 2}
-df.val %>% 
-  ggplot(
-    aes(
-      x=LRT, 
-      y=p.val,
-      color=species
-    )
-  ) +
-  geom_point() + 
-  facet_wrap(vars(species), scales='free') + 
-  theme_pubr() + 
-  theme(legend.position = 'none') + 
+```{r hist}
+df.omega %>% 
+  filter(!is.na(pval),
+         # species %in% genome_species
+         ) %>%
+ggpubr::gghistogram(., x="pval",bins=100,fill = 'species') +
+  facet_wrap(vars(species)) + 
+  # scale_fill_manual(values=species_color) +
+  scale_y_log10() +
+  theme_pubr() +
   labs_pubr()
 
+```
 
-ggpubr::gghistogram(df.val %>% mutate(p.val=p.val), x="p.val",bins=100) +
-  facet_wrap(vars(species)) + 
-  scale_y_log10()
-  # theme_pubr() + 
-  # labs_pubr()
+```{r manhattan - all plot}
+
+df.omega %>% mutate(chr=seqname, s=start, e=end) %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  mutate(col = chr_n %% 2 %>% as.factor) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=-log(pval),
+        alpha=-log(pval),
+        color=species)
+  
+  ) +
+  # geom_text_repel(
+  #   data = df.val.geneID.all %>% 
+  # mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  #     filter(pval<=0.05),
+  #   aes(x=s,
+  #       y=-log(pval),
+  #       label=human_gene_name)
+  # )+
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_alpha(range = c(0.3,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
 
 ```
 
-```{r}
-df.val.geneID <- df.tt %>% 
-  filter(p.val<=0.05)
+```{r manhattan - autosomes}
 
-list.geneid <- df.val.geneID %>% 
+chr_col_autosome = tibble(
+  chr_n = c(1:3, 5:22),
+  col = rep_len(c(0,1), length.out = length(c(1:3, 5:22))) %>% as.factor
+)
+
+genes.selection.shared <- df.volcano.plot.sig %>% 
+  select(species, pval, human_gene_name) %>% 
+  group_by(human_gene_name) %>% 
+  count() %>% 
+  arrange(desc(n)) %>% 
+  filter(n>2)
+
+df.manhattan.topgenesPerChrPerSpc <- df.val.geneID.all %>% 
+  group_by(chr, species) %>% 
+  arrange(pval) %>% 
+  mutate(n=row_number()) %>% 
+  filter(n<=1) %>% 
+  ungroup
+
+df.manhattan.sharedselection3 <- df.val.geneID.all %>% 
+  filter(human_gene_name %in% genes.selection.shared$human_gene_name)
+
+df.val.geneID.all %>% 
+  mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  filter(!(chr_n %in% c(4,23))) %>% 
+  left_join(
+    chr_col_autosome,
+    by='chr_n'
+  ) %>% 
+  ggplot() +
+  geom_rect(
+    aes(
+      xmin=-Inf,
+      xmax=Inf,
+      ymin=-Inf,
+      ymax=Inf,
+      fill=col
+    ),
+    color='white'
+  ) + 
+  geom_point(
+    aes(x=s,
+        y=-log(pval),
+        alpha=-log(pval),
+        color=species)
+  
+  ) +
+  # geom_text_repel(
+  #   data = df.manhattan.sharedselection3,
+  #   aes(x=s,
+  #       y=-log(pval),
+  #       label=human_gene_name),
+  #   size=3,
+  #   max.overlaps=Inf
+  # )+
+    scale_fill_manual(values=c('lightgrey','white'), guide=guide_none()) + 
+  scale_color_manual("Species", values=species_color, guide=guide_none()) + 
+  scale_alpha(range = c(0.3,1), guide=guide_none()) +
+  facet_grid(rows = vars(species %>% str_replace("_", "\n")), 
+             cols = vars(chr_n), 
+             scales = 'free_x',switch = 'x') + 
+  xlab('Chr') + 
+  theme_pubr() + 
+  labs_pubr() +
+  theme(
+    axis.text.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    panel.spacing = unit(0,'lines'),
+    panel.border = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face='bold',
+                              size=rel(0.8)),
+    # strip.text.y = element_text(size=5)
+  )
+
+```
+
+
+```{r, eval=F}
+list.geneid.ourMyotis <- df.val.geneID.all %>% 
+  filter(pval<=0.05) %>% 
   select(species, human_gene_name) %>% 
+  filter(!is.na(human_gene_name)) %>% 
   group_split(species)
-list.geneid <- 
-  magrittr::set_names(list.geneid, list.geneid %>% sapply(. %>% pull(species) %>% unique)) %>%
+list.geneid.ourMyotis <- 
+  magrittr::set_names(list.geneid.ourMyotis, list.geneid.ourMyotis %>% sapply(. %>% pull(species) %>% unique)) %>%
   lapply(pull, human_gene_name)
 ```
 
-```{r}
+```{r upset ourMyotis, eval=F}
 
-mat.absrel <- list_to_matrix(list.geneid)
+mat.absrel <- list_to_matrix(list.geneid.ourMyotis)
 
-m1 <-  make_comb_mat(mat.absrel)
+m1 <-  make_comb_mat(list.geneid.ourMyotis)
 
 set_name(m1)
 
+## This is the old one for 20% longest-lived bats
+# cols_comb_core <- c(
+#   "000010000" = species_color[['Myotis_lucifugus']],  # myoLuc
+#   "000000100" = species_color[['Myotis_occultus']],  # myoOcc
+#   "000100000" = species_color[['Myotis_evotis']],  # myoEvo
+#   "000000010" = species_color[['Myotis_volans']],  # myoVol
+#   "001000000" = '#E6AF2E',  # myoBra
+#   "000001000" = '#816E94',  # myoMyo
+#   "100000000" = '#3D348B',  # desRot
+#   "010000000" = '#A01A7D',  # minSch
+#   "000000001" = '#273E47',  # rhiFer
+#   "001111110" = 'red',  # panMyo
+#   "110000001" = 'white',  # notMyo
+#   "001110110" = 'green',  # neaMyo
+#   "000110110" = 'blue',  # wesMyo
+#   "000010100" = 'goldenrod'  # LucOcc
+# )
+
+# This one is for all our myotis only
 cols_comb_core <- c(
-  "000010000" = species_color[['Myotis_lucifugus']],  # myoLuc
-  "000000100" = species_color[['Myotis_occultus']],  # myoOcc
-  "000100000" = species_color[['Myotis_evotis']],  # myoEvo
+  "100000000" = species_color[['Myotis_auriculus']],  # myoAui
+  "010000000" = species_color[['Myotis_californicus']],  # myoCai
+  "001000000" = species_color[['Myotis_evotis']],  # myoEvo
+  "000100000" = species_color[['Myotis_lucifugus']],  # myoLuc
+  "000010000" = species_color[['Myotis_occultus']],  # myoOcc
+  "000001000" = species_color[['Myotis_thysanodes']],  # myoThy
+  "000000100" = species_color[['Myotis_velifer']],  # myoVel
   "000000010" = species_color[['Myotis_volans']],  # myoVol
-  "001000000" = '#E6AF2E',  # myoBra
-  "000001000" = '#816E94',  # myoMyo
-  "100000000" = '#3D348B',  # desRot
-  "010000000" = '#A01A7D',  # minSch
-  "000000001" = '#273E47',  # rhiFer
-  "001111110" = 'red',  # panMyo
-  "110000001" = 'white',  # notMyo
-  "001110110" = 'green',  # neaMyo
-  "000110110" = 'blue',  # wesMyo
-  "000010100" = 'goldenrod'  # LucOcc
+  "000000001" = species_color[['Myotis_yumanensis']],  # myoYum
+  "000110000" = '#E6AF2E',  # LucOcc
+  "000000101" = '#816E94',  # VelYum
+  "000110101" = 'red',      # LucOccVelYum
+  "001001000" = '#3D348B',  # EvoThy
+  "101001000" = '#A01A7D',  # EvoThyAui
+  "111001000" = '#273E47',  # EvoThyAuiCai
+  "111111101" = '#4B818C'    # NoVol
 )
 
 unhighlighted <- setdiff(
@@ -154,14 +1370,14 @@ cols_comb <- c(
 order_set <- c(
     'Myotis_lucifugus',
     'Myotis_occultus',
+    'Myotis_yumanensis',
+    'Myotis_velifer',
     'Myotis_evotis',
-    'Myotis_brandtii',
-    'Myotis_volans',
-    'Myotis_myotis',
-    'Desmodus_rotundus',
-    'Miniopterus_schreibersii',
-    'Rhinolophus_ferrumequinum'
-  )
+    'Myotis_thysanodes',
+    'Myotis_auriculus',
+    'Myotis_californicus',
+    'Myotis_volans'
+    )
 
 
 order_cols_core <- match(names(cols_comb_core), names(comb_size(m1))) %>% 
@@ -174,19 +1390,19 @@ order_cols = c(
 )
 
 cols_set <- c(
-  "Desmodus_rotundus" = '#3D348B',
-  "Miniopterus_schreibersii" = '#A01A7D',
-  "Myotis_brandtii" = '#E6AF2E',
-  "Myotis_evotis" = species_color[['Myotis_evotis']],
-  "Myotis_lucifugus" = species_color[['Myotis_lucifugus']],
-  "Myotis_myotis" = '#816E94',
-  "Myotis_occultus" = species_color[['Myotis_occultus']],
-  "Myotis_volans" = species_color[['Myotis_volans']],
-  "Rhinolophus_ferrumequinum" = '#273E47'
-  )
+  "Myotis_auriculus" = species_color[['Myotis_auriculus']],  # myoAui
+  "Myotis_californicus" = species_color[['Myotis_californicus']],  # myoCai
+  "Myotis_evotis" = species_color[['Myotis_evotis']],  # myoEvo
+  "Myotis_lucifugus" = species_color[['Myotis_lucifugus']],  # myoLuc
+  "Myotis_occultus" = species_color[['Myotis_occultus']],  # myoOcc
+  "Myotis_thysanodes" = species_color[['Myotis_thysanodes']],  # myoThy
+  "Myotis_velifer" = species_color[['Myotis_velifer']],  # myoVel
+  "Myotis_volans" = species_color[['Myotis_volans']],  # myoVol
+  "Myotis_yumanensis" = species_color[['Myotis_yumanensis']]  # myoYum
+)
 ```
 
-```{r full Upset}
+```{r full Upset, eval=F}
 UpSet(
   m1,
   set_order = order_set,
@@ -195,7 +1411,7 @@ UpSet(
 )
 ```
 
-```{r subset upset}
+```{r subset upset, eval=F}
 subset_m <- m1[comb_name(m1) %in% names(cols_comb_core)]
 order_cols_sub = c(
  match(names(cols_comb_core), names(comb_size(subset_m))) %>% 
@@ -235,7 +1451,7 @@ ht=draw(u1)
 
 ```
 
-```{r subset upset with tree}
+```{r subset upset with tree, eval=F}
 library(ggtree)
 library(treeio)
 library(tidytree)
@@ -254,7 +1470,7 @@ phylo_row_dend = as.dendrogram(tt.hclust)
 
 ```
 
-```{r}
+```{r, eval=F}
 p.lq <- df.lq.bats.ntiles %>% 
   # mutate(y=0.02 %>% multiply_by(rep(c(1,-1), times=5))) %>%
   ggplot(
@@ -317,7 +1533,7 @@ p.lq <- df.lq.bats.ntiles %>%
 p.lq
 ```
 
-```{r}
+```{r, eval=F}
 p.ht <- grid.grabExpr(
   draw(u1),
   width=unit(6, 'in'),
@@ -327,37 +1543,37 @@ p.tr <- revts(ggtree(timetree) + theme_tree2()) +
   scale_x_continuous(labels=abs)
 ```
 
-
-
 ## WebGestaltR
 
 ### Prep
 
 ```{r sets}
 sets = list(
-  desRot = extract_comb(m1, '100000000'),
-  minSch = extract_comb(m1, '010000000'),
-  myoBra = extract_comb(m1, '001000000'),
-  myoEvo = extract_comb(m1, '000100000'),
-  myoLuc = extract_comb(m1, '000010000'),
-  myoMyo = extract_comb(m1, '000001000'),
-  myoOcc = extract_comb(m1, '000000100'),
-  myoVol = extract_comb(m1, '000000010'),
-  rhiFer = extract_comb(m1, '000000001'),
-  panMyo = extract_comb(m1, '001111110'),
-  notMyo = extract_comb(m1, '110000001'),
-  neaMyo = extract_comb(m1, '001110110'),
-  wesMyo = extract_comb(m1, '000110110'),
-  LucOcc = extract_comb(m1, '000010100')
+  myoAui = extract_comb(m1,"100000000"),
+  myoCai = extract_comb(m1,"010000000"),
+  myoEvo = extract_comb(m1,"001000000"),
+  myoLuc = extract_comb(m1,"000100000"),
+  myoOcc = extract_comb(m1,"000010000"),
+  myoThy = extract_comb(m1,"000001000"),
+  myoVel = extract_comb(m1,"000000100"),
+  myoVol = extract_comb(m1,"000000010"),
+  myoYum = extract_comb(m1,"000000001"),
+  LucOcc = extract_comb(m1,"000110000"),
+  VelYum = extract_comb(m1,"000000101"),
+  LucOccVelYum = extract_comb(m1,"000110101"),
+  EvoThy = extract_comb(m1,"001001000"),
+  EvoThyAui = extract_comb(m1,"101001000"),
+  EvoThyAuiCai = extract_comb(m1,"111001000"),
+  NoVol = extract_comb(m1,"111111101")
 )
 ```
 
 
 ```{r dirs}
-dir.create('../output/webGestalt/', recursive=T, showWarnings = F)
+dir.create('../output/webGestalt/absrel_OurMyotisOnly', recursive=T, showWarnings = F)
 
 for (set in names(sets)) {
-  opath <- paste0('../output/webGestalt/', set)
+  opath <- paste0('../output/webGestalt/absrel_OurMyotisOnly/', set)
   dir.create(opath, recursive=T, showWarnings = F)
   sets[[set]] %>% write_lines(paste0(opath, '/aBSREL-', set, '.txt'))
   all_genes %>% write_lines(paste0(opath, 'aBSREL-allGenes.txt'))
@@ -382,26 +1598,764 @@ run_ORA <- function(geneSet, refGeneSet, outputDirectory, enrichmentDB, fdrThr, 
     reportNum=100,
     isOutput = T,
     outputDirectory = outputDirectory,
-    hostName="http://www.webgestalt.org/",
+    hostName="https://www.webgestalt.org/",
     projectName=projName
   )
 }
 
 enrichments <- lapply(
-  names(sets)[1],
+  names(sets)[1:length(names(sets))],
   function(n, s=sets, a=all_genes, e='pathway_Reactome', f=0.1, p = 'aBSREL'){
-    run_ORA(
-      # geneSet = s[[n]],
+    try(
+      run_ORA(
+      geneSet = s[[n]],
   refGeneSet = a, 
-  outputDirectory = paste0('../output/webGestalt/', n), 
+  outputDirectory = paste0('../output/webGestalt/absrel_OurMyotisOnly/', n), 
   enrichmentDB = e, 
   fdrThr = f, 
   projName = p
   )
+    )
   }
 )
 ```
 
+```{r}
+# A successful run has 11 items in the list position
+
+enrichments <- enrichments[which(sapply(enrichments, length)>1)] %>% 
+  set_names(.,names(sets)[which(sapply(enrichments, length)>1)])
+
+```
+
+```{r}
+all.PS <- sets %>% unlist %>% unique
+
+dir.create(paste0('../output/webGestalt/absrel_OurMyotisOnly/all/'))
+
+all.enrichment <- run_ORA(
+      geneSet = all.PS,
+  refGeneSet = all_genes, 
+  outputDirectory = paste0('../output/webGestalt/absrel_OurMyotisOnly/all/'), 
+  enrichmentDB = 'pathway_Reactome', 
+  fdrThr = 0.1, 
+  projName = 'aBSREL'
+  )%>% as_tibble
+```
+
+
+
 ## All Myotis Nodes
 
+```{r All nodes that lead to myoLuc}
+nodes_toMyoLuc = c(
+  "Myotis_lucifugus",
+  "Node_288_",
+  "Node_287_",
+  "Node_283_",
+  "Node_282_"
+)
+
+df_nodes_toMyoLuc = tribble(
+  ~species, ~label,
+  "Myotis_lucifugus", "Myotis_lucifugus",
+  "Node_288_", "Luc-Occ",
+  "Node_287_", "Luc-Vel",
+  "Node_283_", "Luc-Evo",
+  "Node_282_", "Myotis"
+)
+
+
+df.omega.toluci <- df.omega %>% 
+  filter(species %in% nodes_toMyoLuc) %>% 
+  select(species, omega, pval, human_gene_name) %>% 
+  filter(pval<=0.05) %>% 
+  left_join(df_nodes_toMyoLuc)
+
+dir.create('../output/webGestalt/absrel_toMyoLuc')
+
+lapply(
+  df_nodes_toMyoLuc$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoLuc',.) %>% 
+    dir.create(.)
+)
+
+list.toMyoLuc <- df.omega.toluci %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>% 
+    dplyr::group_split()
+
+names(list.toMyoLuc) <- df.omega.toluci %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>%
+  group_keys %>% 
+  pull(label)
+
+list.toMyoLuc %>% 
+  names %>% 
+  lapply(
+    .,
+    function(n, l=list.toMyoLuc){
+      l[[n]] %>% 
+    pull(human_gene_name) %>% 
+    write_lines(str_c('../output/webGestalt/absrel_toMyoLuc',n,'/absrel-',n,'.txt'))
+    }
+  )
+
+dir.create(str_c('../output/webGestalt/absrel_toMyoLuc/union'))
+
+df.omega.toluci %>% pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoLuc/union/absrel-genesToLuci.txt')
+
+```
+
+```{r All nodes that lead to myoCai/Aui}
+nodes_toMyoCai = c(
+  "Myotis_californicus",
+  "Myotis_auriculus",
+  "Node_285_",
+  "Node_284_"
+)
+
+df_nodes_toMyoCai = tribble(
+  ~species, ~label,
+  "Myotis_californicus", "Myotis_californicus",
+  "Myotis_auriculus", "Myotis_auriculus",
+  "Node_285_", "Aui-Evo",
+  "Node_284_", "Cai-Aui"
+)
+
+
+df.omega.tocali <- df.omega %>% 
+  filter(species %in% nodes_toMyoCai) %>% 
+  select(species, omega, pval, human_gene_name) %>% 
+  filter(pval<=0.05) %>% 
+  left_join(df_nodes_toMyoCai)
+
+dir.create('../output/webGestalt/absrel_toMyoCai')
+
+lapply(
+  df_nodes_toMyoCai$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoCai/',.) %>% 
+    dir.create(.)
+)
+
+list.toMyoCai <- df.omega.tocali %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>% 
+    dplyr::group_split()
+
+names(list.toMyoCai) <- df.omega.tocali %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>%
+  group_keys %>% 
+  pull(label)
+
+list.toMyoCai %>% 
+  names %>% 
+  lapply(
+    .,
+    function(n, l=list.toMyoCai){
+      l[[n]] %>% 
+    pull(human_gene_name) %>% 
+    write_lines(str_c('../output/webGestalt/absrel_toMyoCai/',n,'/absrel-',n,'.txt'))
+    }
+  )
+
+dir.create(str_c('../output/webGestalt/absrel_toMyoCai/union-toCai'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoCai/union-toAui'))
+
+df.omega.tocali %>% 
+  filter(label %in% c('Myotis_californicus','Node_284_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis'))
+  ) %>%  
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoCai/union-toCai/absrel-genesToCai.txt')
+
+df.omega.tocali %>% 
+  filter(label %in% c('Myotis_auriculus','Node_284_','Node_285_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis'))
+  ) %>%  
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoCai/union-toAui/absrel-genesToAui.txt')
+
+```
+
+```{r All nodes that lead to myoVel/Yum}
+nodes_toMyoVel = c(
+  "Myotis_velifer",
+  "Myotis_yumanensis",
+  "Node_289_"
+)
+
+df_nodes_toMyoVel = tribble(
+  ~species, ~label,
+    "Myotis_velifer", "Myotis_velifer",
+    "Myotis_yumanensis", "Myotis_yumanensis",
+    "Node_289_", "Vel-Yum"
+)
+
+
+df.omega.toveli <- df.omega %>% 
+  filter(species %in% nodes_toMyoVel) %>% 
+  select(species, omega, pval, human_gene_name) %>% 
+  filter(pval<=0.05) %>% 
+  left_join(df_nodes_toMyoVel)
+
+dir.create('../output/webGestalt/absrel_toMyoVel')
+
+lapply(
+  df_nodes_toMyoVel$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoVel/',.) %>% 
+    dir.create(.)
+)
+
+list.toMyoVel <- df.omega.toveli %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>% 
+    dplyr::group_split()
+
+names(list.toMyoVel) <- df.omega.toveli %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>%
+  group_keys %>% 
+  pull(label)
+
+list.toMyoVel %>% 
+  names %>% 
+  lapply(
+    .,
+    function(n, l=list.toMyoVel){
+      l[[n]] %>% 
+    pull(human_gene_name) %>% 
+    write_lines(str_c('../output/webGestalt/absrel_toMyoVel/',n,'/absrel-',n,'.txt'))
+    }
+  )
+
+dir.create(str_c('../output/webGestalt/absrel_toMyoVel/union-toVel'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoVel/union-toYum'))
+
+df.omega.toveli %>% 
+  filter(label %in% c('Myotis_velifer','Node_289_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis','Luc-Vel'))
+  ) %>%  
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoVel/union-toVel/absrel-genesToVel.txt')
+
+df.omega.toveli %>% 
+  filter(label %in% c('Myotis_yumanensis','Node_289_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis','Luc-Vel'))
+  ) %>%  
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoVel/union-toYum/absrel-genesToYum.txt')
+
+```
+
+```{r}
+df_nodes_toLucCaiAui = list(
+  read_tsv('../output/webGestalt/absrel_toMyoLucMyotis_lucifugus/enrichment_results_wg_result1712080753.txt') %>% mutate(node="Luc"),
+  read_tsv('../output/webGestalt/absrel_toMyoLucLuc-Occ/enrichment_results_wg_result1712080652.txt') %>% mutate(node="Luc-Occ"),
+  read_tsv('../output/webGestalt/absrel_toMyoLucLuc-Vel/enrichment_results_wg_result1712080876.txt') %>% mutate(node="Luc-Vel"),
+  read_tsv('../output/webGestalt/absrel_toMyoLucLuc-Evo/enrichment_results_wg_result1712080981.txt') %>% mutate(node="Luc-Evo"),
+  read_tsv('../output/webGestalt/absrel_toMyoLucMyotis/enrichment_results_wg_result1712081027.txt') %>% mutate(node="Myotis"),
+  read_tsv('../output/webGestalt/absrel_toMyoLuc/union/enrichment_results_wg_result1712081137.txt') %>% mutate(node="All-Luc"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/Aui-Evo/enrichment_results_wg_result1712088780.txt') %>% mutate(node="Aui-Evo"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/Cai-Aui/enrichment_results_wg_result1712088872.txt') %>% mutate(node="Cai-Aui"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/Myotis_auriculus/enrichment_results_wg_result1712088956.txt') %>% mutate(node="Aui"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/Myotis_californicus/enrichment_results_wg_result1712088968.txt') %>% mutate(node="Cai"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/union-toCai/enrichment_results_wg_result1712089363.txt') %>% mutate(node="All-Cai"),
+  read_tsv('../output/webGestalt/absrel_toMyoCai/union-toAui/enrichment_results_wg_result1712089371.txt') %>% mutate(node="All-Aui")
+) %>% 
+  bind_rows()
+
+stats.LucCaiAui <- df_nodes_toLucCaiAui %>% 
+  select(node, description) %>% 
+  mutate(Cancer = is.cancer(description)) %>% 
+  # View()
+  group_by(node) %>% 
+  summarize(n=n(),
+            n.cancer = sum(Cancer)) #%>% 
+  # pivot_longer(-node)
+
+node.levels = c("Myotis", "Luc-Evo", "Luc-Vel", "Luc-Occ", "Luc", "Cai-Aui","Cai","Aui-Evo","Aui", "All-Luc", "All-Cai","All-Aui")
+
+df.node.levels = tibble(
+  node = node.levels %>% factor(levels=node.levels),
+  group = c("Myotis", "Myotis", "Luc", "Luc", "Luc", "Cai-Aui","Cai","Aui","Aui", "Luc", "Cai","Aui")
+)
+
+df.lineage = tibble(
+  node = c("Myotis", "Myotis", "Myotis", 
+           "Luc-Evo", "Luc-Evo", "Luc-Evo",
+           "Luc-Vel", "Luc-Occ", "Luc", 
+           "Cai-Aui", "Cai-Aui",
+           "Cai",
+           "Aui-Evo","Aui", 
+           "All-Luc", "All-Cai","All-Aui")%>% factor(levels=node.levels),
+  lineage1 = c("Luc", "Cai","Aui", 
+              "Luc", "Cai","Aui", 
+              "Luc", "Luc", "Luc", 
+              "Cai", "Aui",
+              "Cai",
+              "Aui","Aui", 
+              "Luc", "Cai","Aui"),
+  lineage2 = c("Shared", "Shared","Shared", 
+              "Shared", "Shared","Shared", 
+              "Luc", "Luc", "Luc", 
+              "Cai", "Aui",
+              "Cai",
+              "Aui","Aui", 
+              "Union", "Union","Union"),
+)
+
+stats.LucCaiAui %>% 
+  mutate(node = factor(node, levels = node.levels)) %>% 
+  left_join(df.node.levels) %>% 
+  left_join(df.lineage) %>% 
+  ggplot(
+    aes(
+      x=node,
+      y=n.cancer,
+      fill=group
+    )
+  ) + 
+  geom_bar(stat='identity') + 
+  scale_fill_manual(
+    "Lineage", 
+    values=c(
+      "Myotis" = "#F7A072",
+      "Luc" = "#0FA3B1",
+      "Cai" = "#8CB369",
+      "Cai-Aui" = "#BFB9B3",
+      "Aui" = "#f2befc"
+    ),
+    guide=guide_none()
+  ) +
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1, scale = 1)) +
+  labs(
+    x= "Node",
+    y="Cancer Pathways Out of Top 100 Reactome Pathways"
+  ) + 
+  facet_wrap(~lineage2, scales = "free_x") + 
+  theme_pubr() + 
+  labs_pubr()
+
+```
+
+```{r}
+df_nodes_toLucCaiAuiVelYum = list(
+  df_nodes_toLucCaiAui,
+  read_tsv('../output/webGestalt/absrel_toMyoVel/Vel-Yum/enrichment_results_wg_result1712091874.txt') %>% mutate(node="Vel-Yum"),
+  read_tsv('../output/webGestalt/absrel_toMyoVel/Myotis_velifer/enrichment_results_wg_result1712091843.txt') %>% mutate(node="Vel"),
+  read_tsv('../output/webGestalt/absrel_toMyoVel/Myotis_yumanensis/enrichment_results_wg_result1712091851.txt') %>% mutate(node="Yum"),
+  read_tsv('../output/webGestalt/absrel_toMyoVel/union-toVel/enrichment_results_wg_result1712091862.txt') %>% mutate(node="All-Vel"),
+  read_tsv('../output/webGestalt/absrel_toMyoVel/union-toYum/enrichment_results_wg_result1712091994.txt') %>% mutate(node="All-Yum")
+) %>% 
+  bind_rows()
+
+stats.LucCaiAuiVelYum <- df_nodes_toLucCaiAuiVelYum %>% 
+  select(node, description) %>% 
+  mutate(Cancer = is.cancer(description)) %>% 
+  # View()
+  group_by(node) %>% 
+  summarize(n=n(),
+            n.cancer = sum(Cancer)) #%>% 
+  # pivot_longer(-node)
+
+node.levels = c("Myotis", "Luc-Evo", "Luc-Vel", "Luc-Occ", "Luc", "Vel-Yum", "Vel", "Yum", "Cai-Aui","Cai","Aui-Evo","Aui", "All-Luc", "All-Cai","All-Aui", "All-Vel", "All-Yum")
+
+# df.node.levels = tibble(
+#   node = node.levels %>% factor(levels=node.levels),
+#   group = c("Myotis", "Myotis", "Luc", "Luc", "Luc", "Cai-Aui","Cai","Aui","Aui", "Luc", "Cai","Aui")
+# )
+
+df.lineage = tibble(
+  node = c("Myotis", "Myotis", "Myotis", 
+           "Luc-Evo", "Luc-Evo", "Luc-Evo",
+           "Luc-Vel", "Luc-Occ", "Luc", 
+           "Vel-Yum", "Vel-Yum", 
+           "Vel", "Yum",
+           "Cai-Aui", "Cai-Aui",
+           "Cai",
+           "Aui-Evo","Aui", 
+           "All-Luc", "All-Cai","All-Aui", "All-Vel", "All-Yum")%>% factor(levels=node.levels),
+  lineage1 = c("Luc", "Cai","Aui", 
+              "Luc", "Cai","Aui", 
+              "Luc", "Luc", "Luc", 
+              "Vel", "Yum",
+              "Vel", "Yum",
+              "Cai", "Aui",
+              "Cai",
+              "Aui","Aui", 
+              "Luc", "Cai","Aui", "Vel", "Yum"),
+  lineage2 = c("Shared", "Shared","Shared", 
+              "Shared", "Shared","Shared", 
+              "Luc", "Luc", "Luc", 
+              "Vel", "Yum",
+              "Vel", "Yum",
+              "Cai", "Aui",
+              "Cai",
+              "Aui","Aui", 
+              "Union", "Union","Union", "Union","Union"),
+)
+
+p.stats.LucCaiAuiVelYum <- stats.LucCaiAuiVelYum %>% 
+  mutate(node = factor(node, levels = node.levels)) %>% 
+  # left_join(df.node.levels) %>% 
+  left_join(df.lineage) %>% 
+  ggplot(
+    aes(
+      x=node,
+      y=n.cancer,
+      fill=lineage2
+    )
+  ) + 
+  geom_bar(stat='identity') +
+  scale_fill_brewer(palette = 'Dark2', guide=guide_none()) + 
+  # scale_fill_manual(
+  #   "Lineage", 
+  #   values=c(
+  #     "Myotis" = "#F7A072",
+  #     "Luc" = "#0FA3B1",
+  #     "Cai" = "#8CB369",
+  #     "Cai-Aui" = "#BFB9B3",
+  #     "Aui" = "#f2befc"
+  #   ),
+  #   guide=guide_none()
+  # ) +
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1, scale = 1)) +
+  labs(
+    x= "Node",
+    y="Cancer Pathways Out of Top 100 Reactome Pathways"
+  ) + 
+  facet_wrap(~lineage2, scales = "free_x") + 
+  theme_pubr() + 
+  labs_pubr()
+print.ggplot(p.stats.LucCaiAuiVelYum, 4,4)
+```
+
+```{r}
+reactome_all <- read_tsv('../data/ReactomePathways.txt', col_names = c('ID', 'description', 'species'))
+
+reactome_hs <- reactome_all %>% 
+  filter(species == 'Homo sapiens') %>% 
+  select(description) %>% 
+  mutate(Cancer = is.cancer(description))
+
+reactome_pctCancer <- replicate(
+  n=1000,
+  expr = slice_sample(reactome_hs, n = 100, replace = FALSE) %>% 
+  summarize(n=n(),
+            n.cancer = sum(Cancer)) %>% 
+    pull(n.cancer),
+  simplify = 'vector'
+) 
+
+df_ci_reactome_pctCancer <- tibble(n.cancer=reactome_pctCancer) %>% 
+  summarise(mean = mean(n.cancer, na.rm = TRUE),
+            sd = sd(n.cancer, na.rm = TRUE),
+            n = n()) %>%
+  mutate(se = sd / sqrt(n),
+         lower.ci = mean - qt(1 - (0.05 / 2), n - 1) * se,
+         upper.ci = mean + qt(1 - (0.05 / 2), n - 1) * se)
+
+
+
+stats.LucCaiAuiVelYum %>% 
+  mutate(node = factor(node, levels = node.levels)) %>% 
+  # left_join(df.node.levels) %>% 
+  left_join(df.lineage) %>% 
+  ggplot(
+    aes(
+      x=node,
+      y=n.cancer,
+      fill=lineage2
+    )
+  ) + 
+  geom_bar(stat='identity') +
+  scale_fill_brewer(palette = 'Dark2', guide=guide_none()) + 
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$mean
+  ) + 
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$lower.ci,
+    lty='dashed'
+  ) + 
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$upper.ci,
+    lty='dashed'
+  ) + 
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1, scale = 1)) +
+  labs(
+    x= "Node",
+    y="Cancer Pathways Out of Top 100 Reactome Pathways"
+  ) + 
+  facet_wrap(~lineage2, scales = "free_x") + 
+  theme_pubr() + 
+  labs_pubr()
+```
+
+```{r All nodes that lead to anyone/everyone else}
+nodes_toleft = c(
+  "Myotis_occultus",
+  "Myotis_evotis",
+  "Myotis_thysanodes",
+  "Node_286_"
+)
+
+df_nodes_toleft = tribble(
+  ~species, ~label,
+  "Myotis_occultus", "Myotis_occultus",
+  "Myotis_evotis", "Myotis_evotis",
+  "Myotis_thysanodes", "Myotis_thysanodes",
+  "Node_286_", "Evo-Thy"
+)
+
+
+df.omega.toleft <- df.omega %>% 
+  filter(species %in% nodes_toleft) %>% 
+  select(species, omega, pval, human_gene_name) %>% 
+  filter(pval<=0.05) %>% 
+  left_join(df_nodes_toleft)
+
+dir.create('../output/webGestalt/absrel_toMyoOccEvoThy')
+
+lapply(
+  df_nodes_toleft$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoOccEvoThy/',.) %>% 
+    dir.create(.)
+)
+
+list.toleft <- df.omega.toleft %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>% 
+    dplyr::group_split()
+
+names(list.toleft) <- df.omega.toleft %>% 
+  select(human_gene_name, label) %>% 
+  group_by(label) %>%
+  group_keys %>% 
+  pull(label)
+
+list.toleft %>% 
+  names %>% 
+  lapply(
+    .,
+    function(n, l=list.toleft){
+      l[[n]] %>% 
+    pull(human_gene_name) %>% 
+    write_lines(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/',n,'/absrel-',n,'.txt'))
+    }
+  )
+
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy'))
+
+df.omega.toleft %>% 
+  filter(label %in% c('Myotis_occultus')) %>% 
+  bind_rows(
+    df.omega.toluci
+  ) %>%  
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc/absrel-genesToOcc.txt')
+
+
+df.omega.toleft %>% 
+  filter(label %in% c('Myotis_evotis','Node_286_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis'))
+  ) %>%  
+  bind_rows(
+    df.omega.tocali %>% filter(label %in% c('Node_284_','Node_285_'))
+  ) %>% 
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo/absrel-genesToEvo.txt')
+
+
+df.omega.toleft %>% 
+  filter(label %in% c('Myotis_thysanodes','Node_286_')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Luc-Evo','Myotis'))
+  ) %>%  
+  bind_rows(
+    df.omega.tocali %>% filter(label %in% c('Node_284_','Node_285_'))
+  ) %>% 
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy/absrel-genesToThy.txt')
+
+```
+
+```{r}
+df_nodes_toall = list(
+  df_nodes_toLucCaiAuiVelYum,
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Evo-Thy/enrichment_results_wg_result1712099415.txt') %>% mutate(node="Evo-Thy"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_evotis/enrichment_results_wg_result1712099451.txt') %>% mutate(node="Evo"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_occultus/enrichment_results_wg_result1712099520.txt') %>% mutate(node="Occ"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_thysanodes/enrichment_results_wg_result1712099552.txt') %>% mutate(node="Thy"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo/enrichment_results_wg_result1712099590.txt') %>% mutate(node="All-Evo"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc/enrichment_results_wg_result1712099627.txt') %>% mutate(node="All-Occ"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy/enrichment_results_wg_result1712099658.txt') %>% mutate(node="All-Thy")
+) %>% 
+  bind_rows()
+
+stats.all <- df_nodes_toall %>% 
+  select(node, description) %>% 
+  mutate(Cancer = is.cancer(description)) %>% 
+  # View()
+  group_by(node) %>% 
+  summarize(n=n(),
+            n.cancer = sum(Cancer)) #%>% 
+  # pivot_longer(-node)
+
+node.levels = c("Myotis", "Luc-Evo", "Luc-Vel", "Luc-Occ", "Luc", "Occ", "Vel-Yum", "Vel", "Yum", "Cai-Aui","Cai","Aui-Evo","Aui", "Evo-Thy", "Evo", "Thy", "All-Luc", "All-Occ", "All-Vel", "All-Yum", "All-Evo", "All-Thy", "All-Cai","All-Aui")
+
+# df.node.levels = tibble(
+#   node = node.levels %>% factor(levels=node.levels),
+#   group = c("Myotis", "Myotis", "Luc", "Luc", "Luc", "Cai-Aui","Cai","Aui","Aui", "Luc", "Cai","Aui")
+# )
+
+# df.lineage = tibble(
+#   node = c("Myotis", "Luc-Evo",
+#            "Luc-Vel", "Luc-Occ", "Luc", 
+#            "Luc-Vel", "Luc-Occ", "Occ",
+#            "Luc-Vel", "Vel-Yum", "Vel",
+#            "Luc-Vel", "Vel-Yum", "Yum",
+#            "Cai-Aui", "Cai",
+#            "Cai-Aui", "Aui-Evo","Aui", 
+#            "Cai-Aui", "Aui-Evo", "Evo-Thy", "Evo",
+#            "Cai-Aui", "Aui-Evo", "Evo-Thy", "Thy",
+#            "All-Luc", "All-Cai","All-Aui", "All-Vel", "All-Yum",
+#            "All-Occ", "All-Evo", "All-Thy")%>% factor(levels=node.levels),
+#   lineage = c("Shared", "Shared",
+#               "Luc", "Luc", "Luc", 
+#               "Occ", "Occ", "Occ",
+#               "Vel", "Vel", "Vel",
+#               "Vel", "Yum", "Yum",
+#               "Cai", "Cai",
+#               "Aui","Aui", "Aui", 
+#               "Evo", "Evo", "Evo", "Evo",
+#               "Thy", "Thy", "Thy", "Thy",
+#               "Union", "Union","Union", "Union","Union",
+#               "Union", "Union","Union") %>% 
+#     factor(levels=c("Luc", "Occ", "Vel", "Yum", "Evo", "Thy", "Aui", "Cai", "Shared", "Union")),
+# )
+
+df.lineage = tibble(
+  node = c(
+    "Myotis", "Luc-Evo", 
+    "Luc-Vel", "Luc-Occ", 
+    "Luc", "Occ", 
+    "Vel-Yum", 
+    "Vel", "Yum", 
+    "Cai-Aui",
+    "Cai",
+    "Aui-Evo",
+    "Aui", 
+    "Evo-Thy", 
+    "Evo", "Thy", 
+    "All-Luc", "All-Occ", "All-Vel", "All-Yum", "All-Evo", "All-Thy", "All-Cai","All-Aui"
+  ) %>% factor(levels=node.levels),
+  lineage = c(
+    "Shared", "Shared", 
+    "Luc,Vel,Occ,Yum", "Luc,Occ", 
+    "Luc", "Occ", 
+    "Vel,Yum", 
+    "Vel", "Yum", 
+    "Cai,Aui,Evo,Thy",
+    "Cai",
+    "Aui,Evo,Thy",
+    "Aui", 
+    "Evo,Thy", 
+    "Evo", "Thy", 
+    "Union", "Union","Union", "Union","Union", "Union", "Union","Union"
+    )
+)
+stats.all.aug <- stats.all %>% 
+  mutate(node = factor(node, levels = node.levels)) %>%
+  # left_join(df.node.levels) %>% 
+  left_join(df.lineage) %>%
+  separate_rows(lineage, sep=",") %>% 
+  distinct() %>% 
+  mutate(lineage = lineage %>% 
+    factor(levels=c("Luc", "Occ", "Vel", "Yum", "Evo", "Thy", "Aui", "Cai", "Shared", "Union")))
+p.stats.all <- stats.all.aug %>%
+  ggplot(
+    aes(
+      x=node,
+      y=n.cancer,
+      fill=lineage
+    )
+  ) + 
+  geom_bar(stat='identity') +
+  ggsci::scale_fill_d3(palette = "category10", guide=guide_none())+
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$mean
+  ) + 
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$lower.ci,
+    lty='dashed'
+  ) + 
+  geom_hline(
+    yintercept = df_ci_reactome_pctCancer$upper.ci,
+    lty='dashed'
+  ) + 
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1, scale = 1)) +
+  labs(
+    x= "Node",
+    y="Cancer Pathways Out of Top 100 Reactome Pathways"
+  ) + 
+  coord_flip() + 
+  facet_wrap(~lineage, scales = "free_y", nrow=5) +
+  theme_pubr() + 
+  labs_pubr()
+
+print.ggplot(p.stats.all, 8,6)
+```
+
+```{r phylo version of cancer pathway plot}
+
+df_node_translation <- tribble(
+  ~node, ~label,
+  "Luc-Occ", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_lucifugus', "Myotis_occultus")) %>% pull(label),
+  "Luc-Vel", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_lucifugus', "Myotis_velifer")) %>% pull(label),
+  "Luc-Evo", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_lucifugus', "Myotis_evotis")) %>% pull(label),
+  "Myotis", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_lucifugus', "Myotis_volans")) %>% pull(label),
+  "Vel-Yum", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_velifer', "Myotis_yumanensis")) %>% pull(label),
+  "Evo-Thy", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_evotis', "Myotis_thysanodes")) %>% pull(label),
+  "Aui-Evo", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_evotis', "Myotis_auriculus")) %>% pull(label),
+  "Cai-Aui", tr %>% as_tibble %>% filter(node == tr %>% MRCA('Myotis_californicus', "Myotis_auriculus")) %>% pull(label),
+  "Luc", "Myotis_lucifugus",
+  "Occ", "Myotis_occultus",
+  "Vel", "Myotis_velifer",
+  "Yum", "Myotis_yumanensis",
+  "Evo", "Myotis_evotis",
+  "Thy", "Myotis_thysanodes",
+  "Aui", "Myotis_auriculus",
+  "Cai", "Myotis_californicus",
+  "Vol", "Myotis_volans"
+)
+
+stats.all.node <- left_join(
+  df_node_translation,
+  stats.all
+) %>% 
+  select(-node)
+
+tr.ReactomeCancerProp <- tr %>% 
+  full_join(stats.all.node)
+
+(
+  tr.ReactomeCancerProp %>% 
+    ggtree() + 
+    geom_tiplab() + 
+    xlim(c(NA,10))
+
+) %>% print.ggplot(4,4)
+
+```
+
+
+```{r scatterplot of RICR vs pathway enrichment for cancer}
+```
 

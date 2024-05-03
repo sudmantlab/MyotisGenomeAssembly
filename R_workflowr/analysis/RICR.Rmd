@@ -68,9 +68,10 @@ our_genomes = c(
   "Myotis_thysanodes"
 )
 
-tt.upham <- read_tsv('../data/trees/UphamEtAl2019_harmonizednames.tsv') %>% 
-  select(newlab = label, label=submitted_name)
-tr.upham <- read.tree('../data/trees/UphamEtAl2019_harmonizednames.nwk')
+# tt.upham <- read_tsv('../data/trees/UphamEtAl2019_harmonizednames.tsv') %>% 
+#   select(newlab = label, label=submitted_name)
+# tr.upham <- read.tree('../data/trees/UphamEtAl2019_harmonizednames.nwk')
+tr.upham <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera.tree')
 df.lq <- read_tsv('../data/lifehistory/manny_mammal_agedata_harmonized.withLQ_hasAli.tsv')
 # cancerSucceptibility.table <- read_csv('../data/stableTraits/cancerRisk-UphamEtAl2019WithBS_Run1_2.csv')
 # sizetable <- read_csv('../data/stableTraits/bodysize-UphamEtAl2019_harmonizednames_withSizeLife_size_concat.csv') %>% 
@@ -228,7 +229,7 @@ p.r2line
 
 ```{r StableTraits Trees}
 
-life.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.ancstates') %>% 
+life.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.ancstates') %>% 
       filter(!str_starts(Parameter, 'stable')) %>% 
   rename(
     label=Parameter,
@@ -238,16 +239,16 @@ life.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSiz
     lnLife.high=`95%CI_High`
   )
 
-tr.life <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_life_concat.sqchange_tree') #%>% 
+tr.life <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera_lifespan.sqchange_tree') #%>% 
   # as.treedata() %>% 
   # full_join(
   #   life.anc,
   #   by=c(label='Parameter')
   # )
 
-tr.size <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.sqchange_tree')
+tr.size <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera.sqchange_tree')
 
-size.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.ancstates') %>% 
+size.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_newChiroptera.ancstates') %>% 
       filter(!str_starts(Parameter, 'stable')) %>% 
   rename(
     label=Parameter,
@@ -257,7 +258,7 @@ size.anc <- read_tsv('../data/stableTraits/UphamEtAl2019_harmonizednames_withSiz
     lnSize.high=`95%CI_High`
   )
 
-tr.og.size <- read.tree('../data/stableTraits/UphamEtAl2019_harmonizednames_withSizeLifeLn_size_concat.tree')
+tr.og.size <- read.tree('../data/stableTraits/UphamEtAl2019_newChiroptera.tree')
 
 # shared = intersect(tr.life$tip.label, tr.size$tip.label)
 # 
@@ -1399,6 +1400,8 @@ p.dbltree.all
 ```
 
 
+
+
 ### All together figure - Myotis
 
 ```{r}
@@ -1529,11 +1532,11 @@ cancerSucceptibility.table %>%
 
 ```{r save RICR results, eval=F, include=F}
 tr.cancerSucceptibility %>% 
-  treeio::write.beast('../output/Upham2019-RICR-Data.nexus')
+  treeio::write.beast('../output/Upham2019_newChiroptera-RICR-Data.nexus')
 ```
 
 ```{r load precalc RICR results}
-tr.cancerSucceptibility <- treeio::read.beast('../output/Upham2019-RICR-Data.nexus')
+tr.cancerSucceptibility <- treeio::read.beast('../output/Upham2019_newChiroptera-RICR-Data.nexus')
 tr.cancerSucceptibility@data <- tr.cancerSucceptibility@data %>% 
   mutate_at(vars(-label.y, -node,-Ancestor),as.numeric)
 ```
@@ -1635,6 +1638,60 @@ It seems like overall, there's not much change in cancer risk at nodes within th
 At the common ancestor of Grey myotis and the other bats, there's a series of small increases in RICR (3.8, 0.99, 4.24, 0.65) from the common ancestor until you get to _grisescens_ -  then there's a big drop (-12.7) in RICR. Brandt's bat is the longest-lived bat and the daughter of a short-lived node, so it makes sense that there's a big drop there (-0.22 to -6.8). All of our _Myotis_ show drops in RICR, especially for _lucifugus_ (-4.1). Note that for _Myotis myotis_, while it has a low drop in RICR (-1.0), its most recent ancestor had a larger drop (-3.2). The second greatest drop in RICR in in Megabats, in _Pteropus gigantus_ (-7.3).  
 
 ### RICR-based version of bat fig
+
+```{r RangePlot RICR - bats}
+p.RICR.bats <- tr.cancerSucceptibility %>%
+  tidytree::tree_subset(MRCA(tr.cancerSucceptibility, 'Myotis_lucifugus', 'Pteropus_vampyrus'), levels_back = 0) %>%
+  as_tibble %>% 
+  arrange(log2CancerSucceptabilityChange) %>% 
+  mutate(label = factor(label, levels=label)) %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) + 
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  # geom_point(aes(x=LQ.low, color=LQ.low), size=1.5, stroke=2, pch="]") +
+  # geom_point(aes(x=LQ.high, color=LQ.high), size=1.5, stroke=2, pch="[") +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  labs(
+    x="RICR",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+p.RICR.bats
+```
+
 
 ```{r RangePlot RICR - Myotis}
 p.RICR.myotis <- tr.cancerSucceptibility %>%
@@ -1910,7 +1967,7 @@ ggsave(
 ```{r myotis-only size-life-RICR fig}
 
 p.tr.myotis <- tr.cancerSucceptibility %>%
-  keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>% 
+  tidytree::keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>% 
   tidytree::tree_subset(MRCA(tr.upham %>%
   keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>% 
   ggtree(
@@ -1931,7 +1988,7 @@ p.tr.myotis <- tr.cancerSucceptibility %>%
   xlim(c(NA, 50))
 
 p.tr.myotis2 <- (tr.cancerSucceptibility %>%
-  keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>%
+  tidytree::keep.tip(tr.lifedata.chiroptera@phylo$tip.label) %>%
   tidytree::tree_subset(MRCA(tr.upham %>%
   keep.tip(tr.lifedata.chiroptera@phylo$tip.label), 'Myotis_lucifugus', 'Nycticeius_humeralis'), levels_back = 0) %>%
   ggtree(
@@ -1967,7 +2024,7 @@ fig.myotis.sizelifericr <- (
        # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
        theme(legend.position = 'none')
      ) / 
-    (p.RICR.myotis2 + 
+    (p.RICR.myotis3 + 
        # theme(legend.position = 'left', legend.direction = 'vertical', legend.title.align = 0)
        theme(legend.position = 'none')
      )
@@ -1997,11 +2054,13 @@ ggsave(
 )
 ```
 
+### RICR with bat averages
+
 ```{r Bat averages}
 # tr.RICR.chiroptera %>% ggtree(layout='circular') + geom_tiplab2()
 
 node.myotis = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Myotis_emarginatus')
-node.vespertilionidae = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Lasiurus_cinereus')
+node.vespertilionidae = MRCA(tr.RICR.chiroptera, 'Myotis_lucifugus', 'Corynorhinus_townsendii')
 node.molossidae = MRCA(tr.RICR.chiroptera, 'Molossus_molossus', 'Chaerephon_pumilus')
 node.phyllostomidae = MRCA(tr.RICR.chiroptera, 'Macrotus_waterhousii', 'Artibeus_jamaicensis')
 node.yinpterochiroptera = MRCA(tr.RICR.chiroptera, 'Macroderma_gigas', 'Pteropus_giganteus')
@@ -2164,7 +2223,7 @@ p.RICR.myotis.sum <- tbl.RICR.myotis.withSummary %>%
     x="Cancer Risk",
     y="Node"
   ) + 
-  theme_pubclean()+
+  theme_pubr()+
   labs_pubr() + 
   guides(
     shape = guide_legend()
@@ -2347,4 +2406,1117 @@ ggsave(
   units = 'in',
   dpi=300
 )
+```
+
+### Size x Life
+
+```{r}
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+
+p.sizelife.chiroptera <- tr.RICR.chiroptera %>% 
+  as_tibble %>% 
+  mutate(isTip = sapply(node, function(x){isTip(tr.sizelife.lq.chiroptera , x)})) %>% 
+  ggplot(
+    aes(
+      x= lnSize.median,
+      y= lnLife.median,
+      color= log2CancerSucceptabilityChange,
+      fill=log2CancerSucceptabilityChange,
+      alpha = ifelse(isTip, 25, 0)
+    )
+  ) + 
+  geom_point(pch=21) + 
+  guides(alpha=guide_none()) + 
+  labs(x="Median Estimated Body Size",
+       y="Median Estimated Lifespan") + 
+  scale_color_viridis_c(guide=guide_none()) + 
+  scale_fill_viridis_c() + 
+  theme_pubr() + 
+  labs_pubr()
+
+p.sizelife <- tr.cancerSucceptibility %>% 
+  as_tibble %>% 
+  mutate(isTip = sapply(node, function(x){isTip(tr.sizelife.lq , x)})) %>% 
+  ggplot(
+    aes(
+      x= lnSize.median,
+      y= lnLife.median,
+      alpha = ifelse(isTip, 25, 0)
+    )
+  ) + 
+  geom_point(pch=21, fill='black') +
+  geom_point(data = tr.RICR.chiroptera %>% 
+               as_tibble %>% 
+               mutate(isTip = sapply(node, function(x){isTip(tr.RICR.chiroptera , x)})), 
+             mapping = aes(
+               color=log2CancerSucceptabilityChange,
+               fill=log2CancerSucceptabilityChange
+             ), 
+             pch=21)+
+  guides(alpha=guide_none()) + 
+  scale_color_viridis_c() +
+  scale_fill_viridis_c() +
+  labs(x="Median Estimated Body Size",
+       y="Median Estimated Lifespan") + 
+  theme_pubr() + 
+  labs_pubr()
+
+(p.sizelife + ggtitle('All Mammals')) + (p.sizelife.chiroptera + ggtitle('Bats'))
+
+
+p.sizelife2 <- tr.cancerSucceptibility %>% 
+  as_tibble %>% 
+  mutate(isTip = sapply(node, function(x){isTip(tr.sizelife.lq , x)})) %>% 
+  ggplot(
+    aes(
+      x= lnSize.median,
+      y= lnLife.median,
+      fill=log2CancerSucceptabilityChange,
+      alpha = ifelse(isTip, 25, 0)
+    )
+  ) + 
+  geom_point(pch=21, aes(color=log2CancerSucceptabilityChange)) +
+  geom_point(data = tr.RICR.chiroptera %>% 
+               as_tibble %>% 
+               mutate(isTip = sapply(node, function(x){isTip(tr.RICR.chiroptera , x)})), 
+             mapping = aes(
+               fill=log2CancerSucceptabilityChange
+             ), 
+               color='black',
+             pch=21)+
+  guides(alpha=guide_none()) + 
+  scale_color_viridis_c(guide=guide_none()) + 
+  scale_fill_viridis_c() + 
+  labs(x="Median Estimated Body Size",
+       y="Median Estimated Lifespan") + 
+  theme_pubr() + 
+  labs_pubr()
+
+(p.sizelife2 + ggtitle('All Mammals')) + (p.sizelife.chiroptera + ggtitle('Bats'))
+```
+
+
+```{r}
+
+p.layout = c(
+  area(t = 1, l = 1, b = 4, r = 2),
+  area(t = 1, l = 3, b = 2, r = 5),
+  area(t = 3, l = 3, b = 4, r = 5),
+  area(t = 4, l = 1, b = 5, r = 2)
+)
+
+(p.tr.myotis) + (p.sizelife2 + ggtitle('All Mammals')+theme(legend.position = 'none')) + (p.sizelife.chiroptera + ggtitle('Bats')) + guide_area() + plot_layout(design = p.layout, guide='collect')
+
+```
+
+```{r, eval=F}
+
+p.layout = c(
+  area(t = 1, l = 1, b = 6, r = 3), # Phylo
+  area(t = 1, l = 3, b = 2, r = 5), # RICR-All
+  area(t = 3, l = 3, b = 4, r = 5), # RICR-Bat
+  area(t = 5, l = 3, b = 6, r = 5), # Virus - PGLS
+  area(t = 2, l = 4, b = 2, r = 5)  # guides
+)
+
+(p.tr.myotis) + 
+  (p.sizelife2 + ggtitle('All Mammals')+theme(legend.position = 'none')) + 
+  (p.sizelife.chiroptera + ggtitle('Bats')) + 
+  p.coor + 
+  guide_area() +
+  plot_layout(design = p.layout, guide='collect')
+
+```
+
+## Phylogram
+
+```{r phenograms}
+p.phenogram.life <- tr.RICR.chiroptera %>% 
+  ggtree(
+    aes(color=log2CancerSucceptabilityChange),yscale = "lnLife.median"
+  ) + 
+  ggrepel::geom_text_repel(aes(label=label %>% str_replace("_", " ") %>% str_remove('\\d+'))) + 
+  xlim(c(NA,80)) + 
+  scale_color_viridis_c('RICR') + 
+  theme_pubclean() + 
+  theme(legend.position='bottom') +
+  ylab("Lifespan (log)")
+
+p.phenogram.size <- tr.RICR.chiroptera %>% 
+  ggtree(
+    aes(color=log2CancerSucceptabilityChange),yscale = "lnSize.median"
+  ) + 
+  ggrepel::geom_text_repel(aes(label=label %>% str_replace("_", " ") %>% str_remove('\\d+'))) + 
+  xlim(c(NA,80)) + 
+  scale_color_viridis_c('RICR') + 
+  theme_pubclean() + 
+  theme(legend.position='bottom') +
+  ylab("Body Size (log)")
+
+# p.phenogram.lifeVsSize <- tr.RICR.chiroptera %>% 
+#   ggtree(
+#     aes(color=log2CancerSucceptabilityChange),yscale = "lnLife.median", branch.length = 'lnSize.median'
+#   ) + 
+#   geom_point(
+#     data= tr.RICR.chiroptera %>% as_tibble(),
+#     mapping = aes(x=lnSize.median, y=lnLife.median, color=log2CancerSucceptabilityChange)
+#   ) + 
+#   scale_color_viridis_c('RICR') + 
+#   theme_pubclean() + 
+#   theme(legend.position='bottom') +
+#   xlab("Body Size (log)")+
+#   ylab("Lifespan (log)")
+```
+
+## Cumulative RICR
+```{r cummulative RICR}
+node.myotis
+
+tbl.RICR.chiroptera <- tr.RICR.chiroptera %>% as_tibble
+
+tbl.RICR.chain <- tbl.RICR.chiroptera %>% 
+  select(parent, node, K1)
+
+RICR.luc <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_lucifugus') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node')) %>% 
+  select(-parent, -parent.y, -node)
+  
+RICR.occ <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_occultus') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node')) %>%
+ select(-parent, -parent.y, -node)
+
+RICR.vel <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_velifer') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node')) %>%
+ select(-parent, -parent.y, -node)
+
+RICR.yum <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_yumanensis') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node')) %>%
+ select(-parent, -parent.y, -node)
+
+RICR.evo <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_evotis') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node'))%>%
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.6=K1), by=c('parent'='node'))%>%
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.7=K1), by=c('parent'='node'))%>%
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.8=K1), by=c('parent'='node')) %>%
+ select(-parent, -parent.y, -node)
+
+RICR.thy <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_thysanodes') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.5=K1), by=c('parent'='node'))%>%
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.6=K1), by=c('parent'='node'))%>%
+ select(-parent, -parent.y, -node)
+
+RICR.cal <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_californicus') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>%
+  select(-parent, -parent.y, -node)
+
+RICR.vol <- tbl.RICR.chiroptera %>% 
+  filter(label == 'Myotis_volans') %>% 
+  select(parent, node, label, K1) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.1=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% 
+  left_join(tbl.RICR.chain %>% rename(K1.2=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.3=K1), by=c('parent'='node')) %>% 
+  select(-parent) %>% rename(parent=parent.y) %>% left_join(tbl.RICR.chain %>% rename(K1.4=K1), by=c('parent'='node')) %>% 
+   select(-parent, -parent.y, -node)
+```
+
+
+## Nodes of Note from RICR
+```{r}
+# tbl.RICR.chiroptera %>% colnames()
+
+# 1657 is Luc-Occ
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1657) %>% pull(node), type="tips"))
+
+# 1646 is the root of Myotis
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1646) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange)
+
+# 1648 is long-lived EuroMyo, noBrandt
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1648) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1648 is long-lived EuroMyo, yesBrandt
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1647) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1630 is Vespertilliodinae
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1630) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1653 is volans, sodalis, mystacinus
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1653) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1662 is Evo-Thy-Aui-Cai
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1662) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1663 is Sept-Auri
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1663) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1654 is volans, mystacinus
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1654) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+# 1649 is EuroMyo not myo not brandt
+tbl.RICR.chiroptera %>% filter(node %in% offspring(tr.RICR.chiroptera, tbl.RICR.chiroptera %>% filter(label==1649) %>% pull(node), type="tips")) %>% select(label, log2CancerSucceptabilityChange) %>% print(n=121)
+
+```
+
+```{r}
+highlight_tips_nodes <- c(
+  species_color,
+  "1657" = '#E6AF2E',  # LucOcc
+  "1659" = '#816E94',  # VelYum
+  "1656" = 'red',      # LucOccVelYum
+  "1664" = '#3D348B',  # EvoThy
+  "1662" = '#A01A7D',  # EvoThyAui
+  "1661" = '#273E47',  # EvoThyAuiCai
+  "1655" = '#4B818C',  # noVol
+  "Myotis_brandtii" = '#000000',
+  "Myotis_myotis" = '#000000',
+  "Myotis_grisescens" = '#000000',
+  "1646" = 'red',
+  "1630" = '#000000', # Vespertilionidae,
+  "1627" = '#000000', # Molossidae,
+  "1602" = '#000000', # Phyllostomidae,
+  "1581" = '#000000', # Yinpterochiroptera,
+  "1609" = '#000000', # Yangochiroptera,
+  "Myotis" = '#000000', # Average Myotis
+  "Vespertilionidae" = 'grey30', # Average Vespertilionidae,
+  "Molossidae" = 'grey30', # Average Molossidae,
+  "Phyllostomidae" = 'grey30', # Average Phyllostomidae,
+  "Yinpterochiroptera" = 'grey30', # Average Yinpterochiroptera,
+  "Yangochiroptera" = 'grey30', # Average Yangochiroptera,
+  "1581" = '#000000'
+)
+
+label_clean <- c(
+  "Myotis_auriculus" = "Myotis auriculus",
+  "Myotis_californicus" = "Myotis californicus",
+  "Myotis_occultus" = "Myotis occultus",
+  "Myotis_lucifugus" = "Myotis lucifugus",
+  "Myotis_yumanensis" = "Myotis yumanensis",
+  "Myotis_volans" = "Myotis volans",
+  "Myotis_velifer" = "Myotis velifer",
+  "Myotis_evotis" = "Myotis evotis",
+  "Myotis_thysanodes" = "Myotis thysanodes",
+  "1657" = 'Luc-Occ',
+  "1659" = 'Vel-Yum',
+  "1656" = 'Luc-Yum',
+  "1664" = 'Evo-Thy',
+  "1662" = 'Evo-Aui',
+  "1661" = 'Evo-Cai',
+  "1655" = 'Luc-Evo',
+  "Myotis_brandtii" = 'Myotis brandtii',
+  "Myotis_myotis" = 'Myotis myotis',
+  "Myotis_grisescens" = 'Myotis grisescens',
+  "1646" = 'Myotis',
+  "1630" = 'Vespertilionidae',
+  "1627" = 'Molossidae',
+  "1602" = 'Phyllostomidae',
+  "1581" = 'Yinpterochiroptera',
+  "1609" = 'Yangochiroptera',
+  "Myotis" = 'Avg. Myotis',
+  "Vespertilionidae" = 'Avg. Vespertilionidae',
+  "Molossidae" = 'Avg. Molossidae',
+  "Phyllostomidae" = 'Avg. Phyllostomidae',
+  "Yinpterochiroptera" = 'Avg. Yinpterochiroptera',
+  "Yangochiroptera" = 'Avg. Yangochiroptera',
+  "1581" = "Chiroptera"
+)
+```
+
+
+```{r}
+tbl.RICR.bats.withSummary <- tr.RICR.chiroptera %>% as_tibble()%>% 
+    select(label, lnSize.median, lnLife.median, lnSize.low, lnLife.low, lnSize.high, lnLife.high, lnK1, lnK2, log2CancerSucceptabilityChange) %>% 
+    bind_rows(tr.RICR.summary) %>% 
+  arrange(desc(log2CancerSucceptabilityChange)) %>% 
+  mutate(
+    label_clean = sapply(label, function(x){label_clean[x]}),
+    label= factor(label, levels=label)
+  )
+
+
+p.RICR.myotis.sumv2 <- tbl.RICR.bats.withSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=lnK1
+      )
+  ) +
+  geom_bar(
+    data = . %>% filter(label %in% names(highlight_tips_nodes)),
+    aes(
+      x=Inf,
+      fill=label
+    ),
+    color=NA,
+    stat='identity',
+    alpha=0.3
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=lnK2, xend=lnK1,
+        color=log2CancerSucceptabilityChange),
+    arrow = arrow(length = unit(0.1, 'cm'),type='closed')
+  ) + 
+  geom_point(aes(x=lnK2), size=2, shape="|") +
+  labs(
+    x="Cancer Risk",
+    y="Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  scale_y_discrete(
+    breaks = names(highlight_tips_nodes),
+    labels = label_clean[names(highlight_tips_nodes)]
+  ) + 
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sumv2
+```
+
+
+```{r}
+p.RICR.myotis.sumv3 <- tbl.RICR.bats.withSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  geom_text_repel(
+    data=tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = 13-tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = -13-tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Node Within Bats"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    # x = c(-13,13),
+    y = c(
+      tbl.RICR.bats.withSummary$label %>% as.numeric() %>% min() %>% subtract(5),
+      tbl.RICR.bats.withSummary$label %>% as.numeric() %>% max() %>% add(5)
+    )
+  ) + 
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sumv3
+```
+
+```{r}
+p.RICR.myotis.sumv3.2 <- tbl.RICR.bats.withSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_rect(
+    aes(
+      xmin = -Inf,
+      xmax = 0,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'pink',
+    color=NA,
+    alpha=0.2
+  ) + 
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = Inf,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'lightblue',
+    color = NA,
+    alpha=0.2
+  ) + 
+  annotate(
+    geom='text', 
+    x= -7,
+    y= tbl.RICR.bats.withSummary$label[tbl.RICR.bats.withSummary$label=='Myotis_auriculus'],
+    label = 'Increased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  annotate(
+    geom='text', 
+    x= 7,
+    y= tbl.RICR.bats.withSummary$label[tbl.RICR.bats.withSummary$label=='Myotis_grisescens'],
+    label = 'Decreased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  geom_text_repel(
+    data=tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = 13-tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = -13-tbl.RICR.bats.withSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Node Within Bats"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    # x = c(-13,13),
+    y = c(
+      tbl.RICR.bats.withSummary$label %>% as.numeric() %>% min() %>% subtract(5),
+      tbl.RICR.bats.withSummary$label %>% as.numeric() %>% max() %>% add(5)
+    )
+  ) + 
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sumv3.2
+```
+
+```{r}
+tbl.RICR.withBatSummary <- tr.cancerSucceptibility %>% as_tibble()%>% 
+    select(label, lnSize.median, lnLife.median, lnSize.low, lnLife.low, lnSize.high, lnLife.high, lnK1, lnK2, log2CancerSucceptabilityChange) %>% 
+    bind_rows(tr.RICR.summary) %>% 
+  arrange(desc(log2CancerSucceptabilityChange)) %>% 
+  mutate(
+    label_clean = sapply(label, function(x){label_clean[x]}),
+    label= factor(label, levels=label)
+  )
+
+min.RICR.lab = tbl.RICR.withBatSummary %>% filter(log2CancerSucceptabilityChange==min(log2CancerSucceptabilityChange)) %>% pull(label)
+max.RICR.lab = tbl.RICR.withBatSummary %>% filter(log2CancerSucceptabilityChange==max(log2CancerSucceptabilityChange)) %>% pull(label)
+
+p.RICR.myotis.sumv4 <- tbl.RICR.withBatSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_rect(
+    aes(
+      xmin = -Inf,
+      xmax = 0,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'pink',
+    color=NA,
+    alpha=0.2
+  ) + 
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = Inf,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'lightblue',
+    color = NA,
+    alpha=0.2
+  ) + 
+  annotate(
+    geom='text', 
+    x= -7,
+    y= max.RICR.lab,
+    label = 'Increased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  annotate(
+    geom='text', 
+    x= 7,
+    y= min.RICR.lab,
+    label = 'Decreased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = 13-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = -13-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Mammalian Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    # x = c(-13,13),
+    y = c(
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% min() %>% subtract(100),
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% max() %>% add(100)
+    )
+  ) + 
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sumv4
+```
+
+```{r}
+tbl.RICR.withBatSummary <- tr.cancerSucceptibility %>% as_tibble()%>% 
+    select(label, lnSize.median, lnLife.median, lnSize.low, lnLife.low, lnSize.high, lnLife.high, lnK1, lnK2, log2CancerSucceptabilityChange) %>% 
+    bind_rows(tr.RICR.summary) %>% 
+  arrange(desc(log2CancerSucceptabilityChange)) %>% 
+  mutate(
+    label_clean = sapply(label, function(x){label_clean[x]}),
+    label= factor(label, levels=label)
+  )
+
+min.RICR.lab = tbl.RICR.withBatSummary %>% filter(log2CancerSucceptabilityChange==min(log2CancerSucceptabilityChange)) %>% pull(label)
+max.RICR.lab = tbl.RICR.withBatSummary %>% filter(log2CancerSucceptabilityChange==max(log2CancerSucceptabilityChange)) %>% pull(label)
+
+p.RICR.myotis.sumv4 <- tbl.RICR.withBatSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_rect(
+    aes(
+      xmin = -Inf,
+      xmax = 0,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'pink',
+    color=NA,
+    alpha=0.2
+  ) + 
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = Inf,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'lightblue',
+    color = NA,
+    alpha=0.2
+  ) + 
+  annotate(
+    geom='text', 
+    x= -7,
+    y= max.RICR.lab,
+    label = 'Increased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  annotate(
+    geom='text', 
+    x= 7,
+    y= min.RICR.lab,
+    label = 'Decreased Cancer Resistance',
+    fontface = 'bold'
+  ) + 
+  geom_segment(
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(aes(color=log2CancerSucceptabilityChange), size=1) +
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0),
+    aes(
+      label=label_clean,
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = 13-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0),
+    aes(
+      # x=-11,
+      label=label_clean
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    # nudge_x = -1,
+    nudge_x = -13-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Mammalian Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    # x = c(-13,13),
+    y = c(
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% min() %>% subtract(100),
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% max() %>% add(100)
+    )
+  ) + 
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 6, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 8, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "bottom"
+  )
+
+p.RICR.myotis.sumv4
+```
+
+```{r}
+
+bat.nodes <- offspring(tr.cancerSucceptibility, MRCA(tr.cancerSucceptibility, "Myotis_lucifugus", "Pteropus_vampyrus"), type='all', self_include = T)
+
+bat.labs <- tr.cancerSucceptibility %>% as_tibble %>% filter(node %in% bat.nodes) %>% pull(label)
+
+p.RICR.myotis.sumv4.2 <- tbl.RICR.withBatSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_rect(
+    aes(
+      xmin = -Inf,
+      xmax = 0,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'pink',
+    color=NA,
+    alpha=0.2
+  ) + 
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = Inf,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'lightblue',
+    color = NA,
+    alpha=0.2
+  ) + 
+  # annotate(
+  #   geom='text', 
+  #   x= -7,
+  #   y= max.RICR.lab,
+  #   label = 'Increased Cancer Resistance',
+  #   fontface = 'bold'
+  # ) + 
+  # annotate(
+  #   geom='text', 
+  #   x= 7,
+  #   y= min.RICR.lab,
+  #   label = 'Decreased Cancer Resistance',
+  #   fontface = 'bold'
+  # ) + 
+  geom_segment(
+    data = . %>% filter(!(label %in% bat.labs)),
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange),
+    alpha=0.1
+  ) +
+  geom_point(
+    data = . %>% filter(!(label %in% bat.labs)),
+    aes(color=log2CancerSucceptabilityChange), 
+    size=1,
+    alpha=0.1
+  ) +
+  geom_segment(
+    data = . %>% filter(label %in% bat.labs),
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(
+    data = . %>% filter(label %in% bat.labs),
+    aes(color=log2CancerSucceptabilityChange), size=1
+  ) +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  ggnewscale::new_scale_color() + 
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0),
+    aes(
+      label = label_clean,
+      color = label
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    nudge_x = 15-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0),
+    aes(
+      label=label_clean,
+      color = label
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    nudge_x = -15-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  scale_color_manual(
+    values = highlight_tips_nodes
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Mammalian Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    y = c(
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% min() %>% subtract(100),
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% max() %>% add(100)
+    )
+  ) + 
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none(),
+    color = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 14, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 18, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "None"
+  )
+
+p.RICR.myotis.sumv4.2
 ```

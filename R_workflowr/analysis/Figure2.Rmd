@@ -1,0 +1,302 @@
+---
+title: "Figure2"
+author: "docmanny"
+date: "2024-04-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(ape)
+library(ggpubr)
+library(ggdist)
+library(ComplexHeatmap)
+library(WebGestaltR)
+library(ggnewscale)
+library(ggrepel)
+library(grid)
+library(cowplot)
+library(tidytree)
+
+is.cancer <- function(desc) {
+  str_detect(desc, "APC|[Cc]yclin|[Cc]ell[Cc]ycle|Ubiq|NER|ROS|DNA|G1|[Mm]eiotic|[Mm]itotic|[Cc]heckpoint|[Cc]ancer|IGF|[Rr]ecombination|D-Loop|AURK|HDR|[Ii]nterphase|[Aa]popto|[Cc]entrosome|Fanconi|TP53|MMR|[Rr]epair|Insulin|FGF|NHEJ|ATR|Hyaluronan|[Tt]elomere|AKT|[Nn]icotinamide")
+}
+```
+
+```{r}
+our_genomes = c(
+  "Myotis_auriculus",
+  "Myotis_californicus",
+  "Myotis_occultus",
+  "Myotis_lucifugus",
+  "Myotis_yumanensis",
+  "Myotis_volans",
+  "Myotis_velifer",
+  "Myotis_evotis",
+  "Myotis_thysanodes"
+)
+
+genome_species <- c(
+  'mMyoAui1' = 'Myotis_auriculus',
+  'mMyoCai1' = 'Myotis_californicus',
+  'mMyoOcc1' = 'Myotis_occultus',
+  'mMyoLuc1' = 'Myotis_lucifugus',
+  'mMyoYum1' = 'Myotis_yumanensis',
+  'mMyoVol1' = 'Myotis_volans',
+  'mMyoVel1' = 'Myotis_velifer',
+  'mMyoEvo1' = 'Myotis_evotis',
+  'mMyoThy1' = 'Myotis_thysanodes'
+)
+
+species_color = ggsci::pal_d3(palette = "category20")(length(our_genomes)+1) %>% 
+  set_names(., c(our_genomes, "Other"))
+
+species_color["Myotis_evotis"] = "#17BECFFF"
+species_color["Other"] = "#7F7F7FFF"
+highlight_tips_nodes <- c(
+  species_color,
+  "1657" = '#E6AF2E',  # LucOcc
+  "1659" = '#816E94',  # VelYum
+  "1656" = 'red',      # LucOccVelYum
+  "1664" = '#3D348B',  # EvoThy
+  "1662" = '#A01A7D',  # EvoThyAui
+  "1661" = '#273E47',  # EvoThyAuiCai
+  "1655" = '#4B818C',  # noVol
+  "Myotis_brandtii" = '#000000',
+  "Myotis_myotis" = '#000000',
+  "Myotis_grisescens" = '#000000',
+  "1646" = 'red',
+  "1630" = '#000000', # Vespertilionidae,
+  "1627" = '#000000', # Molossidae,
+  "1602" = '#000000', # Phyllostomidae,
+  "1581" = '#000000', # Yinpterochiroptera,
+  "1609" = '#000000', # Yangochiroptera,
+  "Myotis" = '#000000', # Average Myotis
+  "Vespertilionidae" = 'grey30', # Average Vespertilionidae,
+  "Molossidae" = 'grey30', # Average Molossidae,
+  "Phyllostomidae" = 'grey30', # Average Phyllostomidae,
+  "Yinpterochiroptera" = 'grey30', # Average Yinpterochiroptera,
+  "Yangochiroptera" = 'grey30', # Average Yangochiroptera,
+  "1581" = '#000000'
+)
+
+v.label_clean <- c(
+  "Myotis_auriculus" = "Myotis auriculus",
+  "Myotis_californicus" = "Myotis californicus",
+  "Myotis_occultus" = "Myotis occultus",
+  "Myotis_lucifugus" = "Myotis lucifugus",
+  "Myotis_yumanensis" = "Myotis yumanensis",
+  "Myotis_volans" = "Myotis volans",
+  "Myotis_velifer" = "Myotis velifer",
+  "Myotis_evotis" = "Myotis evotis",
+  "Myotis_thysanodes" = "Myotis thysanodes",
+  "1657" = 'Luc-Occ',
+  "1659" = 'Vel-Yum',
+  "1656" = 'Luc-Yum',
+  "1664" = 'Evo-Thy',
+  "1662" = 'Evo-Aui',
+  "1661" = 'Evo-Cai',
+  "1655" = 'Luc-Evo',
+  "Myotis_brandtii" = 'Myotis brandtii',
+  "Myotis_myotis" = 'Myotis myotis',
+  "Myotis_grisescens" = 'Myotis grisescens',
+  "1646" = 'Myotis',
+  "1630" = 'Vespertilionidae',
+  "1627" = 'Molossidae',
+  "1602" = 'Phyllostomidae',
+  "1581" = 'Yinpterochiroptera',
+  "1609" = 'Yangochiroptera',
+  "Myotis" = 'Avg. Myotis',
+  "Vespertilionidae" = 'Avg. Vespertilionidae',
+  "Molossidae" = 'Avg. Molossidae',
+  "Phyllostomidae" = 'Avg. Phyllostomidae',
+  "Yinpterochiroptera" = 'Avg. Yinpterochiroptera',
+  "Yangochiroptera" = 'Avg. Yangochiroptera',
+  "1581" = "Chiroptera"
+)
+```
+
+
+## F2A: RICR
+
+```{r}
+tr.cancerSucceptibility <- treeio::read.beast('../output/Upham2019_newChiroptera-RICR-Data.nexus')
+tr.cancerSucceptibility@data <- tr.cancerSucceptibility@data %>% 
+  mutate_at(vars(-label.y, -node,-Ancestor),as.numeric)
+
+bat.nodes <- offspring(tr.cancerSucceptibility, MRCA(tr.cancerSucceptibility, "Myotis_lucifugus", "Pteropus_vampyrus"), type='all', self_include = T)
+
+bat.labs <- tr.cancerSucceptibility %>% as_tibble %>% filter(node %in% bat.nodes) %>% pull(label)
+
+tbl.RICR.withBatSummary <- read_tsv('../output/RICR_BatSummary.tsv') %>% 
+  arrange(desc(log2CancerSucceptabilityChange)) %>% 
+  mutate(
+    label_clean = sapply(label, function(x){v.label_clean[x]}),
+    label= factor(label, levels=label)
+  )
+
+p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>% 
+  ggplot(
+    aes(
+      y=label,
+      x=log2CancerSucceptabilityChange
+      )
+  ) +
+  geom_rect(
+    aes(
+      xmin = -Inf,
+      xmax = 0,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'pink',
+    color=NA,
+    alpha=0.2
+  ) + 
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = Inf,
+      ymin = -Inf,
+      ymax = Inf
+    ),
+    fill = 'lightblue',
+    color = NA,
+    alpha=0.2
+  ) + 
+  # annotate(
+  #   geom='text', 
+  #   x= -7,
+  #   y= max.RICR.lab,
+  #   label = 'Increased Cancer Resistance',
+  #   fontface = 'bold'
+  # ) + 
+  # annotate(
+  #   geom='text', 
+  #   x= 7,
+  #   y= min.RICR.lab,
+  #   label = 'Decreased Cancer Resistance',
+  #   fontface = 'bold'
+  # ) + 
+  geom_segment(
+    data = . %>% filter(!(label %in% bat.labs)),
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange),
+    alpha=0.1
+  ) +
+  geom_point(
+    data = . %>% filter(!(label %in% bat.labs)),
+    aes(color=log2CancerSucceptabilityChange), 
+    size=1,
+    alpha=0.1
+  ) +
+  geom_segment(
+    data = . %>% filter(label %in% bat.labs),
+    aes(y=label, yend=label,
+        x=0, xend=log2CancerSucceptabilityChange,
+        color=log2CancerSucceptabilityChange)
+  ) +
+  geom_point(
+    data = . %>% filter(label %in% bat.labs),
+    aes(color=log2CancerSucceptabilityChange), size=1
+  ) +
+  scale_color_viridis_c(
+    option = 'D',
+    guide = guide_colorbar(
+      title="RICR",
+      title.theme =  element_text(size = 6, face = "bold", colour = "black"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  ggnewscale::new_scale_color() + 
+  geom_text_repel(
+    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0, !str_starts(label_clean, 'Avg.')),
+    aes(
+      label = label_clean,
+      color = label
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    nudge_x = 15-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0, !str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  geom_text_repel(
+    data=. %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0, !str_starts(label_clean, 'Avg.')),
+    aes(
+      label=label_clean,
+      color = label
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    nudge_x = -15 - tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0, !str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) +   geom_text_repel(
+    data=. %>% filter(str_starts(label_clean, 'Avg.')),
+    aes(
+      label=label_clean,
+      color = label
+    ),
+    max.overlaps = Inf,
+    fontface='bold.italic',
+    hjust=1,
+    direction = 'y',
+    nudge_x = -15 - tbl.RICR.withBatSummary %>% filter(str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    min.segment.length = 0,
+    segment.curvature = -1e-20
+  ) + 
+  scale_color_manual(
+    values = highlight_tips_nodes
+  ) + 
+  labs(
+    x="Cancer Risk",
+    y="Mammalian Node"
+  ) + 
+  theme_pubr()+
+  labs_pubr() + 
+  expand_limits(
+    y = c(
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% min() %>% subtract(100),
+      tbl.RICR.withBatSummary$label %>% as.numeric() %>% max() %>% add(100)
+    )
+  ) + 
+  scale_fill_manual(values=highlight_tips_nodes) + 
+  guides(
+    shape = guide_legend(),
+    fill = guide_none(),
+    color = guide_none()
+  ) +
+  theme(
+    text = element_text(face = "plain", 
+                        colour = "black", lineheight = 0.9, 
+                        hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
+                        debug = FALSE), 
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text = element_text(size = 14, 
+                               colour = "black", face = "bold"),
+    axis.title = element_text(size = 18, 
+                              colour = "black", face = "bold"),
+    plot.title = element_text(size = 8, 
+                              colour = "black", lineheight = 1, face = "bold"), 
+    legend.text = element_text(size = 6, 
+                               face = "plain", colour = "black"),
+    legend.position = "None"
+  )
+
+p.RICR.myotis.sumv4.3
+```
+
+
+## F2B
+
