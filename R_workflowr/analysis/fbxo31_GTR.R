@@ -8,7 +8,7 @@ tr.fbxo31@phylo$tip.label <- l.names[tr.fbxo31@phylo$tip.label]
 plotly::ggplotly(tr.fbxo31 %>% ggtree(aes(text=label)))
 
 nodes.ortho <- c(
-  tr.fbxo31 %>% as_tibble %>% filter(str_detect(Species, "Myotis", negate=T)) %>% pull(node))
+  tr.fbxo31 %>% as_tibble %>% filter(str_detect(Species, "Myotis", negate=T)) %>% pull(node),
   85,84,82,83,81,77,78,79,80
   )
 

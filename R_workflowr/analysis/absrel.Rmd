@@ -685,7 +685,8 @@ df.cat[(df.cat$symbol %in% senescence$symbol),]$cat <- 'Senescence'
 df.omega.plot.colored <- df.omega.plot %>% 
   ungroup %>% 
   left_join(df.cat %>% select(-n) %>% unique,
-            by=c(human_gene_name='symbol'))
+            by=c(human_gene_name='symbol')) %>% 
+  mutate(chr = seqname %>% str_remove("SUPER__") %>% str_remove("SCAFF__"))
 df.omega.plot.colored[is.na(df.omega.plot.colored$cat),]$cat <- "Other"
 ```
 
@@ -1230,18 +1231,19 @@ genes.selection.shared <- df.volcano.plot.sig %>%
   arrange(desc(n)) %>% 
   filter(n>2)
 
-df.manhattan.topgenesPerChrPerSpc <- df.val.geneID.all %>% 
+df.manhattan.topgenesPerChrPerSpc <- df.omega.plot.colored %>% 
   group_by(chr, species) %>% 
   arrange(pval) %>% 
   mutate(n=row_number()) %>% 
   filter(n<=1) %>% 
   ungroup
 
-df.manhattan.sharedselection3 <- df.val.geneID.all %>% 
+df.manhattan.sharedselection3 <- df.omega.plot.colored %>% 
   filter(human_gene_name %in% genes.selection.shared$human_gene_name)
 
-df.val.geneID.all %>% 
+df.omega.plot.colored %>% 
   mutate(chr_n = str_extract(chr, '\\d+') %>% as.numeric) %>% 
+  filter(chr_n %in% 1:23) %>% 
   filter(!(chr_n %in% c(4,23))) %>% 
   left_join(
     chr_col_autosome,
@@ -1259,7 +1261,7 @@ df.val.geneID.all %>%
     color='white'
   ) + 
   geom_point(
-    aes(x=s,
+    aes(x=start,
         y=-log(pval),
         alpha=-log(pval),
         color=species)
@@ -1296,8 +1298,8 @@ df.val.geneID.all %>%
 ```
 
 
-```{r, eval=F}
-list.geneid.ourMyotis <- df.val.geneID.all %>% 
+```{r}
+list.geneid.ourMyotis <- df.omega.plot.colored %>% 
   filter(pval<=0.05) %>% 
   select(species, human_gene_name) %>% 
   filter(!is.na(human_gene_name)) %>% 
@@ -1307,7 +1309,7 @@ list.geneid.ourMyotis <-
   lapply(pull, human_gene_name)
 ```
 
-```{r upset ourMyotis, eval=F}
+```{r upset ourMyotis tip only}
 
 mat.absrel <- list_to_matrix(list.geneid.ourMyotis)
 
@@ -1402,7 +1404,7 @@ cols_set <- c(
 )
 ```
 
-```{r full Upset, eval=F}
+```{r full Upset}
 UpSet(
   m1,
   set_order = order_set,
@@ -1411,7 +1413,7 @@ UpSet(
 )
 ```
 
-```{r subset upset, eval=F}
+```{r subset upset}
 subset_m <- m1[comb_name(m1) %in% names(cols_comb_core)]
 order_cols_sub = c(
  match(names(cols_comb_core), names(comb_size(subset_m))) %>% 
@@ -1434,8 +1436,8 @@ u1 <- UpSet(
       -set_size(subset_m), 
       baseline = 0,
       axis_param = list(
-        at = c(0, -100, -200, -300, -400),
-        labels = c(0, 100, 200, 300, 400),
+        at = c(0, -2000, -4000),
+        labels = c(0, 2000, 4000),
         labels_rot = 0
         ),
       border = FALSE, 
@@ -1448,8 +1450,49 @@ u1 <- UpSet(
 )
 
 ht=draw(u1)
-
 ```
+
+```{r}
+
+sub_m1_over100 <- m1[comb_size(m1)>=100]
+
+order_cols_sub = c(
+ match(names(cols_comb_core), names(comb_size(sub_m1_over100))) %>% 
+  .[!is.na(.)],
+ setdiff(order(comb_size(sub_m1_over100),decreasing = T), order_cols_core)
+)
+
+u2 <- UpSet(
+  sub_m1_over100,
+  set_order = order_set,
+  comb_col = cols_comb[comb_name(subset_m)],
+  left_annotation = rowAnnotation(
+    set_name = anno_text(
+      set_name(subset_m), 
+      location = 0.5, 
+      just = "center",
+      width = max_text_width(set_name(subset_m)) + unit(4, "mm")
+    ),
+    "Postively-Selected Genes" = anno_barplot(
+      -set_size(subset_m), 
+      baseline = 0,
+      axis_param = list(
+        at = c(0, -2000, -4000),
+        labels = c(0, 2000, 4000),
+        labels_rot = 0
+        ),
+      border = FALSE, 
+      gp = gpar(fill = "black"), 
+      width = unit(4, "cm")
+    )
+  ),
+  right_annotation = NULL,
+  show_row_names=F
+)
+
+ht=draw(u2)
+```
+
 
 ```{r subset upset with tree, eval=F}
 library(ggtree)
@@ -1672,15 +1715,6 @@ df.omega.toluci <- df.omega %>%
   filter(pval<=0.05) %>% 
   left_join(df_nodes_toMyoLuc)
 
-dir.create('../output/webGestalt/absrel_toMyoLuc')
-
-lapply(
-  df_nodes_toMyoLuc$label,
-  . %>% 
-    str_c('../output/webGestalt/absrel_toMyoLuc',.) %>% 
-    dir.create(.)
-)
-
 list.toMyoLuc <- df.omega.toluci %>% 
   select(human_gene_name, label) %>% 
   group_by(label) %>% 
@@ -1691,6 +1725,18 @@ names(list.toMyoLuc) <- df.omega.toluci %>%
   group_by(label) %>%
   group_keys %>% 
   pull(label)
+```
+
+
+```{r mkdir lead to myoLuc, eval=F}
+dir.create('../output/webGestalt/absrel_toMyoLuc')
+
+lapply(
+  df_nodes_toMyoLuc$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoLuc',.) %>% 
+    dir.create(.)
+)
 
 list.toMyoLuc %>% 
   names %>% 
@@ -1732,15 +1778,6 @@ df.omega.tocali <- df.omega %>%
   filter(pval<=0.05) %>% 
   left_join(df_nodes_toMyoCai)
 
-dir.create('../output/webGestalt/absrel_toMyoCai')
-
-lapply(
-  df_nodes_toMyoCai$label,
-  . %>% 
-    str_c('../output/webGestalt/absrel_toMyoCai/',.) %>% 
-    dir.create(.)
-)
-
 list.toMyoCai <- df.omega.tocali %>% 
   select(human_gene_name, label) %>% 
   group_by(label) %>% 
@@ -1751,6 +1788,18 @@ names(list.toMyoCai) <- df.omega.tocali %>%
   group_by(label) %>%
   group_keys %>% 
   pull(label)
+```
+
+
+```{r mkdir lead to myoCai/Aui, eval=F}
+dir.create('../output/webGestalt/absrel_toMyoCai')
+
+lapply(
+  df_nodes_toMyoCai$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoCai/',.) %>% 
+    dir.create(.)
+)
 
 list.toMyoCai %>% 
   names %>% 
@@ -1803,15 +1852,6 @@ df.omega.toveli <- df.omega %>%
   filter(pval<=0.05) %>% 
   left_join(df_nodes_toMyoVel)
 
-dir.create('../output/webGestalt/absrel_toMyoVel')
-
-lapply(
-  df_nodes_toMyoVel$label,
-  . %>% 
-    str_c('../output/webGestalt/absrel_toMyoVel/',.) %>% 
-    dir.create(.)
-)
-
 list.toMyoVel <- df.omega.toveli %>% 
   select(human_gene_name, label) %>% 
   group_by(label) %>% 
@@ -1822,6 +1862,18 @@ names(list.toMyoVel) <- df.omega.toveli %>%
   group_by(label) %>%
   group_keys %>% 
   pull(label)
+```
+
+
+```{r mkdir lead to myoVel/Yum, eval=F}
+dir.create('../output/webGestalt/absrel_toMyoVel')
+
+lapply(
+  df_nodes_toMyoVel$label,
+  . %>% 
+    str_c('../output/webGestalt/absrel_toMyoVel/',.) %>% 
+    dir.create(.)
+)
 
 list.toMyoVel %>% 
   names %>% 
@@ -2033,7 +2085,8 @@ p.stats.LucCaiAuiVelYum <- stats.LucCaiAuiVelYum %>%
   facet_wrap(~lineage2, scales = "free_x") + 
   theme_pubr() + 
   labs_pubr()
-print.ggplot(p.stats.LucCaiAuiVelYum, 4,4)
+p.stats.LucCaiAuiVelYum
+# print.ggplot(p.stats.LucCaiAuiVelYum, 4,4)
 ```
 
 ```{r}
@@ -2102,7 +2155,8 @@ nodes_toleft = c(
   "Myotis_occultus",
   "Myotis_evotis",
   "Myotis_thysanodes",
-  "Node_286_"
+  "Node_286_",
+  "Myotis_volans"
 )
 
 df_nodes_toleft = tribble(
@@ -2110,7 +2164,8 @@ df_nodes_toleft = tribble(
   "Myotis_occultus", "Myotis_occultus",
   "Myotis_evotis", "Myotis_evotis",
   "Myotis_thysanodes", "Myotis_thysanodes",
-  "Node_286_", "Evo-Thy"
+  "Node_286_", "Evo-Thy",
+  "Myotis_volans", "Myotis_volans"
 )
 
 
@@ -2120,17 +2175,18 @@ df.omega.toleft <- df.omega %>%
   filter(pval<=0.05) %>% 
   left_join(df_nodes_toleft)
 
-dir.create('../output/webGestalt/absrel_toMyoOccEvoThy')
+dir.create('../output/webGestalt/absrel_toMyoOccEvoThyVol')
 
 lapply(
   df_nodes_toleft$label,
   . %>% 
-    str_c('../output/webGestalt/absrel_toMyoOccEvoThy/',.) %>% 
+    str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/',.) %>% 
     dir.create(.)
 )
 
 list.toleft <- df.omega.toleft %>% 
   select(human_gene_name, label) %>% 
+  filter(!is.na(human_gene_name)) %>% 
   group_by(label) %>% 
     dplyr::group_split()
 
@@ -2139,7 +2195,10 @@ names(list.toleft) <- df.omega.toleft %>%
   group_by(label) %>%
   group_keys %>% 
   pull(label)
+```
 
+
+```{r mkdir lead to anyone/everyone else}
 list.toleft %>% 
   names %>% 
   lapply(
@@ -2147,20 +2206,21 @@ list.toleft %>%
     function(n, l=list.toleft){
       l[[n]] %>% 
     pull(human_gene_name) %>% 
-    write_lines(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/',n,'/absrel-',n,'.txt'))
+    write_lines(str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/',n,'/absrel-',n,'.txt'))
     }
   )
 
-dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc'))
-dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo'))
-dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toOcc'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toEvo'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toThy'))
+dir.create(str_c('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toVol'))
 
 df.omega.toleft %>% 
   filter(label %in% c('Myotis_occultus')) %>% 
   bind_rows(
     df.omega.toluci
   ) %>%  
-  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc/absrel-genesToOcc.txt')
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toOcc/absrel-genesToOcc.txt')
 
 
 df.omega.toleft %>% 
@@ -2171,7 +2231,7 @@ df.omega.toleft %>%
   bind_rows(
     df.omega.tocali %>% filter(label %in% c('Node_284_','Node_285_'))
   ) %>% 
-  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo/absrel-genesToEvo.txt')
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toEvo/absrel-genesToEvo.txt')
 
 
 df.omega.toleft %>% 
@@ -2182,8 +2242,15 @@ df.omega.toleft %>%
   bind_rows(
     df.omega.tocali %>% filter(label %in% c('Node_284_','Node_285_'))
   ) %>% 
-  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy/absrel-genesToThy.txt')
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toThy/absrel-genesToThy.txt')
 
+df.omega.toleft %>% 
+  filter(label %in% c('Myotis_volans')) %>% 
+  bind_rows(
+    df.omega.toluci %>% filter(label %in% c('Myotis'))
+  ) %>%
+  filter(!is.na(human_gene_name)) %>% 
+  pull(human_gene_name) %>% unique %>% write_lines('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toVol/absrel-genesToVol.txt')
 ```
 
 ```{r}
@@ -2193,9 +2260,11 @@ df_nodes_toall = list(
   read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_evotis/enrichment_results_wg_result1712099451.txt') %>% mutate(node="Evo"),
   read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_occultus/enrichment_results_wg_result1712099520.txt') %>% mutate(node="Occ"),
   read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/Myotis_thysanodes/enrichment_results_wg_result1712099552.txt') %>% mutate(node="Thy"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThyVol/Myotis_volans/enrichment_results_wg_result1714779537.txt') %>% mutate(node="Vol"),
   read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toEvo/enrichment_results_wg_result1712099590.txt') %>% mutate(node="All-Evo"),
   read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toOcc/enrichment_results_wg_result1712099627.txt') %>% mutate(node="All-Occ"),
-  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy/enrichment_results_wg_result1712099658.txt') %>% mutate(node="All-Thy")
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThy/union-toThy/enrichment_results_wg_result1712099658.txt') %>% mutate(node="All-Thy"),
+  read_tsv('../output/webGestalt/absrel_toMyoOccEvoThyVol/union-toVol/enrichment_results_wg_result1714779592.txt') %>% mutate(node="All-Vol")
 ) %>% 
   bind_rows()
 
@@ -2253,8 +2322,10 @@ df.lineage = tibble(
     "Aui-Evo",
     "Aui", 
     "Evo-Thy", 
-    "Evo", "Thy", 
-    "All-Luc", "All-Occ", "All-Vel", "All-Yum", "All-Evo", "All-Thy", "All-Cai","All-Aui"
+    "Evo", "Thy",
+    "Vol",
+    "All-Luc", "All-Occ", "All-Vel", "All-Yum", "All-Evo", "All-Thy", "All-Cai","All-Aui",
+    "All-Vol"
   ) %>% factor(levels=node.levels),
   lineage = c(
     "Shared", "Shared", 
@@ -2267,8 +2338,9 @@ df.lineage = tibble(
     "Aui,Evo,Thy",
     "Aui", 
     "Evo,Thy", 
-    "Evo", "Thy", 
-    "Union", "Union","Union", "Union","Union", "Union", "Union","Union"
+    "Evo", "Thy",
+    "Vol"
+    "Union", "Union","Union", "Union","Union", "Union", "Union","Union","Union"
     )
 )
 stats.all.aug <- stats.all %>% 
@@ -2310,7 +2382,8 @@ p.stats.all <- stats.all.aug %>%
   theme_pubr() + 
   labs_pubr()
 
-print.ggplot(p.stats.all, 8,6)
+# print.ggplot(p.stats.all, 8,6)
+p.stats.all
 ```
 
 ```{r phylo version of cancer pathway plot}
@@ -2345,17 +2418,29 @@ stats.all.node <- left_join(
 tr.ReactomeCancerProp <- tr %>% 
   full_join(stats.all.node)
 
-(
-  tr.ReactomeCancerProp %>% 
+p.tr <- tr.ReactomeCancerProp %>% 
     ggtree() + 
     geom_tiplab() + 
     xlim(c(NA,10))
 
-) %>% print.ggplot(4,4)
+# p.tr + geom_nodelab(aes(label=node))
+
+p.tr <- p.tr %>% 
+  ggtree::rotate(15) %>% 
+  ggtree::rotate(17) %>% 
+  ggtree::rotate(14)
+
+pies <- nodepie(stats.all.node, cols = 1:6)
 
 ```
 
 
 ```{r scatterplot of RICR vs pathway enrichment for cancer}
+```
+
+```{r Do a longevity-omega plot for genes that are under selection in more than one bat}
+
+df.omega.plot.colored %>% 
+
 ```
 

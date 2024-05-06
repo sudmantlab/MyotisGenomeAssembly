@@ -19,6 +19,7 @@ library(ggrepel)
 library(grid)
 library(cowplot)
 library(tidytree)
+library(magrittr)
 
 is.cancer <- function(desc) {
   str_detect(desc, "APC|[Cc]yclin|[Cc]ell[Cc]ycle|Ubiq|NER|ROS|DNA|G1|[Mm]eiotic|[Mm]itotic|[Cc]heckpoint|[Cc]ancer|IGF|[Rr]ecombination|D-Loop|AURK|HDR|[Ii]nterphase|[Aa]popto|[Cc]entrosome|Fanconi|TP53|MMR|[Rr]epair|Insulin|FGF|NHEJ|ATR|Hyaluronan|[Tt]elomere|AKT|[Nn]icotinamide")
@@ -131,10 +132,16 @@ bat.nodes <- offspring(tr.cancerSucceptibility, MRCA(tr.cancerSucceptibility, "M
 bat.labs <- tr.cancerSucceptibility %>% as_tibble %>% filter(node %in% bat.nodes) %>% pull(label)
 
 tbl.RICR.withBatSummary <- read_tsv('../output/RICR_BatSummary.tsv') %>% 
-  arrange(desc(log2CancerSucceptabilityChange)) %>% 
+  arrange(desc(log2CancerSucceptabilityChange)) 
+
+RICRLabs.ordered <- tbl.RICR.withBatSummary %>%
+  pull(label) %>% 
+  unique
+
+tbl.RICR.withBatSummary <- tbl.RICR.withBatSummary %>% 
   mutate(
     label_clean = sapply(label, function(x){v.label_clean[x]}),
-    label= factor(label, levels=label)
+    label= factor(label, levels=RICRLabs.ordered)
   )
 
 p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>% 
@@ -151,10 +158,10 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
       ymin = -Inf,
       ymax = Inf
     ),
-    fill = 'pink',
+    fill = NA,
     color=NA,
-    alpha=0.2
-  ) + 
+    # alpha=0.2
+  ) +
   geom_rect(
     aes(
       xmin = 0,
@@ -162,24 +169,10 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
       ymin = -Inf,
       ymax = Inf
     ),
-    fill = 'lightblue',
+    fill = NA,
     color = NA,
     alpha=0.2
-  ) + 
-  # annotate(
-  #   geom='text', 
-  #   x= -7,
-  #   y= max.RICR.lab,
-  #   label = 'Increased Cancer Resistance',
-  #   fontface = 'bold'
-  # ) + 
-  # annotate(
-  #   geom='text', 
-  #   x= 7,
-  #   y= min.RICR.lab,
-  #   label = 'Decreased Cancer Resistance',
-  #   fontface = 'bold'
-  # ) + 
+  ) +
   geom_segment(
     data = . %>% filter(!(label %in% bat.labs)),
     aes(y=label, yend=label,
@@ -189,18 +182,18 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
   ) +
   geom_point(
     data = . %>% filter(!(label %in% bat.labs)),
-    aes(color=log2CancerSucceptabilityChange), 
+    aes(color=log2CancerSucceptabilityChange),
     size=1,
     alpha=0.1
   ) +
   geom_segment(
-    data = . %>% filter(label %in% bat.labs),
+    data = . %>% filter(label %in% bat.labs) %>% mutate(label=factor(label, levels=RICRLabs.ordered)),
     aes(y=label, yend=label,
         x=0, xend=log2CancerSucceptabilityChange,
         color=log2CancerSucceptabilityChange)
   ) +
   geom_point(
-    data = . %>% filter(label %in% bat.labs),
+    data = . %>% filter(label %in% bat.labs) %>% mutate(label=factor(label, levels=RICRLabs.ordered)),
     aes(color=log2CancerSucceptabilityChange), size=1
   ) +
   scale_color_viridis_c(
@@ -214,7 +207,12 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
   ) +
   ggnewscale::new_scale_color() + 
   geom_text_repel(
-    data=tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0, !str_starts(label_clean, 'Avg.')),
+    data=. %>% 
+      filter(
+        !is.na(label_clean), 
+        log2CancerSucceptabilityChange>0, 
+        !str_starts(label_clean, 'Avg.')
+      ),
     aes(
       label = label_clean,
       color = label
@@ -223,12 +221,27 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
     fontface='bold.italic',
     hjust=1,
     direction = 'y',
-    nudge_x = 15-tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange>0, !str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    force = 10,
+    nudge_x = 15 %>% subtract(
+      tbl.RICR.withBatSummary %>% 
+        filter(
+          !is.na(label_clean), 
+          log2CancerSucceptabilityChange>0, 
+          !str_starts(label_clean, 'Avg.')
+        ) %>% pull(log2CancerSucceptabilityChange)
+    ),
     min.segment.length = 0,
-    segment.curvature = -1e-20
+    segment.curvature = -1e-20,
+    size=3,
+    seed = 5000
   ) + 
   geom_text_repel(
-    data=. %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0, !str_starts(label_clean, 'Avg.')),
+    data=. %>% 
+      filter(
+        !is.na(label_clean), 
+        log2CancerSucceptabilityChange<0, 
+        !str_starts(label_clean, 'Avg.')
+        ),
     aes(
       label=label_clean,
       color = label
@@ -237,10 +250,24 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
     fontface='bold.italic',
     hjust=1,
     direction = 'y',
-    nudge_x = -15 - tbl.RICR.withBatSummary %>% filter(!is.na(label_clean), log2CancerSucceptabilityChange<0, !str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    force = 20,
+    nudge_x = -15 %>% subtract(
+      tbl.RICR.withBatSummary %>% 
+        filter(
+          !is.na(label_clean), 
+          log2CancerSucceptabilityChange<0, 
+          !str_starts(label_clean, 'Avg.')
+        ) %>% 
+        pull(log2CancerSucceptabilityChange)
+    ),
+    ylim = c(tbl.RICR.withBatSummary %>% pull(label) %>% as.numeric %>% max %>% divide_by(2) %>% subtract(100),
+             tbl.RICR.withBatSummary %>% pull(label) %>% as.numeric %>% max %>% add(100)),
     min.segment.length = 0,
-    segment.curvature = -1e-20
-  ) +   geom_text_repel(
+    segment.curvature = -1e-20,
+    size=3,
+    seed = 5000
+  ) +   
+  geom_text_repel(
     data=. %>% filter(str_starts(label_clean, 'Avg.')),
     aes(
       label=label_clean,
@@ -250,10 +277,18 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
     fontface='bold.italic',
     hjust=1,
     direction = 'y',
-    nudge_x = -15 - tbl.RICR.withBatSummary %>% filter(str_starts(label_clean, 'Avg.')) %>% pull(log2CancerSucceptabilityChange),
+    force = 100,
+    nudge_x = -15 %>% subtract(
+       tbl.RICR.withBatSummary %>% 
+         filter(str_starts(label_clean, 'Avg.')) %>% 
+         pull(log2CancerSucceptabilityChange)
+    ),
+    ylim = c(0, tbl.RICR.withBatSummary %>% pull(label) %>% as.numeric %>% max %>% divide_by(2) %>% subtract(100)),  
     min.segment.length = 0,
-    segment.curvature = -1e-20
-  ) + 
+    segment.curvature = -1e-20,
+    size=3,
+    seed = 5000
+  ) +
   scale_color_manual(
     values = highlight_tips_nodes
   ) + 
@@ -268,7 +303,7 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
       tbl.RICR.withBatSummary$label %>% as.numeric() %>% min() %>% subtract(100),
       tbl.RICR.withBatSummary$label %>% as.numeric() %>% max() %>% add(100)
     )
-  ) + 
+  ) +
   scale_fill_manual(values=highlight_tips_nodes) + 
   guides(
     shape = guide_legend(),
@@ -277,24 +312,30 @@ p.RICR.myotis.sumv4.3 <- tbl.RICR.withBatSummary %>%
   ) +
   theme(
     text = element_text(face = "plain", 
+                        size=8,
                         colour = "black", lineheight = 0.9, 
                         hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), 
                         debug = FALSE), 
     axis.text.y = element_blank(),
     axis.line.y = element_blank(),
     axis.ticks.y = element_blank(),
-    axis.text = element_text(size = 14, 
+    axis.text = element_text(size = 8, 
                                colour = "black", face = "bold"),
-    axis.title = element_text(size = 18, 
+    axis.title = element_text(size = 10, 
                               colour = "black", face = "bold"),
-    plot.title = element_text(size = 8, 
-                              colour = "black", lineheight = 1, face = "bold"), 
-    legend.text = element_text(size = 6, 
-                               face = "plain", colour = "black"),
+    # plot.title = element_text(size = 8, 
+    #                           colour = "black", lineheight = 1, face = "bold"), 
+    # legend.text = element_text(size = 8, 
+    #                            face = "plain", colour = "black"),
     legend.position = "None"
   )
 
 p.RICR.myotis.sumv4.3
+```
+
+```{r}
+p.RICR.myotis.sumv4.3 %>% ggsave2(filename="../output/subfigs/RICR_mammals.pdf",device = cairo_pdf,height = 5, width = 5.5, units = 'in' )
+p.RICR.myotis.sumv4.3 %>% ggsave2(filename="../output/subfigs/RICR_mammals.png",height = 5, width = 5.5, units = 'in', dpi=300)
 ```
 
 
