@@ -3,7 +3,7 @@ Extensive longevity and DNA virus-driven adaptation in nearctic _Myotis_ bats
 
 <a content="https://www.biorxiv.org/content/10.1101/2024.10.10.617725v1" href="https://www.biorxiv.org/content/10.1101/2024.10.10.617725v1" rel="me noopener noreferrer" style="vertical-align:center;"><img alt="bioRxiv" src="https://www.biorxiv.org/sites/default/files/bioRxiv_article.jpg"><a/>
 
-[![DOI]()]()
+[![DOI](https://zenodo.org/badge/341733135.svg)](https://doi.org/10.5281/zenodo.14226783)
 
 The genus Myotis is one of the largest clades of bats, and exhibits some of the most extreme variation in lifespans among mammals alongside unique adaptations to viral tolerance and immune defense. To study the evolution of longevity-associated traits and infectious disease, we generated near-complete genome assemblies and cell lines for 8 closely related species of Myotis. Using genome-wide screens of positive selection, analyses of structural variation, and functional experiments in primary cell lines, we identify new patterns of adaptation contributing to longevity, cancer resistance, and viral interactions in bats. We find that Myotis bats have some of the most significant variation in cancer risk across mammals and demonstrate a unique DNA damage response in primary cells of the long-lived M. lucifugus. We also find evidence of abundant adaptation in response to DNA viruses - but not RNA viruses - in Myotis and other bats in sharp contrast with other mammals, potentially contributing to the role of bats as reservoirs of zoonoses. Together, our results demonstrate how genomics and primary cells derived from diverse taxa uncover the molecular bases of extreme adaptations in non-model organisms. 
 
